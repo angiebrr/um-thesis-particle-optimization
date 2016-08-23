@@ -1,64 +1,32 @@
-%\twocolumn
-
-%========================================================================
+%=================================================================================================================================
 %Beginning of Introduction
-%========================================================================
+%=================================================================================================================================
+
 \chapter{INTRODUCTION}\label{ch:intro}
 
-Before starting, I \emph{highly} recommend you take a good look at the \emph{macros.tex} file.  It contains a lot of new commands that I added to this thesis template and is extremely useful.  It is also the clearing house for author-specific information that you will need to address before attempting to build this document.
- 
-Be sure to import the \emph{dvi2pdf.tco} build configuration into TeXniCenter (if you're using that) to get the proper build sequence.  It is in the root directory of this template.  You can also refer to the \emph{isuthesis.pdf} file which came from the Iowa State University thesis template upon which this template is built.
 
-\section{Template Issues}\label{sec:issues}
-  
-  Many of the issues found in the previous version have been fixed, but there is no guarantee everything will work smoothly.
-  \emph{google is your best friend!}
-
-  I've written a DOS/Windows based build system that calls on a perl script to establish bounding boxes for the figures and then compile your thesis into a pdf.
-  \LaTeX needs these bounding boxes in order to size the images correctly.
-  I'm sure that any Linux user will have no problem hacking make.bat and clean.bat into bash commands in order to accommplish the same thing...
-
-  The previous version of this template used a MATLAB file to deal with figures, which you may or may not prefer.
-
-  \script{saveFig.m} will save the currently active figure to \textit{.fig}, \textit{.jpg}, and \textit{.eps} formats.  It assumes you already have the folder hierarchy that comes with this thesis template and is mainly geared to archiving your graphics so that you don't have to completely redo them later.  You also have the ability to later switch from \textit{.eps} to \textit{.jpg} driven graphics later via the \emph{addfigure} macro.
-
-  If you move it from its current directory, you'll need to update the directories inside the function.
-
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+%Motivation 
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Motivation}\label{sec:motive}
 
-Check out this minipage with a shadowbox around it:
-\vspace{.5cm}
-\begin{center}
-\shadowbox{%
-\begin{minipage}{0.8\textwidth}
-\begin{quote}
-\textit{``all algorithms that search for an extremum of a cost function will eventually choke like Mama Cass on a ham sandwich.''} 
-\end{quote}
-\end{minipage}
-}%close shadowbox
-\end{center}
 
-and the same minipage with no shadowbox:
-\vspace{.5cm}
-\begin{center}
-%\shadowbox{%
-\begin{minipage}{0.8\textwidth}
-\begin{quote}
-\textit{``all algorithms that search for an extremum of a cost function will eventually choke like Mama Cass on a ham sandwich.''} 
-\end{quote}
-\end{minipage}
-%}%close shadowbox
-\end{center}
 
-\section{Goal}\label{sec:goal}
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+%Goals
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\section{Goals}\label{sec:goal}
 
-The goal of this thesis is ...
 
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+%Benefits
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Benefits}\label{sec:benefits}
 
-...
 
-%\newpage
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+%Thesis Organization
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Thesis Organization}\label{sec:organization}
 
 The rest of this thesis is organized as follows:
@@ -68,19 +36,19 @@ The rest of this thesis is organized as follows:
 %DONE: these need to be more than just chapter headings
 
 %background
-\item \textbf{Chapter \ref{ch:overview}} Literature review and overview of the framework
+\item \textbf{Chapter \ref{ch:background}} Review of particles in video games and the ChilliSource game engine
 
 %work done
-\item \textbf{Chapter \ref{ch:methods}} Data acquisition and computational methods
+\item \textbf{Chapter \ref{ch:methods}} Overview of the instrumentation done and the optimizations made
 
 %results
-\item \textbf{Chapter \ref{ch:results}} Presentation of case study results
+\item \textbf{Chapter \ref{ch:results}} Presentation of the results before and after optimizations were made
 
 %conclusions/future work
 \item \textbf{Chapter \ref{ch:conclusions}} Discussion of results, conclusions, and future directions
 
 \end{itemize}
 
-%========================================================================
+%=================================================================================================================================
 %End of Introduction
-%========================================================================
+%=================================================================================================================================
