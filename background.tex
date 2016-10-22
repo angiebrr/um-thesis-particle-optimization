@@ -1,0 +1,108 @@
+%=================================================================================================================================
+%Beginning of Background
+%=================================================================================================================================
+
+\chapter{BACKGROUND}\label{ch:background}
+
+
+
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+%Particles Systems
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\section{Particle Systems}
+
+\subsection{Overview}
+
+\addfigure{william_reeves_star_trek_explosion}
+{0.7}{Particle effect created by William T. Reeves}
+{The particle effect created by William T. Reeves from the film Star Trek II: The Wrath of Khan}
+{ParticleEmitters}
+
+Visual representation of "fuzzy objects", or objects that do not have well-defined surfaces, in computer graphics is generally considered a difficult task due to the non-deterministic changes in the fuzzy object's shape and form. When working on the film \textit{Star Trek II: The Wrath of Khan}, a researcher at Lucasfilm Ltd., William Reeves, developed what he called a \textbf{particle system}, which is "... a collection of many minute particles that together represent a fuzzy object. Over a period of time, particles are generated into a system, move and change from within the system, and die from the system." \cite{Reeves1983ParticleSystems} Although the concept of modeling these objects as a collection of particles was not novel, Reeves' basic framework for particle systems is still widely used today to create complex visual effects in video games and films.
+
+Fuzzy objects like sparks, clouds, stars, water, and crowds of people can be easily translated and modeled as a particle system, but particle systems can also be used to model objects that contain numerous strands like hair and grass. These objects can be represented by rendering every strand as the entire lifetime of a particle in the system and is then treated as a single strand. The particles in a system that have a distributed lifetime (e.g. sparks) are thought of as \textbf{animated} and particles that are rendered all at once (e.g. hair) are thought of as \textbf{static}.
+
+
+\addfigure{static_animated_particles}
+{0.7}{Cubes emitting particles}
+{Left: A cube emitting a stream of 1000 animated particles from 5 of its 6 faces. Right: A cube emitting a stream of 1000 static particles, or strands, from 5 of its 6 faces}
+{ParticleEmitters}
+
+\subsection{Particle Model} 
+
+\subsubsection{Life Cycle}
+
+A particle system has 4 main events that defines its life cycle:
+
+\begin{enumerate}
+	\itemsep-1.0em
+	\item Emission (or Generation, according to Reeves)
+	\item Update
+	\item Render
+	\item Death (or Extinction, according to Reeves)
+\end{enumerate}
+
+The \textbf{Emission} event is the initial process in which particles are generated with their initial values. Often a "generation shape" is used during the emission phase that defines the two or three dimensional space that the particles can originate, or emit, from. Emission can be increased or decreased in frequency using the \textit{emission rate}, and the number of particles that enter the particle system each emission can also be changed. After emission, particles in the particle system undergo the \textbf{Update} and \textbf{Render} events. These events are repeated in perpetuum until the particle dies, or undergoes the extinction phase. The update phase involves iterating over all particles throughout the system and updating their attributes (e.g. position, velocity, etc.). The render phase, on the other hand, is the phase in which all of the particles are actually drawn to the screen.
+
+\subsubsection{Particle Attributes}
+
+As mentioned above, each individual particle in a particle system will have attributes that change over time. Although every particle system is different, the following is what Reeves considered to be the core attributes of a particle:
+
+\begin{itemize}
+	\itemsep-1.0em
+	\item Position
+	\item Velocity
+	\item Size
+	\item Color
+	\item Transparency
+	\item Shape
+	\item Lifetime
+\end{itemize}
+
+A particle has a position in two or three dimensional space, and its initial position is determined by the emission process. Other attributes that may also change over time include its speed, direction, size, color, and transparency. Its lifetime, however, is pre-determined at emission, and it is the attribute that dictates how long the particle "lives", or remains on the screen. In order to emulate realism and decrease uniformity, all of these values can vary across the particles in the system. For example, the particles in a given particle system could have a varying lifetime of 5 to 10 seconds so that the particles that shared an emission would not all die simultaneously.
+
+\subsubsection{Hierarchy}
+
+It is often convenient to design a particle system such that it is made up of a hierarchy of child particle systems. This hierarchy "can be used to exert global control on a complicated fuzzy object that is composed of many particle systems." \cite{Reeves1983ParticleSystems} In other words, a fuzzy object could easily be transformed in overall shape, size, color, etc. by sweeping through the descendant particle systems. It also allows the grouping together of particle systems that have different types of particles. For example, a campfire fuzzy object would need smoke, sparks, and the flame itself. All of these components would have distinct particle definitions and would be separate particle systems. A particle system hierarchy, in this case, would allow the smoke, sparks, and flame particle systems to be bundled together as a single fuzzy object.
+
+
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+%The ChilliSource Game Engine
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\section{The ChilliSource Game Engine}
+
+\subsection{Overview}
+
+ChilliSource is a free, open source game engine created by ChilliWorks which is a group that is part of United Kingdom’s Tag Games. It allows you to develop 2D and 3D content for iOS, Android, Kindle, and Windows operating systems in C++ 11. Some of its key features include networking, shader support, responsive (i.e. adaptive to different resolutions) graphical user interfaces, modular and extensible lighting and shadows, skinned animation, Facebook connect integration, consistent API, and automatic builds of iOS/Android/Kindle applications. 
+
+\subsection{Architecture}
+
+\subsection{Life Cycle}
+
+
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+%ChilliSource Particle Effect Cmponents
+%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\section{ChilliSource Particle Effect Components}
+
+\subsection{Overview}
+
+\subsection{Usage}
+
+\subsection{Architecture}
+
+\subsection{Attributes}
+
+\subsection{Life Cycle}
+
+\subsubsection{Overview}
+
+\subsubsection{Update Event}
+
+\subsubsection{Render Event}
+
+
+%=================================================================================================================================
+%End of Background
+%=================================================================================================================================
+

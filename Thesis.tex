@@ -31,6 +31,7 @@
 \usepackage{subfig}  %for side-by-side figs
 \usepackage{multirow}	%for multirow stuff in tables
 \usepackage{nicefrac}	%for slanty 3/4 type fracs
+\usepackage{flafter}
 
 %this handy little package puts bookmarks in your thesis.
 %there are a ton of parameters, check it out. (hyperref)
@@ -178,11 +179,13 @@
 
 
 %------------ main body section -----------------------
-\include{chapter1}
-\include{chapter2}
-\include{chapter3}
-\include{chapter4}
-\include{chapter5}
+
+\include{intro}
+\include{background}
+\include{pong_game}
+\include{case_studies}
+\include{observations}
+
 %-------------------------------------------------------
 
 
@@ -197,6 +200,7 @@
 
 %Include bibliograpy in the Table of Contents
 \phantomsection\addcontentsline{toc}{chapter}{BIBLIOGRAPHY}
+\nocite{*}
 \bibliography{references}
 %-------------------------------------------------------
 
