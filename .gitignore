@@ -13,8 +13,12 @@
 # these rules might exclude image files for figures etc.
 # *.ps
 # *.eps
-# *.pdf
+*.pdf
 *.bb
+
+# Bin
+# Ignore all pdfs and dvis except for the ones in bin
+!bin/*
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl
