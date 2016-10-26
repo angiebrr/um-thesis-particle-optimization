@@ -1,11 +1,11 @@
 %this file contains all the macros I need/want for my thesis.
 
 %title info, replace with your version
-\newcommand{\mytitle}{ChilliWorks Game Engine Particle Optimization }
-\newcommand{\mytitlecaps}{CHILLIWORKS GAME ENGINE PARTICLE OPTIMIZATION }
+\newcommand{\mytitle}{ChilliSource Game Engine Particle Study }
+\newcommand{\mytitlecaps}{CHILLISOURCE GAME ENGINE PARTICLE STUDY }
 
-\newcommand{\mysubtitle}{Standard Caps Sub Title}     %you may or may not even want a subtitle
-\newcommand{\mysubtitlecaps}{SUBTITLE WITH ALL CAPS}
+\newcommand{\mysubtitle}{}     %you may or may not even want a subtitle
+\newcommand{\mysubtitlecaps}{}
 
 %my name, normal and last, first
 \newcommand{\me}{Angela Nicole Gross}
@@ -50,6 +50,11 @@
 	%------------------------------
 %----------------------------------------------------------
 
+%Simple formatting macros
+\newcommand*\vtick{\textsc{\char13}} %A single vertical apostrophe
+
+%----------------------------------------------------------
+
 
 %figure, table, etc... shortcuts---------------------------
 %the tilde character prevents the wrapping of the command across
@@ -72,6 +77,8 @@
 % \textbf -> bold
 % \underline -> underline
 \newcommand{\var}[1]{\textit{#1}}
+
+\newcommand{\define}[1]{\textit{\textbf{#1}}}
 
 \newcommand{\sys}[1]{\textit{\underline{#1}}}
 
@@ -99,20 +106,93 @@
 % parameter 5 == label for referencing 
 \newcommand{\addfigure}[5]{%
 \begin{figure}[htbp]
-\centering
-\singlespacing
-\footnotesize
-\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
-\ifthenelse{\equal{#3}{}} %if 3 is blank
-{% then
-\isucaption[#4]{#4}
-}%
-{% else
-\isucaption[#3]{#4}
-}%
-\label{#5}
+	
+	\centering
+	\singlespacing
+	\footnotesize
+	
+	\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
+	
+	\ifthenelse{\equal{#3}{}} %if 3 is blank
+	{% then
+		\isucaption[#4]{#4}
+	}%
+	{% else
+		\isucaption[#3]{#4}
+	}%
+	
+	\label{#5}
+	
 \end{figure}
 }%
+
+%single figure macro, adds to table of contents-----------
+%and can have a separate name for caption and toc entry
+%if no 3rd value, toc entry is same as caption
+%otherwise, 3rd value is toc entry
+% parameter 1 == file name (no extension
+% parameter 2 == percent of text width (up to 1.0, 0.7 is good)
+% parameter 3 == toc entry text (if blank, will use 
+%                value for parameter 4
+% parameter 4 == caption text
+% parameter 5 == label for referencing 
+\newcommand{\addtopfigure}[5]{%
+	\begin{figure}[t]
+		
+		\centering
+		\singlespacing
+		\footnotesize
+		
+		\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
+		
+		\ifthenelse{\equal{#3}{}} %if 3 is blank
+		{% then
+			\isucaption[#4]{#4}
+		}%
+		{% else
+			\isucaption[#3]{#4}
+		}%
+		
+		\label{#5}
+		
+	\end{figure}
+}%
+
+%single figure macro, adds to table of contents-----------
+%and can have a separate name for caption and toc entry
+%if no 3rd value, toc entry is same as caption
+%otherwise, 3rd value is toc entry
+% parameter 1 == file name (no extension
+% parameter 2 == percent of text width (up to 1.0, 0.7 is good)
+% parameter 3 == toc entry text (if blank, will use 
+%                value for parameter 4
+% parameter 4 == caption text
+% parameter 5 == label for referencing 
+\newcommand{\addbottomfigure}[5]{%
+	\begin{figure}[b]
+		
+		\centering
+		\singlespacing
+		\footnotesize
+		
+		\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
+		
+		\ifthenelse{\equal{#3}{}} %if 3 is blank
+		{% then
+			\isucaption[#4]{#4}
+		}%
+		{% else
+			\isucaption[#3]{#4}
+		}%
+		
+		\label{#5}
+		
+	\end{figure}
+}%
+
+
+
+
 %-------------------------------------------------------
 \newcommand{\tblformat}{csv}
 \newcommand{\tbldir}{tables/}
@@ -128,9 +208,11 @@
 
 %code framing environment-------------------------------
 
-%1 - language for syntax highlighting
-%2 - source folder
-%3 - filename
+% #1 the language to use for syntax highlighting
+% #2 the name of the folder in source
+% #3 the filename of the script
+% #4 the label used to refer to this code elsewhere in the text
+% #5 the caption used in the text and in the code listing near the table of contents
 \newenvironment{framecode}[5]%
 {
  %setup language specific syntax highlightning
