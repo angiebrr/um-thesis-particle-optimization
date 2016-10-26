@@ -4,7 +4,7 @@
 %to get the right build (it's included).
 
 %divpdfm is the dvi=>pdf engine
-\documentclass [12 pt,dvipdfm] {report}
+\documentclass [11 pt] {report}
 \input{macros}
 \usepackage[maxfloats=100]{morefloats}
 \usepackage{isuthesis}
@@ -12,6 +12,7 @@
 %numbers produces [1] citations, with corresponding 
 %citation numbers next to refs in bibliography
 \usepackage[numbers]{natbib} %number format
+
 %\usepackage{natbib} %author year format
 
 %\usepackage[utf8]{inputenc}
@@ -19,19 +20,26 @@
 %\usepackage{textcomp}
 %\usepackage{gensymb}
 
+\usepackage{lipsum}
+\setlength{\skip\footins}{24pt plus 3pt minus 3pt}
+
 \usepackage{fancybox}% I use it for framing definitions
 \usepackage{csvsimple} % used to import csv files into the document as tables
-	
+  
 \usepackage{xcolor}
 %\usepackage{color}
 
-\usepackage{amsmath, amssymb, amscd}%Contains the AMS expanded math symbols library.
+\usepackage{amsmath, amssymb, amscd} % Contains the AMS expanded math symbols library.
 \usepackage{graphicx}
-\usepackage{rotating}   %allows figures to be rotated
-\usepackage{subfig}  %for side-by-side figs
-\usepackage{multirow}	%for multirow stuff in tables
-\usepackage{nicefrac}	%for slanty 3/4 type fracs
+\usepackage{rotating} % Allows figures to be rotated
+\usepackage{subfig}  % For side-by-side figs
+\usepackage{multirow} % For multirow stuff in tables
+\usepackage{nicefrac} % For slanty 3/4 type fracs
 \usepackage{flafter}
+\usepackage{enumitem} % Helps formatting lists
+
+\usepackage{courier} % Allows adding courier font
+
 
 %this handy little package puts bookmarks in your thesis.
 %there are a ton of parameters, check it out. (hyperref)
@@ -42,12 +50,14 @@
 \usepackage[pdftitle={\mytitle}, 
             pdfauthor={\me},
             pdfkeywords={game programming,
-			             particles,
-			             c++,
-             			 computer science,
-             			 thesis},  
+                   particles,
+                   c++,
+                   computer science,
+                   thesis},  
             pdfstartview=FitH,   
-            pdfpagemode={None}]{hyperref} 	%gives bookmarks in pdf file
+            pdfpagemode={None},
+            driverfallback=dvipdfm,
+            hidelinks]{hyperref}  %gives bookmarks in pdf file
 
 
 \usepackage{listings} %this is for code listings
@@ -67,28 +77,28 @@
  abovecaptionskip=5px,
  belowcaptionskip=5px,
  mathescape=false,
- backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
- basicstyle=\footnotesize,        % the size of the fonts that are used for the code
- breakatwhitespace=true,         % sets if automatic breaks should only happen at whitespace
- breaklines=true,                 % sets automatic line breaking
- commentstyle=\color{dkgreen},    % comment style
- deletekeywords={...},            % if you want to delete keywords from the given language
- extendedchars=true,              % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
- frame=single,	                   % adds a frame around the code
- keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
- keywordstyle=\color{blue},       % keyword style
- language=C++,                 % the language of the code
- numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
- numbersep=5pt,                   % how far the line-numbers are from the code
- numberstyle=\tiny\color{gray}, % the style that is used for the line-numbers
- rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments green here))
- showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
- showstringspaces=false,          % underline spaces within strings only
- showtabs=false,                  % show tabs within strings adding particular underscores
- stepnumber=2,                    % the step between two line-numbers. If it's 1, each line will be numbered
- stringstyle=\color{mauve},     % string literal style
- tabsize=2,	                      % sets default tabsize to 2 spaces
- title=\lstname                   % show the filename of files included with \lstinputlisting; also try caption instead of title
+ backgroundcolor=\color{white},   			% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+ basicstyle=\footnotesize\ttfamily,        	% the size of the fonts that are used for the code
+ breakatwhitespace=true,         			% sets if automatic breaks should only happen at whitespace
+ breaklines=true,                 			% sets automatic line breaking
+ commentstyle=\color{dkgreen},    			% comment style
+ deletekeywords={...},            			% if you want to delete keywords from the given language
+ extendedchars=true,              			% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+ frame=single,                     			% adds a frame around the code
+ keepspaces=true,                 			% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+ keywordstyle=\color{blue},       			% keyword style
+ language=C++,                 				% the language of the code
+ numbers=left,                    			% where to put the line-numbers; possible values are (none, left, right)
+ numbersep=5pt,                  	 		% how far the line-numbers are from the code
+ numberstyle=\tiny\color{gray}, 			% the style that is used for the line-numbers
+ rulecolor=\color{black},         			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments green here))
+ showspaces=false,                			% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+ showstringspaces=false,          			% underline spaces within strings only
+ showtabs=false,                  			% show tabs within strings adding particular underscores
+ stepnumber=1,                    			% the step between two line-numbers. If it's 1, each line will be numbered
+ stringstyle=\color{mauve},     			% string literal style
+ tabsize=2,                       			% sets default tabsize to 2 spaces
+ title=\lstname                   			% show the filename of files included with \lstinputlisting; also try caption instead of title
 }
 
 \lstnewenvironment{code}[1][]%
@@ -130,7 +140,6 @@
 %=============== comment this out to eliminate section, subsection numbering
 \alternate
 %==================================================================
-
 
 \parindent 12pt
 %\bibliographystyle{plainnat} %plainnat is the default thesis format
