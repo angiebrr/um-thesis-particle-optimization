@@ -13,8 +13,6 @@
 %citation numbers next to refs in bibliography
 \usepackage[numbers]{natbib} %number format
 
-%\usepackage{natbib} %author year format
-
 %\usepackage[utf8]{inputenc}
 %\usepackage[T1]{fontenc}
 %\usepackage{textcomp}
@@ -60,56 +58,11 @@
             hidelinks]{hyperref}  %gives bookmarks in pdf file
 
 
-\usepackage{listings} %this is for code listings
+\usepackage{minted} % This is for code listings
+\definecolor{mintedbackground}{rgb}{0.95,0.95,0.95}
 
-
-%define the colors used by listings when doing syntax highlighting
-\definecolor{dkgreen}{rgb}{0,0.6,0}   
-\definecolor{gray}{rgb}{0.5,0.5,0.5}
-\definecolor{mauve}{rgb}{0.58,0,0.82}
-
-\lstset{
- captionpos=t,                    % sets the caption-position t -> top, b -> bottom
- aboveskip=\medskipamount,        %above and below skip adds space before or after the listing
- belowskip=\medskipamount,
- %abovecaptionskip=\smallskipamount, 
- %belowcaptionskip=\smallskipamount,
- abovecaptionskip=5px,
- belowcaptionskip=5px,
- mathescape=false,
- backgroundcolor=\color{white},   			% choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
- basicstyle=\footnotesize\ttfamily,        	% the size of the fonts that are used for the code
- breakatwhitespace=true,         			% sets if automatic breaks should only happen at whitespace
- breaklines=true,                 			% sets automatic line breaking
- commentstyle=\color{dkgreen},    			% comment style
- deletekeywords={...},            			% if you want to delete keywords from the given language
- extendedchars=true,              			% lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
- frame=single,                     			% adds a frame around the code
- keepspaces=true,                 			% keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
- keywordstyle=\color{blue},       			% keyword style
- language=C++,                 				% the language of the code
- numbers=left,                    			% where to put the line-numbers; possible values are (none, left, right)
- numbersep=5pt,                  	 		% how far the line-numbers are from the code
- numberstyle=\tiny\color{gray}, 			% the style that is used for the line-numbers
- rulecolor=\color{black},         			% if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments green here))
- showspaces=false,                			% show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
- showstringspaces=false,          			% underline spaces within strings only
- showtabs=false,                  			% show tabs within strings adding particular underscores
- stepnumber=1,                    			% the step between two line-numbers. If it's 1, each line will be numbered
- stringstyle=\color{mauve},     			% string literal style
- tabsize=2,                       			% sets default tabsize to 2 spaces
- title=\lstname                   			% show the filename of files included with \lstinputlisting; also try caption instead of title
-}
-
-\lstnewenvironment{code}[1][]%
-{
-   \noindent
-   \minipage{\linewidth} 
-   \vspace{0.5\baselineskip}
-   \lstset{basicstyle=\ttfamily\footnotesize,frame=single,#1}}
-{\endminipage}
-
-\renewcommand{\lstlistingname}{Code Listing}
+\renewcommand\listoflistingscaption{Code Listings}
+\renewcommand{\listingscaption}{\fontsize{9}{11}\selectfont Code Listing}
 
 
 % makeatletter block is necessary to get
@@ -142,7 +95,6 @@
 %==================================================================
 
 \parindent 12pt
-%\bibliographystyle{plainnat} %plainnat is the default thesis format
 \bibliographystyle{ieeetran} %only works with [numbers] option of natbib
 \renewcommand{\bibname}{BIBLIOGRAPHY}
 
@@ -167,11 +119,10 @@
 \tableofcontents
 %-------------------------------------------------------
 
-\renewcommand\lstlistlistingname{CODE LISTINGS}
 
 %--------------- list of figs, tables ------------------
 \newpage\phantomsection\specialtocchapt{CODE LISTINGS}
-\lstlistoflistings
+\listoflistings
 
 \newpage\phantomsection\specialtocchapt{LIST OF FIGURES}
 \listoffigures

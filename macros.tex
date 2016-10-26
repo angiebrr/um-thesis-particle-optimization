@@ -69,7 +69,6 @@
 %---------------------------------------------------------
 
 %---------------------------------------------------------
-\usepackage{courier}
 % Setup special formatting commands for things like 
 % variables or system commands
 % maybe italics, bold, or even change font to like courier
@@ -216,31 +215,41 @@
 \newenvironment{framecode}[5]%
 {
  %setup language specific syntax highlightning
- % see https://en.wikibooks.org/wiki/LaTeX/Source_Code_Listings#Supported_languages
- % for a list of language options
- \lstset{language=#1} 
- %\vspace{.5cm} 
+ % https://www.sharelatex.com/learn/Code_Highlighting_with_minted
+
  \begin{singlespace}
- \lstinputlisting[caption={#5}, label=#4]{\appdir#2/#3}
+
+ 	\vspace{0.5cm}
+
+ 	\captionof{listing}{\fontsize{9}{11}\selectfont #5 \label{#4}}
+	\inputminted
+	[
+	 	bgcolor=mintedbackground,
+		fontfamily=courier,
+		fontsize=\footnotesize,
+		linenos=true,
+		numbersep=12pt,
+		numbersep=5pt,
+		gobble=0,
+		frame=leftline,
+		framerule=0.4pt,
+		framesep=2mm,
+		funcnamehighlighting=true,
+		tabsize=4,
+		obeytabs=false,
+		mathescape=false,
+		resetmargins=true,
+		samepage=false, %with this setting you can force the list to appear on the same page
+		showspaces=false,
+		showtabs =false,
+		texcl=false
+	]
+	{#1}{\appdir#2/#3}
+
  \end{singlespace}
 }{}
 
+\newcommand{\appdir}{source/}
 
 %------------------------------------------------------
 
-\newcommand{\appdir}{source/}
-
-%1 - caption as new section
-%2 - filename
-%3 - label
-\newenvironment{dispcode}[3]%
-{
-\section{#1}\label{#3}
-\begin{singlespace}
-%\begin{footnotesize}
-%\lstinputlisting[caption={\lstname}]{\appdir/#2} %use this line if you want list of listings to show the appendix code
-\lstinputlisting{\appdir/#2}
-%\verbatiminput{\appdir/#2}
-%\end{footnotesize}
-\end{singlespace}
-}{}
