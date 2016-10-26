@@ -22,6 +22,7 @@
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 temp
+_minted-Thesis
 *.bbl
 *.bcf
 *.blg
