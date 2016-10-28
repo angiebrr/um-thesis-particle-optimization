@@ -60,6 +60,7 @@
 %the tilde character prevents the wrapping of the command across
 %two lines.  Any changes to UM's formatting can be accomplished
 %by changing the text inside the {} here.
+\newcommand{\chap}[1]{Chapter~\ref{#1}}
 \newcommand{\sect}[1]{Section~\ref{#1}}
 \newcommand{\eq}[1]{Equation~\eqref{#1}}
 \newcommand{\fig}[1]{Figure~\ref{#1}}
@@ -77,11 +78,15 @@
 % \underline -> underline
 \newcommand{\var}[1]{\textit{#1}}
 
+\newcommand{\class}[1]{\textit{#1}}
+
 \newcommand{\define}[1]{\textit{\textbf{#1}}}
 
 \newcommand{\sys}[1]{\textit{\underline{#1}}}
 
 \newcommand{\func}[1]{\textbf{#1}}
+
+\newcommand{\phase}[1]{\textbf{#1}}
 
 \newcommand{\script}[1]{\texttt{\textbf{#1}}}
 
@@ -222,6 +227,7 @@
  	\vspace{0.5cm}
 
  	\captionof{listing}{\fontsize{9}{11}\selectfont #5 \label{#4}}
+
 	\inputminted
 	[
 	 	bgcolor=mintedbackground,
