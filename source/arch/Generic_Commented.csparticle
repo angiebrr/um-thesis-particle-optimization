@@ -1,0 +1,69 @@
+{
+  /* The duration of the particle effect. */
+  "Duration": "1.0",
+  /* The total max number of particles in the effect.*/
+  "MaxParticles": "10000",
+  /* The space in which the particle effect is simulated.*/
+  "SimulationSpace": "World",
+  /* The property used to generate the lifetime of a new particle.*/
+  "LifetimeProperty":
+  {
+    "Type": "RandomConstant",
+    "LowerValue": "0.8",
+    "UpperValue": "1.2"
+  },
+  /* The property used to generate the initial scale of a new particle.*/
+  "InitialScaleProperty": "1.0",
+  /* The property used to generate the initial rotation of a new particle.*/
+  "InitialRotationProperty": "0.0",
+  /* The property used to generate the initial colour of a new particle.*/
+  "InitialColourProperty": "0.0 0.0 0.0 0.0",
+  /* The property used to generate the initial speed of a new particle. 
+   * The initial direction of motion is described by the emitter.*/
+  "InitialSpeedProperty": "0.5",
+  /* The property used to generate the initial angular velocity of a new particle.*/
+  "InitialAngularVelocityProperty": "0.0",
+  /* Particle drawables are reponsible for the actual rendering  of the particles.*/ 
+  "Drawable": 
+  {
+    /* A particle drawable for rendering particles as billboards.*/
+    "Type": "StaticBillboard",
+    /* The file path of the material that will be used to render the particles.*/
+    "MaterialPath": "Particle/Particle.csmaterial",
+    /* The file path of the texture atlas that will be used.*/
+        "AtlasPath": "TextureAtlases/Particle/Particle.csatlas",
+        /* A space separated list of texture atlas Ids that will be used. */
+        "ImageIds": "Generic",
+        /* The base size for a billboard.
+    "Size": "1.0 1.0",
+    /* The size policy describing how the particle is rendered when the 
+     * rendered image has a different aspect ratio to the given size. */
+    "SizePolicy": "FitMaintainingAspect"
+  },
+  /* Particle emitters are reponsible for decided when, where and in what 
+   * direction a new particle should be spawned.*/
+  "Emitter":
+  {
+    /* Type of emitter. Possible values are "Cone", "Cone2D", "Circle", "Point", 
+     * or "Sphere".*/
+    "Type": "Cone",
+    /* Describes the emission mode. Possible values are "Stream" or "Burst".*/
+    "EmissionMode": "Stream",
+    /* Where on the particle emitter particles can be emitted from. The possible 
+     * values are "Inside",  "Surface" or "Base".*/
+    "EmitFromType": "Inside",
+    /* Describes how the direction of an emitted particle will be generated. The 
+     * possible values are "AwayFromBase" and "Random".*/
+    "EmitDirectionType": "AwayFromBase",
+    /* A property describing the rate of emission when in stream emission mode.*/
+    "EmissionRateProperty": "100.0f",
+    /* A property describing the number of particles in each emission.*/
+    "ParticlesPerEmissionProperty": "10000",
+    /* A property describing the chance that a particle will actually be emitted.*/
+    "EmissionChanceProperty": "1.0",
+    /* A property describing the radius of the emitter.*/
+    "RadiusProperty": "0.5",
+    /* A property describing the angle of the emitter.*/
+    "AngleProperty": "0.8"
+  }
+}
