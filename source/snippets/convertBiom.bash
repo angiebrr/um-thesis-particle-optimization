@@ -1,1 +1,0 @@
-biom convert -i infile -o outfile --to-tsv --header-key taxonomy
