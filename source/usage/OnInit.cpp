@@ -4,7 +4,7 @@ void State::OnInit()
   // Set the state's current scene's clear color to black
   GetScene()->SetClearColour(CS::Colour::k_black);
 
-  // Retrieve an application system that will help create basic entities like 
+  // Retrieve a state system that will help create basic entities like 
   // cameras, rooms, and lights.
   auto basicEntityFactory = CS::Application::Get()
                           ->GetSystem<Common::BasicEntityFactory>();
