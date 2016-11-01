@@ -96,7 +96,7 @@ The \class{Application} instance initializes and manages \class{Application Syst
 
 \class{Entities} are essentially objects within the game that are defined by both (a) a transform describing their rotation, size, and position and (b) \class{Components}, which are modules that describe the entity's functionality. \class{Entities} can also contain a hierarchy of entities in which, much like in particle systems, their transforms and life cycle events are linked by the hierarchy. Some examples of \class{Components} are AI Controllers, Health, Damage, and Physics. 
 
-ChilliSource's architecture favors composition over inheritance. For example, if we wanted to create enemy and player \class{Entities}, we may be tempted to create a base Human \class{Entity} class that had health related methods and attributes. In order to truly adhere to the spirit of ChilliSource's design, however, you would create a \class{Component} called something like \func{HealthComponent} that could be attached to any single \class{Entity}. In this way, ChilliSource lends itself to a great deal of code reusability and flexibility.
+ChilliSource's architecture favors composition over inheritance. For example, if we wanted to create enemy and player \class{Entities}, we may be tempted to create a base Human \class{Entity} class that had health related methods and attributes. In order to truly adhere to the spirit of ChilliSource's design, however, we would create a \class{Component} called something like \func{HealthComponent} that could be attached to any single \class{Entity}. In this way, ChilliSource lends itself to a great deal of code reusability and flexibility.
 
 %-----------------------------------------------------------------------------------------------------------------------------
 \subsection{Life Cycle}\label{ssec:cs_engine_lifecycle}
@@ -337,7 +337,7 @@ It is important to note that \class{Concurrent Particle Data}'s array of particl
 \subsubsection{Other Important Attributes}
 %............................................................
 
-There are a number of other important attributes that are not the 5 parts discussed above. These include:
+There are a number of other important attributes that are not the 6 parts discussed above. These include:
 
 \begin{itemize}[nolistsep,topsep=10pt]
 
@@ -416,7 +416,9 @@ Of all phases, this is one is by far the simplest. It releases all resources and
 \subsection{Usage}\label{ssec:cs_pec_usage}
 %-----------------------------------------------------------------------------------------------------------------------------
 
-Creating a basic scene that uses a \class{Particle Effect Component} in ChilliSource is fairly simple. As \clis{code:CreateSceneParticleEffect} illustrates, it requires that we first create a camera along with a light source and add them both to the current \class{State}'s \class{Scene}. Although a state system, \class{Basic Entity Factory}, abstracts some of this code, \clis{code:BasicEntityFactory} demonstrates that utilizing ChilliSource's API to create an ambient light is still easy to use and understand. We did not need to do this, but we also used the \class{Basic Entity Factory} to create a room in our scene.
+Creating a basic scene that uses a \class{Particle Effect Component} in ChilliSource is fairly simple. As \clis{code:CreateSceneParticleEffect} illustrates, it requires that we first create a camera along with a light source and add them both to the current \class{State}'s \class{Scene}. Although a state system, \class{Basic Entity Factory}, abstracts some of this code, \clis{code:BasicEntityFactory}\footnotemark $ $ demonstrates that utilizing ChilliSource's API to create an entity like an ambient light is still easy to use and understand. We did not need to do this, but we also used the \class{Basic Entity Factory} to create a room in our scene.
+
+\footnotetext{This is the only time within this paper that we will not use pseudocode. Since we are demonstrating how to use and create a \class{Particle Effect Component}, it seemed appropriate to show the code verbatim. }
 
 \framecode{C++}{usage}{OnInit.cpp}
 {code:CreateSceneParticleEffect}{Creating a scene that adds a basic \class{Particle Effect Component} in ChilliSource.}
