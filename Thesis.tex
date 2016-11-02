@@ -19,7 +19,8 @@
 %\usepackage{gensymb}
 
 \usepackage{lipsum}
-\setlength{\skip\footins}{24pt plus 3pt minus 3pt}
+
+\usepackage[bottom,flushmargin,splitrule]{footmisc} % Formats footrules
 
 \usepackage{fancybox}% I use it for framing definitions
 \usepackage{csvsimple} % used to import csv files into the document as tables
@@ -100,35 +101,14 @@
 
 \setcounter{tocdepth}{3} %include sub sub sections in toc
 
+%-------------------------------------------------------
+
 \begin{document}
 
-%--------------- title section -------------------------
-\include{titletocmas}
-%-------------------------------------------------------
+%------------ title, copyright, toc, etc. --------------
 
-%--------------- copyright section ---------------------
-\include{copyright}
-%-------------------------------------------------------
+\include{preface}
 
-%--------------- abstract, acknowldgements -------------
-\include{abstract}
-\include{acknowl}
-%-------------------------------------------------------
-
-%---------------table of contents ----------------------
-\tableofcontents
-%-------------------------------------------------------
-
-
-%--------------- list of figs, tables ------------------
-\newpage\phantomsection\specialtocchapt{CODE LISTINGS}
-\listoflistings
-
-\newpage\phantomsection\specialtocchapt{LIST OF FIGURES}
-\listoffigures
-
-\newpage\phantomsection\specialtocchapt{LIST OF TABLES}
-\listoftables     
 %-------------------------------------------------------
 
 \newpage
