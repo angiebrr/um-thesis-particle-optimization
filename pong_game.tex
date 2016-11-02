@@ -3,32 +3,73 @@
 %=================================================================================================================================
 %Beginning of Pong Game
 %=================================================================================================================================
-\chapter{THE CHILLISOURCE AUTOMATED PONG GAME}\label{ch:pong_game}
+\chapter{THE CHILLISOURCE AUTOMATED PONG GAME}\label{ch:csapong_game}
 
 %/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 %Overview
 %/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Overview}\label{sec:game_overview}
 
-The ChilliSource Automated Pong Game is a derivative of CSPong \cite{ChilliSourceSample2016Repository}, a simple pong game created with ChilliSource that was developed by the ChilliWorks team. 
+The ChilliSource Automated Pong Game (CSAPong) is the application that we used to aide in our study of ChilliSource's \class{Particle Effect Components}. CSAPong is a derivative of CSPong \cite{ChilliSourceSample2016Repository}, a simple pong game created with ChilliSource that was developed by the ChilliWorks team. CSPong was built to illustrate as much of the engine as possible without creating a complex game, and the three main states attempt to reflect this goal. These states include the \class{Splash State}, the \class{Main Menu State}, and the \class{Game State}. These states help show the engine's life cycle events, how to use the UI app system, how to make custom state systems, how to utilize custom events, how to use the \class{State Manager}, and, most importantly, how you can design entities and components to add enemy AI, player interaction, physics, collision detection, and so on. All three of these states are shown in \fig{fig:CSPongGameExample}.
 
-\addfigure{chillisource_automated_pong_architecture}
-{1.0}{The basic architecture of the automated pong game.}
-{The basic architecture of the automated pong game.}
-{fig:AutomatedPongGameArch}
+Unlike CSPong, CSAPong only uses a single state, the \class{Game State}. The main application instance restarts the \class{Game State} a number of times, and it automatically quits the application when its finished. CSAPong does not have enemy AI or player interaction (i.e. enemy and player paddles), but the left and right walls do collide with the wall and keep track of the "score". Additionally, CSAPong attaches a \class{Particle Effect Component} to the ball that emits particles as the ball moves around the arena. \fig{fig:CSAPongGameExample} shows a simple example of CSAPong in action.
 
-\addfigure{chillisource_automated_game_example}
-{1.0}{A series of screenshots illustrating how the automated pong game works.}
-{The above screenshot series illustrate the automated pong game. The screenshots were taken 1 second apart with the ball starting at the beginning of the arena.}
-{fig:AutomatedPongGameExample}
+\addtopfigure{chillisource_game_example}
+{0.8}{A series of screenshots illustrating how the original pong game works.}
+{The above screenshot series illustrate the original pong game. The screenshots were taken from the beginning of the application to the first goal. The top-left screenshot is from the \class{Splash State}, the top-right screenshot is from the \var{Main Menu State}, and the other three screenshots are from the \class{Game State}.}
+{fig:CSPongGameExample}
 
-
-
+\addtopfigure{chillisource_automated_game_example}
+{0.8}{A series of screenshots illustrating how the automated pong game works.}
+{The above screenshot series illustrate the automated pong game. The screenshots were taken 1 second apart with the ball starting at the beginning of the arena. Due to a small bug, note that the score increments by 2 when the ball collides with the opposing "team's" wall.}
+{fig:CSAPongGameExample}
 
 %/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 %Architecture
 %/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Architecture}\label{sec:game_arch}
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\subsection{Overview}\label{ssec:game_arch_overview}
+%-----------------------------------------------------------------------------------------------------------------------------
+
+\addtopfigure{chillisource_automated_pong_architecture}
+{0.9}{The basic architecture of the automated pong game.}
+{The basic architecture of the automated pong game.}
+{fig:CSAPongGameArch}
+
+Although it is not necessary to go over every single class that makes up CSAPong, it is essential to understand the general architecture of it. As shown in \fig{fig:CSAPongGameArch}, we can broadly describe the structure having two main parts, the ChilliSource engine\footnotemark and the CSAPong application itself. Further, CSAPong can be defined as having \class{Application Systems}, a \class{Game State}, and the \class{Game State}'s \class{State Systems}.
+
+\footnotetext{Obviously, we know that the entirety of the ChilliSource engine is part of the CSAPong application, but we will include it in our discussion of CSAPong's architecture due to the custom application systems that we created within ChilliSource specifically for CSAPong. }
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\subsection{CSAPong Application}\label{ssec:game_arch_application}
+%-----------------------------------------------------------------------------------------------------------------------------
+
+The \class{CSAPong Application} instance creates all application systems that will be have a lifetime that lasts throughout the whole application. This includes \class{Particle Effect Component Factory} and \class{Profiling} application systems, where the former is defined within CSAPong and the latter is defined within ChilliSource itself. It also handles pushing the initial \class{Game State}, restarting the \class{Game State}, and quitting the application.
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\subsection{Application Systems}\label{ssec:game_arch_profiling}
+%-----------------------------------------------------------------------------------------------------------------------------
+
+Although not explicitly part of CSAPong, the \class{Profiling Application Systems} are integral to our studies. They are custom-made application systems that help keep track of engine-specific metrics such as particles per emission, particles actually emitted, particles actually rendered, time spent in \func{ParticleUpdateTask}, time spent in \func{CommitParticleData}, and so forth. The \class{Profiling Application Systems} will be discussed more in detail in \ch{ch:instrumentation}. 
+
+The \class{Particle Effect Component Factory Application System} generate \class{Particle Effect Components} and attach them to entities. It allows the user to hand it an entity, a csparticle file name, the number of desired \class{Particle Effect Component(s)} to add, and it will add the \class{Particle Effect Component(s)} to the entity. This application system is used to generate different kinds of particle effects as CSAPong runs. 
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\subsection{Game State}\label{ssec:game_arch_game_state}
+%-----------------------------------------------------------------------------------------------------------------------------
+
+The \class{Game State} manages the game's life cycle, its entities and components, and its user interface. On initialization, it uses the \class{Game Entity Factory State System} to create a camera, some lighting, the arena, and the ball. The \class{Game Entity Factory}, in turn, uses the \class{Particle Effect Component Factory} to particle effects to the ball when creating it. It also signals the \class{Profiling Systems} to start gathering metrics once the \class{Game State} is fully initialized and has started the game.
+
+%-----------------------------------------------------------------------------------------------------------------------------
+\subsection{State Systems}\label{ssec:game_arch_game_state_systems}
+%-----------------------------------------------------------------------------------------------------------------------------
+
+The \class{Physics State System} handles the movement of dynamic bodies (such as the ball) and collision checking. Being that ChilliSource is a composition-based system, this behavior is described in components. Thus, if we want the ball to be able to move, we add a special type of component, a \class{Dynamic Body Component}, that is used by the \class{Physics State System}. Additionally, if we want collisions to occur between dynamic bodies and the walls, we must add static bodies to the four edges of the arena.
+
+The \class{Scoring State System} uses the collision detection in the \class{Physics State System} to trigger points being added to either "opposing team". As we can see in \fig{fig:CSAPongGameArch}, however, there is a small bug in which 2 points are awarded each time the ball collides with the wall. The bug did not interfere with our study of the \class{Particle Effect Component}, and so time was not taken to fix it.
+
 
 %/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 %Gameplay
