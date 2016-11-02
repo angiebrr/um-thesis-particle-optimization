@@ -32,7 +32,9 @@ Fuzzy objects like sparks, clouds, stars, water, and crowds of people can be eas
 \subsection{Particle Model}\label{ssec:particle_systems_particle_model} 
 %-----------------------------------------------------------------------------------------------------------------------------
 
+%............................................................
 \subsubsection{Life Cycle}
+%............................................................
 
 A particle system has 4 main events that defines its life cycle:
 
@@ -46,7 +48,9 @@ A particle system has 4 main events that defines its life cycle:
 
 The \phase{Emission} event is the initial process in which particles are generated with their initial values. Often a "generation shape"\cite{Reeves1983ParticleSystems} is used during the emission phase that defines the two or three dimensional space that the particles can originate, or emit, from. Emission can be increased or decreased in frequency using the \define{emission rate}, and the number of particles that enter the particle system each emission can also be changed using the \define{particles per emission} variable. After emission, particles in the particle system undergo the \phase{Update} and \phase{Render} events. These events are repeated in perpetuum until the particle dies, or undergoes the \phase{Extinction} phase. The \phase{Update} phase involves iterating over all particles throughout the system and updating their attributes (e.g. position, velocity, etc.). The \phase{Render} phase, on the other hand, is the phase in which all of the particles are actually drawn to the screen.
 
+%............................................................
 \subsubsection{Particle Attributes}
+%............................................................
 
 As mentioned above, each individual particle in a particle system will have attributes that change over time. Although every particle system is different, the following is what Reeves considered to be the core attributes of a particle:
 
@@ -63,7 +67,9 @@ As mentioned above, each individual particle in a particle system will have attr
 
 A particle has a position in two or three dimensional space, and its initial position is determined by the emission process. Other attributes that may also change over time include its speed, direction, size, color, and transparency. Its lifetime, however, is pre-determined at emission, and it is the attribute that dictates how long the particle "lives", or remains on the screen. In order to decrease uniformity and increase realism, all of these values can vary across the particles in the system. For example, the particles in a given particle system could have a varying lifetime of 5 to 10 seconds so that the particles that shared an emission would not all die simultaneously.
 
+%............................................................
 \subsubsection{Hierarchy}
+%............................................................
 
 It is often convenient to design a particle system such that it is made up of a hierarchy of child particle systems. This hierarchy "can be used to exert global control on a complicated fuzzy object that is composed of many particle systems." \cite{Reeves1983ParticleSystems} In other words, a fuzzy object could easily be transformed in overall shape, size, color, etc. by sweeping through the descendant particle systems. It also allows the grouping together of particle systems that have different types of particles. For example, a campfire fuzzy object would need smoke, sparks, and the flame itself. All of these components would have distinct particle definitions and would be separate particle systems. A particle system hierarchy, in this case, would allow the smoke, sparks, and flame particle systems to be bundled together as a single fuzzy object.
 
@@ -359,14 +365,14 @@ The \class{Bounding Box Objects} are containers that describe the effect's shape
 
 The life cycle of a \class{Particle Effect Component} is very similar to the one that was developed by Reeves, and it can be described as 4 main phases:
 
-\begin{itemize}[nolistsep,topsep=10pt]
+\begin{enumerate}[nolistsep,topsep=10pt]
 
 	\item Initialization
 	\item Update
 	\item Render
 	\item Clean Up
 
-\end{itemize} 
+\end{enumerate} 
 
 %............................................................
 \subsubsection{Initialization Phase}
