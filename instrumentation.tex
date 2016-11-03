@@ -1,3 +1,5 @@
+% !TEX root = .\Thesis.tex
+
 % ================================================================================================================================
 % Beginning of Instrumentation
 % ================================================================================================================================
@@ -9,15 +11,127 @@
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Overview}\label{sec:instr_overview}
 
+In order to numerically quantify what occurs during games that are ran by CSAPong, we instrumented different parts of the engine. We examined various metrics (e.g. particles actually emitted), and we also timed how long various sections of code took to run. These two use cases were separated into two application systems that resided within the engine itself, the \class{Metrics} and \class{Timing} systems. As mentioned before, these systems will save a series of files of the gathered information that will go into a timestamped folder within CSAPong's save data file system. These files fueled the direction of our studies due to their ability to answer questions about the engine, e.g. what function in \class{Particle Effect Component} takes the longest to run?
+
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Metrics System
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Metrics System}\label{sec:instr_metrics_system}
 
+\subsection{Metadata}\label{ssec:instr_metrics_system_metadata}
+
+\begin{figure}
+	\addsubfigure{metrics_system_metadata_example}
+	{1.0}{An example of metadata output by the \class{Metrics System}.}
+	{An example of metadata output by the \class{Metrics System}.}
+	{fig:MetricsSystemMetadataExample}
+	%
+	\addsubfigure{metrics_system_metadata_game_example}
+	{1.0}{An example of the changing particle values during games in CSAPong.}
+	{An example of the changing particle values during games in CSAPong.}
+	{fig:MetricsSystemMetadataGameExample}
+\end{figure}
+
+Although not structurally complicated, the \class{Metrics System} keeps track of a great deal of primitives that describe the series of games ran by CSAPong. The following is a list of the tracked primitives that remained constant throughout the games:
+
+\begin{singlespace}
+
+	\begin{itemize}[nolistsep,topsep=0pt]
+	\itemsep1.0em
+
+		\item \define{Are particles looping}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item Whether or not the particle effect component is looping. This means that the particle effect will continue even after the duration has elapsed.
+		\end{itemize}
+
+		\item \define{Number of particle effects}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item The number of particle effect components that were attached to the ball entity.
+		\end{itemize}
+
+		\item \define{Is total maximum particles changing}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item Whether or not \idefine{total maximum particles} is changing across different particle effect types.
+		\end{itemize}
+
+		\item \define{Total maximum particles}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item If \idefine{is total maximum particles changing} is false, then this will be the constant value of \idefine{total maximum particles} across particle effect types.
+		\end{itemize}
+
+		\item \define{Is particles per emission changing}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item Whether or not \idefine{particles per emission} is changing across different particle effect types.
+		\end{itemize}
+
+		\item \define{Particles per emission}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item If \idefine{is particles per emission changing} is false, then this will be the constant value of \idefine{particles per emission} across particle effect types.
+		\end{itemize}
+
+		\item \define{Minimum particles}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item The minimum value for the changing values (i.e. \idefine{total maximum particles} and/or \idefine{particles per emission})
+		\end{itemize}
+
+		\item \define{Maximum particles}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item The maximum value for the changing values (i.e. \idefine{total maximum particles} and/or \idefine{particles per emission})
+		\end{itemize}
+
+		\item \define{Particles step}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item The step value for the changing values (i.e. \idefine{total maximum particles} and/or \idefine{particles per emission})
+		\end{itemize}
+
+		\item \define{Particles per emission step}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item If \idefine{is particles per emission changing} is true, then this will dictate the step value for \idefine{particles per emission} across particle effect types. This is generally a fraction of \idefine{particles step}.
+		\end{itemize}
+
+		\item \define{Total maximum particles step}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item If \idefine{is total maximum particles changing} is true, then this will dictate the step value for \idefine{total maximum particles} across particle effect types. This is generally a fraction of \idefine{particles step}.
+		\end{itemize}
+
+		\item \define{Total number of runs}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item The number of games to run per particle effect type.
+		\end{itemize}
+
+		\item \define{Duration per run}
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item The amount of time in seconds that a single game lasts.
+		\end{itemize}
+
+	\end{itemize}
+
+\end{singlespace}
+
+In order to make the distinction clear between the different kinds of \idefine{particles per emission} and \idefine{total maximum particles} variables, let us examine \fig{fig:MetricsSystemMetadataExample}. The \idefine{minimum particles} is 500, the \idefine{maximum particles} is 2000, and the \idefine{particles step} is 500. Thus, this tells us right away that there will be $ 2000 / 500 = 4 $ kinds of particle effects that will be created\footnotemark. This is true regardless of the other variables' values. From the figure, we know that \idefine{particles per emission} and \idefine{total maximum particles} are changing across particle effects and will not be constant values. Thus, their "step" values will tell us how much each variable will be added as we advance through the 3 different kinds of particle effects. We can see that the \idefine{total maximum particles step} is 500, or 100\% of the \idefine{particles step}. Additionally, we can see that the \idefine{particles per emission step} is 50, or 10\% of the \idefine{particles step}. \fig{fig:MetricsSystemMetadataGameExample} shows how all of these particle variables change as CSAPong executes. We should note that, since we have 4 different kinds of particle effects and 2 \idefine{total number of runs}, CSAPong would play a total of $ 4 \times 2 = 8 $ times in this example.
+
+\footnotetext{Note that we do not subtract 500 from 2000 since the range is inclusive.}
+
+
+
+
+
+\subsection{Metrics}\label{ssec:instr_metrics_system_metrics}
+
+\subsection{Definition}\label{ssec:instr_metrics_system_definition}
+
+
+
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Timing System
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Timing System}\label{sec:instr_timing_system}
+
+\subsection{Visual Studio}\label{ssec:instr_timing_system_vs}
+
+\subsection{Shiny}\label{ssec:instr_timing_system_shiny}
+
+\subsection{Custom Timing}\label{ssec:instr_timing_system_custom}
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Output
