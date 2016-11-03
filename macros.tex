@@ -98,6 +98,7 @@
 \newcommand{\var}[1]{\textit{#1}}
 \newcommand{\class}[1]{\textit{#1}}
 \newcommand{\define}[1]{\textit{\textbf{#1}}}
+\newcommand{\idefine}[1]{\textit{#1}}
 \newcommand{\sys}[1]{\textit{\underline{#1}}}
 \newcommand{\func}[1]{\textbf{#1}}
 \newcommand{\phase}[1]{\textbf{#1}}
@@ -216,6 +217,111 @@
 		\label{#5}
 		
 	\end{figure}
+}
+
+% ----------------------------------------------------------------------------------------------------------------------------
+% ADD SUBFIGURE
+%
+% parameter 1 == file name (no extension)
+% parameter 2 == percent of text width 
+% parameter 3 == toc entry text (if blank, will use value for parameter 4)
+% parameter 4 == caption text
+% parameter 5 == label for referencing 
+%
+% Adds a figure using the graphicsx package. You can have a separate name for caption and toc entry. If no 3rd value, toc 
+% entry is same as caption. Otherwise, 3rd value is toc entry.
+% ----------------------------------------------------------------------------------------------------------------------------
+\newcommand{\addsubfigure}[5]
+{
+	\begin{subfigure}[htbp]{0.5\textwidth}
+		
+		\centering
+		\singlespacing
+		\footnotesize
+		
+		\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
+		
+		\ifthenelse{\equal{#3}{}} % if 3 is blank
+		{% then
+			\isucaption[#4]{#4}
+		}%
+		{% else
+			\isucaption[#3]{#4}
+		}%
+		
+		\label{#5}
+		
+	\end{subfigure}
+}
+
+% ----------------------------------------------------------------------------------------------------------------------------
+% ADD TOP SUBFIGURE
+%
+% parameter 1 == file name (no extension)
+% parameter 2 == percent of text width 
+% parameter 3 == toc entry text (if blank, will use value for parameter 4)
+% parameter 4 == caption text
+% parameter 5 == label for referencing 
+%
+% Adds a figure using the graphicsx package, and it tries to add it to the top of the page if it can. You can have a separate 
+% name for caption and toc entry. If no 3rd value, toc entry is same as caption. Otherwise, 3rd value is toc entry.
+% ----------------------------------------------------------------------------------------------------------------------------
+\newcommand{\addtopsubfigure}[5]
+{
+	\begin{subfigure}[t]{0.5\textwidth}
+		
+		\centering
+		\singlespacing
+		\footnotesize
+		
+		\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
+		
+		\ifthenelse{\equal{#3}{}} % if 3 is blank
+		{% then
+			\isucaption[#4]{#4}
+		}%
+		{% else
+			\isucaption[#3]{#4}
+		}%
+		
+		\label{#5}
+		
+	\end{subfigure}
+}
+
+% ----------------------------------------------------------------------------------------------------------------------------
+% ADD BOTTOM SUBFIGURE
+%
+% parameter 1 == file name (no extension)
+% parameter 2 == percent of text width 
+% parameter 3 == toc entry text (if blank, will use value for parameter 4)
+% parameter 4 == caption text
+% parameter 5 == label for referencing 
+%
+% Adds a figure using the graphicsx package, and it tries to add it to the bottom of the page if it can. You can have a
+% separate name for caption and toc entry. If no 3rd value, toc entry is same as caption. Otherwise, 3rd value is toc entry.
+% ----------------------------------------------------------------------------------------------------------------------------
+\newcommand{\addbottomsubfigure}[5]
+{
+	\begin{subfigure}[b]{0.5\textwidth}
+		
+		\centering
+		\singlespacing
+		\footnotesize
+		
+		\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
+		
+		\ifthenelse{\equal{#3}{}} %if 3 is blank
+		{% then
+			\isucaption[#4]{#4}
+		}%
+		{% else
+			\isucaption[#3]{#4}
+		}%
+		
+		\label{#5}
+		
+	\end{subfigure}
 }
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
