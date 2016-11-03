@@ -366,41 +366,41 @@
 % Adds formatted code from a file to the document. This supports code that spans across multiple page. To see the supported 
 % languages, you can go here: https://www.sharelatex.com/learn/Code_Highlighting_with_minted
 % ----------------------------------------------------------------------------------------------------------------------------
-\newenvironment{framecode}[5]
+\newenvironment{framecode}[5]%
 {
 
- \begin{singlespace}
+	\begin{singlespace}
 
- 	\vspace{0.5cm}
+	 	\vspace{0.5cm}
 
- 	\captionof{listing}{\fontsize{9}{11}\selectfont #5 \label{#4}}
+	 	\captionof{listing}{\fontsize{9}{11}\selectfont #5 \label{#4}}
 
-	\inputminted
-	[
-	 	bgcolor=mintedbackground,
-		fontfamily=courier,
-		fontsize=\footnotesize,
-		linenos=true,
-		numbersep=12pt,
-		numbersep=5pt,
-		gobble=0,
-		frame=leftline,
-		framerule=0.4pt,
-		framesep=2mm,
-		funcnamehighlighting=true,
-		tabsize=4,
-		obeytabs=false,
-		mathescape=false,
-		resetmargins=true,
-		samepage=false,
-		showspaces=false,
-		showtabs =false,
-		texcl=false
-	]
-	{#1}{\appdir#2/#3}
+		\inputminted
+		[
+		 	bgcolor=mintedbackground,
+			fontfamily=courier,
+			fontsize=\footnotesize,
+			linenos=true,
+			numbersep=12pt,
+			numbersep=5pt,
+			gobble=0,
+			frame=leftline,
+			framerule=0.4pt,
+			framesep=2mm,
+			funcnamehighlighting=true,
+			tabsize=4,
+			obeytabs=false,
+			mathescape=false,
+			resetmargins=true,
+			samepage=false, %with this setting you can force the list to appear on the same page
+			showspaces=false,
+			showtabs =false,
+			texcl=false
+		]
+		{#1}{\appdir#2/#3}
 
- \end{singlespace}
-}{}
+	 \end{singlespace}
+}
 
 % ================================================================================================================================
 % End of Macros

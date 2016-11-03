@@ -28,8 +28,6 @@
 % Package that helps produce a bibliography given a .bib file. The "numbers" parameter will produce [$num] citations that 
 % correspond to the refs in bibliography.
 \usepackage[numbers]{natbib}
-% Package that adds the ability to embed formatted code into the document.
-\usepackage{minted} 
 % Package that assists in formatting footnotes. Specifically, this will ensure that footnotes are on the bottom of pages 
 % and are flush with the margin.
 \usepackage[bottom,flushmargin,splitrule]{footmisc}
@@ -73,6 +71,9 @@
             pdfpagemode={None},
             driverfallback=dvipdfm,
             hidelinks]{hyperref}
+
+% Package that adds the ability to embed formatted code into the document.
+\usepackage{minted} 
 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
