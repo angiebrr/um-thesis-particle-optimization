@@ -23,19 +23,6 @@
 % Custom macros defined by author
 \input{macros}
 
-% Package that adds metadata and bookmarks to the outputted PDF. Additionally, it will add links to all "\ref" commands.
-% It will work with pdflatex, but it will fall back to the dvipdfm.tco driver if need be. 
-\usepackage[pdftitle={\mytitle}, 
-            pdfauthor={\me},
-            pdfkeywords={game programming,
-                   particles,
-                   c++,
-                   computer science,
-                   thesis},  
-            pdfstartview=FitH,   
-            pdfpagemode={None},
-            driverfallback=dvipdfm,
-            hidelinks]{hyperref}
 % Custom package bundled with this paper used specifically for theses. The manual is included under "isuthesis.pdf".
 \usepackage{isuthesis}
 % Package that helps produce a bibliography given a .bib file. The "numbers" parameter will produce [$num] citations that 
@@ -72,6 +59,20 @@
 \usepackage{enumitem} 
 % Package that adds the courier font
 \usepackage{courier} 
+
+% Package that adds metadata and bookmarks to the outputted PDF. Additionally, it will add links to all "\ref" commands.
+% It will work with pdflatex, but it will fall back to the dvipdfm.tco driver if need be. 
+\usepackage[pdftitle={\mytitle}, 
+            pdfauthor={\me},
+            pdfkeywords={game programming,
+                   particles,
+                   c++,
+                   computer science,
+                   thesis},  
+            pdfstartview=FitH,   
+            pdfpagemode={None},
+            driverfallback=dvipdfm,
+            hidelinks]{hyperref}
 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
