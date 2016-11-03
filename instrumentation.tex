@@ -32,11 +32,12 @@ In order to numerically quantify what occurs during games that are ran by CSAPon
 	{fig:MetricsSystemMetadataGameExample}
 \end{figure}
 
+
 Although not structurally complicated, the \class{Metrics System} keeps track of a great deal of primitives that describe the series of games ran by CSAPong. The following is a list of the tracked primitives that remained constant throughout the games:
 
 \begin{singlespace}
 
-	\begin{itemize}[nolistsep,topsep=0pt]
+	\begin{itemize}[nolistsep,topsep=5pt]
 	\itemsep1.0em
 
 		\item \define{Are particles looping}
@@ -71,17 +72,17 @@ Although not structurally complicated, the \class{Metrics System} keeps track of
 
 		\item \define{Minimum particles}
 		\begin{itemize}[nolistsep,topsep=0pt]
-			\item The minimum value for the changing values (i.e. \idefine{total maximum particles} and/or \idefine{particles per emission})
+			\item The minimum value for the changing values (i.e. \idefine{total maximum particles} and/or \idefine{particles per emission}).
 		\end{itemize}
 
 		\item \define{Maximum particles}
 		\begin{itemize}[nolistsep,topsep=0pt]
-			\item The maximum value for the changing values (i.e. \idefine{total maximum particles} and/or \idefine{particles per emission})
+			\item The maximum value for the changing values (i.e. \idefine{total maximum particles} and/or \idefine{particles per emission}).
 		\end{itemize}
 
 		\item \define{Particles step}
 		\begin{itemize}[nolistsep,topsep=0pt]
-			\item The step value for the changing values (i.e. \idefine{total maximum particles} and/or \idefine{particles per emission})
+			\item The step value for the changing values (i.e. \idefine{total maximum particles} and/or \idefine{particles per emission}). This is used in conjunction with the minimum and maximum particles values to determine how many particle effects to create and use during CSAPong's execution.
 		\end{itemize}
 
 		\item \define{Particles per emission step}
@@ -108,17 +109,39 @@ Although not structurally complicated, the \class{Metrics System} keeps track of
 
 \end{singlespace}
 
-In order to make the distinction clear between the different kinds of \idefine{particles per emission} and \idefine{total maximum particles} variables, let us examine \fig{fig:MetricsSystemMetadataExample}. The \idefine{minimum particles} is 500, the \idefine{maximum particles} is 2000, and the \idefine{particles step} is 500. Thus, this tells us right away that there will be $ 2000 / 500 = 4 $ kinds of particle effects that will be created\footnotemark. This is true regardless of the other variables' values. From the figure, we know that \idefine{particles per emission} and \idefine{total maximum particles} are changing across particle effects and will not be constant values. Thus, their "step" values will tell us how much each variable will be added as we advance through the 3 different kinds of particle effects. We can see that the \idefine{total maximum particles step} is 500, or 100\% of the \idefine{particles step}. Additionally, we can see that the \idefine{particles per emission step} is 50, or 10\% of the \idefine{particles step}. \fig{fig:MetricsSystemMetadataGameExample} shows how all of these particle variables change as CSAPong executes. We should note that, since we have 4 different kinds of particle effects and 2 \idefine{total number of runs}, CSAPong would play a total of $ 4 \times 2 = 8 $ times in this example.
+Let us examine \fig{fig:MetricsSystemMetadataExample} in order to make the distinction clear between the different kinds of particle variables. The \idefine{minimum particles} is 500, the \idefine{maximum particles} is 2000, and the \idefine{particles step} is 500. Thus, this tells us right away that there will be $ 2000 / 500 = 4 $ kinds of particle effects that will be created and played\footnotemark. This will be true regardless of the other variables' values. From the figure, we know that \idefine{particles per emission} and \idefine{total maximum particles} are changing across particle effects and they will not be constant values. Thus, their "step" values will tell us how much each variable will be added to as we advance through the 4 different kinds of particle effects. We can see that the \idefine{total maximum particles step} is 500, or 100\% of the \idefine{particles step}. Additionally, we can see that the \idefine{particles per emission step} is 50, or 10\% of the \idefine{particles step}. \fig{fig:MetricsSystemMetadataGameExample} shows how all of these particle variables change as CSAPong executes. We should note that, since we have 4 different kinds of particle effects and 2 \idefine{total number of runs}, CSAPong would play a total of $ 4 \times 2 = 8 $ times in this example.
 
 \footnotetext{Note that we do not subtract 500 from 2000 since the range is inclusive.}
 
 
-
-
-
 \subsection{Metrics}\label{ssec:instr_metrics_system_metrics}
 
-\subsection{Definition}\label{ssec:instr_metrics_system_definition}
+\addbottomfigure{metrics_system_metrics_example}
+{1.0}{An example of metrics output by the \class{Metrics System}.}
+{An example of metrics output by the \class{Metrics System}.}
+{fig:MetricsSystemMetricsExample}
+
+
+
+
+
+
+\subsection{Particle Effect Definition}\label{ssec:instr_metrics_pe_definition}
+
+\addfigure{instrumentation_generate_particles_py}
+{1.0}{Shows the parameters that the generate particles script can use.}
+{Shows the parameters that the generate particles script can use.}
+{fig:GenerateParticleFilesScript}
+%
+\addfigure{instrumentation_generate_particles_files}
+{1.0}{Shows the particle files that were generated by an invocation like \clis{code:InvokeGenerateParticles}.}
+{Shows the particle files that were generated by an invocation like \clis{code:InvokeGenerateParticles}.}
+{fig:GenerateParticleFilesListing}
+
+
+
+\framecode{bash}{metrics}{generate_particles.sh}
+{code:InvokeGenerateParticles}{An example invocation of the generate particles script.}
 
 
 
