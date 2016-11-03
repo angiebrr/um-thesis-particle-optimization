@@ -1,65 +1,84 @@
-%this file contains all the macros I need/want for my thesis.
+% !TEX root = .\Thesis.tex
 
-%title info, replace with your version
+% ================================================================================================================================
+% Beginning of Macros
+% ================================================================================================================================
+
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Variables Used for Preface
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+% ----------------------------------------------------------------------------------------------------------------------------
+% GENERAL
+% ----------------------------------------------------------------------------------------------------------------------------
+
+% Title information
 \newcommand{\mytitle}{ChilliSource Game Engine Particle Study }
 \newcommand{\mytitlecaps}{CHILLISOURCE GAME ENGINE PARTICLE STUDY }
 
-\newcommand{\mysubtitle}{}     %you may or may not even want a subtitle
+% Subtitle information
+\newcommand{\mysubtitle}{}
 \newcommand{\mysubtitlecaps}{}
 
-%my name, normal and last, first
+% My name
 \newcommand{\me}{Angela Nicole Gross}
 \newcommand{\melastfirst}{Gross, Angela N.}
 
-%current college and grad date information-------------------
+% Current college
 \newcommand{\college}{The University of Montana}
 \newcommand{\location}{Missoula, MT}
 \newcommand{\mycurrentdegree}{Master of Science}
 \newcommand{\mycurrentdegreeabbrev}{M.S.}
+
+% Previous college
+\newcommand{\myprevdegree}{Bachelor of Science}
+\newcommand{\myprevcollege}{The University of Montana}
+\newcommand{\myprevlocation}{Missoula, MT}
+\newcommand{\myprevdegdate}{2014}
+
+% Graduation information
 \newcommand{\mygradsemester}{Autumn}
 \newcommand{\mygradmonth}{December}
 \newcommand{\mygradyear}{2016}
 \newcommand{\mymajordept}{Computer Science}
-%------------------------------------------------------------
 
-%previous college and grad date information-----------------
-\newcommand{\myprevdegreetwo}{Bachelor of Science}
-\newcommand{\myprevcollegetwo}{The University of Montana}
-\newcommand{\myprevlocationtwo}{Missoula, MT}
-\newcommand{\myprevdegdatetwo}{2014}
+% ----------------------------------------------------------------------------------------------------------------------------
+% COMMITTEE
+% ----------------------------------------------------------------------------------------------------------------------------
 
-%-----------------------------------------------------------
+% Graduate school dean
+\newcommand{\gradschooldean}{J.B. Alexander S. Ross}
 
-%approval and committee members----------------------------
-	\newcommand{\gradschooldean}{J.B. Alexander S. Ross}
+% Committee chairman
+\newcommand{\chairname}{Travis Wheeler}
+\newcommand{\chairdept}{\mymajordept}
 
-	%committee chairman------------
-	\newcommand{\chairname}{Travis Wheeler}
-	\newcommand{\chairdept}{\mymajordept}
-	%------------------------------
-	
-	%committee member #1-----------
-	\newcommand{\committeememberonename}{Michael Cassens}
-	\newcommand{\committeememberonedept}{\mymajordept}
-	%------------------------------
-	
-	%committee member #2 (outside dept)
-	\newcommand{\committeemembertwoname}{Johnathan Bardsley}
-	\newcommand{\committeemembertwodept}{Mathematical Sciences}
+% Committee member #1
+\newcommand{\committeememberonename}{Michael Cassens}
+\newcommand{\committeememberonedept}{\mymajordept}
+%------------------------------
 
-	%------------------------------
-%----------------------------------------------------------
+% Committee member #2 (outside dept)
+\newcommand{\committeemembertwoname}{Johnathan Bardsley}
+\newcommand{\committeemembertwodept}{Mathematical Sciences}
 
-%Simple formatting macros
-\newcommand*\vtick{\textsc{\char13}} %A single vertical apostrophe
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Commands used for formatting
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-%----------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
+% GENERAL
+% ----------------------------------------------------------------------------------------------------------------------------
 
+% A single vertical apostrophe
+\newcommand*\vtick{\textsc{\char13}} 
 
-%figure, table, etc... shortcuts---------------------------
-%the tilde character prevents the wrapping of the command across
-%two lines.  Any changes to UM's formatting can be accomplished
-%by changing the text inside the {} here.
+% ----------------------------------------------------------------------------------------------------------------------------
+% REFERENCES
+% ----------------------------------------------------------------------------------------------------------------------------
+
+% The tilde character prevents the wrapping of the command across two lines.  Any changes to UM's formatting can be 
+% accomplished by changing the text inside the {} here.
 \newcommand{\ch}[1]{Chapter~\ref{#1}}
 \newcommand{\sect}[1]{Section~\ref{#1}}
 \newcommand{\eq}[1]{Equation~\eqref{#1}}
@@ -67,81 +86,48 @@
 \newcommand{\clis}[1]{Code Listing~\ref{#1}}
 \newcommand{\tbl}[1]{Table~\ref{#1}}
 \newcommand{\apdx}[1]{Appendix~\ref{#1}}
-%---------------------------------------------------------
 
-%---------------------------------------------------------
-% Setup special formatting commands for things like 
-% variables or system commands
-% maybe italics, bold, or even change font to like courier
+% ----------------------------------------------------------------------------------------------------------------------------
+% SPECIAL FORMATTING
+% ----------------------------------------------------------------------------------------------------------------------------
+
 % \textit -> italics
 % \textbf -> bold
 % \underline -> underline
+
 \newcommand{\var}[1]{\textit{#1}}
-
 \newcommand{\class}[1]{\textit{#1}}
-
 \newcommand{\define}[1]{\textit{\textbf{#1}}}
-
 \newcommand{\sys}[1]{\textit{\underline{#1}}}
-
 \newcommand{\func}[1]{\textbf{#1}}
-
 \newcommand{\phase}[1]{\textbf{#1}}
-
 \newcommand{\script}[1]{\texttt{\textbf{#1}}}
 
-%macros to make addfigure (see below) work ---------------
-\newcommand{\figformat}{png}	  %extension of graphics
-\newcommand{\figdir}{figures/\figformat/}  %relative to thesis.tex
-%my setup was ./figures/eps/*.eps (all fig files were eps)
-%change yours accordingly, I strongly suggest keeping all
-%figure files the same format
-%---------------------------------------------------------
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Commands used for figure listings
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-%single figure macro, adds to table of contents-----------
-%and can have a separate name for caption and toc entry
-%if no 3rd value, toc entry is same as caption
-%otherwise, 3rd value is toc entry
-% parameter 1 == file name (no extension
-% parameter 2 == percent of text width (up to 1.0, 0.7 is good)
-% parameter 3 == toc entry text (if blank, will use 
-%                value for parameter 4
+% The image format to use; the current pipeline only allows a single type of file.
+\newcommand{\figformat}{png}
+% The figure path, which is relative to Thesis.tex.
+\newcommand{\figdir}{figures/\figformat/}
+
+
+% ----------------------------------------------------------------------------------------------------------------------------
+% ADD FIGURE
+%
+% parameter 1 == file name (no extension)
+% parameter 2 == percent of text width 
+% parameter 3 == toc entry text (if blank, will use value for parameter 4)
 % parameter 4 == caption text
 % parameter 5 == label for referencing 
-\newcommand{\addfigure}[5]{%
-\begin{figure}[htbp]
-	
-	\centering
-	\singlespacing
-	\footnotesize
-	
-	\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
-	
-	\ifthenelse{\equal{#3}{}} %if 3 is blank
-	{% then
-		\isucaption[#4]{#4}
-	}%
-	{% else
-		\isucaption[#3]{#4}
-	}%
-	
-	\label{#5}
-	
-\end{figure}
-}%
-
-%single figure macro, adds to table of contents-----------
-%and can have a separate name for caption and toc entry
-%if no 3rd value, toc entry is same as caption
-%otherwise, 3rd value is toc entry
-% parameter 1 == file name (no extension
-% parameter 2 == percent of text width (up to 1.0, 0.7 is good)
-% parameter 3 == toc entry text (if blank, will use 
-%                value for parameter 4
-% parameter 4 == caption text
-% parameter 5 == label for referencing 
-\newcommand{\addtopfigure}[5]{%
-	\begin{figure}[t]
+%
+% Adds a figure using the graphicsx package. You can have a separate name for caption and toc entry. If no 3rd value, toc 
+% entry is same as caption. Otherwise, 3rd value is toc entry.
+% ----------------------------------------------------------------------------------------------------------------------------
+\newcommand{\addfigure}[5]
+{
+	\begin{figure}[htbp]
 		
 		\centering
 		\singlespacing
@@ -149,7 +135,7 @@
 		
 		\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
 		
-		\ifthenelse{\equal{#3}{}} %if 3 is blank
+		\ifthenelse{\equal{#3}{}} % if 3 is blank
 		{% then
 			\isucaption[#4]{#4}
 		}%
@@ -160,19 +146,57 @@
 		\label{#5}
 		
 	\end{figure}
-}%
+}
 
-%single figure macro, adds to table of contents-----------
-%and can have a separate name for caption and toc entry
-%if no 3rd value, toc entry is same as caption
-%otherwise, 3rd value is toc entry
-% parameter 1 == file name (no extension
-% parameter 2 == percent of text width (up to 1.0, 0.7 is good)
-% parameter 3 == toc entry text (if blank, will use 
-%                value for parameter 4
+% ----------------------------------------------------------------------------------------------------------------------------
+% ADD TOP FIGURE
+%
+% parameter 1 == file name (no extension)
+% parameter 2 == percent of text width 
+% parameter 3 == toc entry text (if blank, will use value for parameter 4)
 % parameter 4 == caption text
 % parameter 5 == label for referencing 
-\newcommand{\addbottomfigure}[5]{%
+%
+% Adds a figure using the graphicsx package, and it tries to add it to the top of the page if it can. You can have a separate 
+% name for caption and toc entry. If no 3rd value, toc entry is same as caption. Otherwise, 3rd value is toc entry.
+% ----------------------------------------------------------------------------------------------------------------------------
+\newcommand{\addtopfigure}[5]
+{
+	\begin{figure}[t]
+		
+		\centering
+		\singlespacing
+		\footnotesize
+		
+		\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
+		
+		\ifthenelse{\equal{#3}{}} % if 3 is blank
+		{% then
+			\isucaption[#4]{#4}
+		}%
+		{% else
+			\isucaption[#3]{#4}
+		}%
+		
+		\label{#5}
+		
+	\end{figure}
+}
+
+% ----------------------------------------------------------------------------------------------------------------------------
+% ADD BOTTOM FIGURE
+%
+% parameter 1 == file name (no extension)
+% parameter 2 == percent of text width 
+% parameter 3 == toc entry text (if blank, will use value for parameter 4)
+% parameter 4 == caption text
+% parameter 5 == label for referencing 
+%
+% Adds a figure using the graphicsx package, and it tries to add it to the bottom of the page if it can. You can have a
+% separate name for caption and toc entry. If no 3rd value, toc entry is same as caption. Otherwise, 3rd value is toc entry.
+% ----------------------------------------------------------------------------------------------------------------------------
+\newcommand{\addbottomfigure}[5]
+{
 	\begin{figure}[b]
 		
 		\centering
@@ -192,35 +216,52 @@
 		\label{#5}
 		
 	\end{figure}
-}%
+}
 
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Commands used for table listings
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-
-%-------------------------------------------------------
+% The table data format
 \newcommand{\tblformat}{csv}
+% The directory that the tables will be in
 \newcommand{\tbldir}{tables/}
 
-%This will blow up if your table is too wide for the document
-%Tables are kind of a pain in LaTeX. My opinion is that making a nice
-%table in excel or open office which can be turned into a jpg or png
-%is often a better route.
-\newcommand{\addtable}[2]{
+% ----------------------------------------------------------------------------------------------------------------------------
+% ADDTABLE
+%
+% parameter 1 == the inner directory that the csv is in
+% parameter 2 == the csv name
+%
+% This will add a table to your document using a csv. Note that results may be undesirable if the table is too wide for the 
+% document. In that case, it may be easier to just create a table and export that as a PNG to insert as a figure.
+% ----------------------------------------------------------------------------------------------------------------------------
+\newcommand{\addtable}[2]
+{
   \csvautotabular{\tbldir#1/#2.\tblformat}
 }
-%-------------------------------------------------------
 
-%code framing environment-------------------------------
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Commands used for code listings
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-% #1 the language to use for syntax highlighting
-% #2 the name of the folder in source
-% #3 the filename of the script
-% #4 the label used to refer to this code elsewhere in the text
-% #5 the caption used in the text and in the code listing near the table of contents
-\newenvironment{framecode}[5]%
+% The source code directory
+\newcommand{\appdir}{source/}
+
+% ----------------------------------------------------------------------------------------------------------------------------
+% FRAMECODE
+%
+% parameter 1 == the language to use for syntax highlighting
+% parameter 2 == the name of the folder in source
+% parameter 3 == the filename of the source code
+% parameter 4 == the label used to refer to this code elsewhere in the text
+% parameter 5 == the caption used in the text and in the code listing near the table of contents
+%
+% Adds formatted code from a file to the document. This supports code that spans across multiple page. To see the supported 
+% languages, you can go here: https://www.sharelatex.com/learn/Code_Highlighting_with_minted
+% ----------------------------------------------------------------------------------------------------------------------------
+\newenvironment{framecode}[5]
 {
- %setup language specific syntax highlightning
- % https://www.sharelatex.com/learn/Code_Highlighting_with_minted
 
  \begin{singlespace}
 
@@ -245,7 +286,7 @@
 		obeytabs=false,
 		mathescape=false,
 		resetmargins=true,
-		samepage=false, %with this setting you can force the list to appear on the same page
+		samepage=false,
 		showspaces=false,
 		showtabs =false,
 		texcl=false
@@ -255,7 +296,7 @@
  \end{singlespace}
 }{}
 
-\newcommand{\appdir}{source/}
-
-%------------------------------------------------------
+% ================================================================================================================================
+% End of Macros
+% ================================================================================================================================
 

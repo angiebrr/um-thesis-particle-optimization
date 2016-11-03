@@ -1,8 +1,8 @@
 % !TEX root = .\Thesis.tex
 
-%=================================================================================================================================
-%Beginning of Background
-%=================================================================================================================================
+% ================================================================================================================================
+% Beginning of Background
+% ================================================================================================================================
 \chapter{BACKGROUND}\label{ch:background}
 
 \addfigure{william_reeves_star_trek_explosion}
@@ -10,14 +10,14 @@
 {The particle effect created by William T. Reeves from the film Star Trek II: The Wrath of Khan}
 {fig:ReevesParticleEffect}
 
-%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-%Particles Systems
-%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Particles Systems
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Particle Systems}\label{sec:particle_systems}
 
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Overview}\label{ssec:particle_systems_overview}
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 
 \addtopfigure{static_animated_particles}
 {0.7}{Cubes emitting particles}
@@ -28,13 +28,13 @@ Visual representation of "fuzzy objects", or objects that do not have well-defin
 
 Fuzzy objects like sparks, clouds, stars, water, and crowds of people can be easily translated and modeled as a particle system, but particle systems can also be used to model objects that contain numerous strands like hair and grass. These objects can be represented by rendering every strand as the entire lifetime of a particle in the system and is then treated as a single strand. The particles in a system that have a distributed lifetime (e.g. sparks) are thought of as \define{animated} and particles that are rendered all at once (e.g. hair) are thought of as \define{static}. For the duration of our own study, we have exclusively focused on animated particles.
 
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Particle Model}\label{ssec:particle_systems_particle_model} 
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 
-%............................................................
+% ...........................................................
 \subsubsection{Life Cycle}
-%............................................................
+% ...........................................................
 
 A particle system has 4 main events that defines its life cycle:
 
@@ -48,9 +48,9 @@ A particle system has 4 main events that defines its life cycle:
 
 The \phase{Emission} event is the initial process in which particles are generated with their initial values. Often a "generation shape"\cite{Reeves1983ParticleSystems} is used during the emission phase that defines the two or three dimensional space that the particles can originate, or emit, from. Emission can be increased or decreased in frequency using the \define{emission rate}, and the number of particles that enter the particle system each emission can also be changed using the \define{particles per emission} variable. After emission, particles in the particle system undergo the \phase{Update} and \phase{Render} events. These events are repeated in perpetuum until the particle dies, or undergoes the \phase{Extinction} phase. The \phase{Update} phase involves iterating over all particles throughout the system and updating their attributes (e.g. position, velocity, etc.). The \phase{Render} phase, on the other hand, is the phase in which all of the particles are actually drawn to the screen.
 
-%............................................................
+% ...........................................................
 \subsubsection{Particle Attributes}
-%............................................................
+% ...........................................................
 
 As mentioned above, each individual particle in a particle system will have attributes that change over time. Although every particle system is different, the following is what Reeves considered to be the core attributes of a particle:
 
@@ -67,27 +67,27 @@ As mentioned above, each individual particle in a particle system will have attr
 
 A particle has a position in two or three dimensional space, and its initial position is determined by the emission process. Other attributes that may also change over time include its speed, direction, size, color, and transparency. Its lifetime, however, is pre-determined at emission, and it is the attribute that dictates how long the particle "lives", or remains on the screen. In order to decrease uniformity and increase realism, all of these values can vary across the particles in the system. For example, the particles in a given particle system could have a varying lifetime of 5 to 10 seconds so that the particles that shared an emission would not all die simultaneously.
 
-%............................................................
+% ...........................................................
 \subsubsection{Hierarchy}
-%............................................................
+% ...........................................................
 
 It is often convenient to design a particle system such that it is made up of a hierarchy of child particle systems. This hierarchy "can be used to exert global control on a complicated fuzzy object that is composed of many particle systems." \cite{Reeves1983ParticleSystems} In other words, a fuzzy object could easily be transformed in overall shape, size, color, etc. by sweeping through the descendant particle systems. It also allows the grouping together of particle systems that have different types of particles. For example, a campfire fuzzy object would need smoke, sparks, and the flame itself. All of these components would have distinct particle definitions and would be separate particle systems. A particle system hierarchy, in this case, would allow the smoke, sparks, and flame particle systems to be bundled together as a single fuzzy object.
 
 
-%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-%The ChilliSource Game Engine
-%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% The ChilliSource Game Engine
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{The ChilliSource Game Engine}\label{sec:cs_engine}
 
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Overview}\label{ssec:cs_engine_overview}
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 
 Chosen for its open source and well-thought out architecture, ChilliSource is the game engine that was used in our study of particle systems. ChilliSource is a free, open source game engine created by ChilliWorks which is a group that is part of United Kingdom{\vtick}s Tag Games. It allows developers to create 2D and 3D content for iOS, Android, Kindle, and Windows operating systems in C++ 11. Some of its key features include networking, shader support, responsive (i.e. adaptive to different resolutions) graphical user interfaces, modular and extensible lighting and shadows, skinned animation, Facebook connect integration, consistent API, and automatic builds of iOS/Android/Kindle applications. \cite{ChilliSource2014Features}
 
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Architecture}\label{ssec:cs_engine_arch}
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 
 The structure of a ChilliSource application is primarily composition based in that it relies on a hierarchy of modules to define its functionality. The main types of modules that comprise the application are \class{States}, \class{Systems}, \class{Entities} and \class{Components}. \fig{fig:ChilliSourceArch} demonstrates the architecture of a ChilliSource application using these basic modules.
 
@@ -104,9 +104,9 @@ The \class{Application} instance initializes and manages \class{Application Syst
 
 ChilliSource's architecture favors composition over inheritance. For example, if we wanted to create enemy and player \class{Entities}, we may be tempted to create a base Human \class{Entity} class that had health related methods and attributes. In order to truly adhere to the spirit of ChilliSource's design, however, we would create a \class{Component} called something like \func{HealthComponent} that could be attached to any single \class{Entity}. In this way, ChilliSource lends itself to a great deal of code reusability and flexibility.
 
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Life Cycle}\label{ssec:cs_engine_lifecycle}
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 
 The majority of game engines follow a life cycle very similar to the one for particle systems that Reeves\vtick developed, which is: 
 
@@ -175,14 +175,14 @@ All of these events are kicked off from the \class{Application} instance. The fl
 Although these are the main events that are automatically pushed by the application, the game developer can create custom events that can be subscribed to by entities, components, and systems. An \class{Event} can open, close, and notify \class{Connections}, where a \class{Connection} allows its user to listen for \class{Events}. Some examples of custom events are entity collisions, player death, cut scene trigger, game lost, game won, etc. 
 
 
-%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-%ChilliSource Particle Effect Components
-%/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% ChilliSource Particle Effect Components
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{ChilliSource Particle Effect Components}\label{sec:cs_pec}
 
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Overview}\label{ssec:cs_pec_overview}
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 
 A special type of component in ChilliSource is the \class{Particle Effect Component}. It inherits from the \class{Render Component} class \footnotemark, which is, just as it sounds, a component that is rendered to the screen. \class{Render Components} have methods for visibility, culling, casting shadows, and usage of its transformation matrix and sort predicates. They also have virtual methods that child classes can define for materials, transparency, rendering, and bounding boxes. For the purpose of our study, however, the exact details of how a \class{Render Component} works is outside of our scope. It is only necessary to know that the \class{Particle Effect Component} is not only updated by its parent entity but is also rendered by the \class{Application}'s renderer.
 
@@ -195,13 +195,13 @@ A special type of component in ChilliSource is the \class{Particle Effect Compon
 
 \begin{samepage}
 
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Architecture}\label{ssec:cs_pec_arch}
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 
-%............................................................
+% ...........................................................
 \subsubsection{Overview}
-%............................................................
+% ...........................................................
 
 \end{samepage}
 
@@ -216,9 +216,9 @@ The structure of a \class{Particle Effect Component} in ChilliSource is fairly c
 	\item An array of \class{Particle} structs
 \end{itemize}
 
-%............................................................
+% ...........................................................
 \subsubsection{Particle Effect}
-%............................................................
+% ...........................................................
 
 The \class{Particle Effect} object contains all of the \class{Properties} and \class{Definitions} for the effect. A \class{Property} defines a value that may be more complex than just a single value. For example, a \class{Property} could be defined as a random value selected within a certain range, it may be a value that changes over the lifetime of the particle effect, or it could simply be a constant primitive value. \class{Definitions}, on the other hand, describe a number of properties that should be used to create an object. The \class{Properties} and \class{Definitions} that the \class{Particle Effect} contains include:
 
@@ -244,17 +244,17 @@ These \class{Properties} and \class{Definitions} are used to create instances an
 {code:GenericParticleFile}
 {An example ChilliSource particle definition file for a generic particle effect. Note how the initial and changing-over-time (i.e. "affector") \class{Properties} can either be random values or constants. }
 
-%............................................................
+% ...........................................................
 \subsubsection{Particle Drawable}
-%............................................................
+% ...........................................................
 
 The \class{Drawable} object is responsible for rendering all of the particles that belong to its \class{Particle Effect Component}. A \class{Static Billboard Particle Drawable}\footnotemark, which is a \class{Drawable} that renders each and every individual particle as camera facing sprites, is used to accomplish this. The \class{Drawable} will always render particles on the main game thread.
 
 \footnotetext{As of version 1.6.0, the only \class{Drawable} type available to us is the \class{Static Billboard}, but the current architecture suggests that there could be different types of \class{Drawables} in future versions.}
 
-%............................................................
+% ...........................................................
 \subsubsection{Particle Emitter}
-%............................................................
+% ...........................................................
 
 The \class{Emitter} object is used to spawn new particles during \func{Emission}. The \class{Emitter} gets to decide the direction, location, and moment that a new particle emits. Unlike the rendering that a \class{Drawable} does, the \class{Emitter} emits particles as a background task. There are 5 different kinds of \class{Emitters}, and their differences lie in the "generation", or emission, shape:
 
@@ -287,9 +287,9 @@ The \class{Emitter} object is used to spawn new particles during \func{Emission}
 
 \end{itemize}
 
-%............................................................
+% ...........................................................
 \subsubsection{Particle Affector}
-%............................................................
+% ...........................................................
 
 A \class{Particle Affector} object applies an effect to all particles that change over time. A \class{Particle Effect Component} can utilize zero or more \class{Affectors}, and, like the \class{Emitter}, \class{Affectors} update particles in a background thread. There are 4 different kinds of \class{Affectors} that can be applied:
 
@@ -317,9 +317,9 @@ A \class{Particle Affector} object applies an effect to all particles that chang
 
 \end{itemize}
 
-%............................................................
+% ...........................................................
 \subsubsection{Particle Array}
-%............................................................
+% ...........................................................
 
 The \var{Particle Array} is a data structure that holds all of the particles that comprise the \class{Particle Effect Component}, and it is used by the \class{Drawable}, \class{Emitter}, \class{Affector}, and \class{Concurrent Particle Data} instances. Each particle is represented by a \class{Particle} struct, as shown in \clis{code:ParticleStruct}. We can observe that the information provided by this struct mirrors the particle attributes that Reeves used in his particle systems.
 
@@ -327,9 +327,9 @@ The \var{Particle Array} is a data structure that holds all of the particles tha
 {code:ParticleStruct}
 {The struct that is used to describe the properties of a particle within the \var{Particle Array} in \class{Particle Effect Component}.}
 
-%............................................................
+% ...........................................................
 \subsubsection{Concurrent Particle Data}
-%............................................................
+% ...........................................................
 
 The \class{Concurrent Particle Data} object is a container for data that is shared by the background and main threads. \class{Concurrent Particle Data} is written to by the same background thread that emits and affects particles, and it is read by the \class{Particle Effect Component's} \class{Drawable} in the main thread. It contains, essentially, copies of important attributes that are shared by these threads. This includes an array of particles, indices of particles that were just emitted, and the bounds of the particle effect. Thus, all thread synchronization and locking occurs in \class{Concurrent Particle Data} and not in the \class{Particle Effect Component} itself. 
 
@@ -339,9 +339,9 @@ It is important to note that \class{Concurrent Particle Data}'s array of particl
 {code:ConcurrentParticleStruct}
 {The struct that is used to describe the properties of a particle within the \var{Particle Array} in \class{Concurrent Particle Data}.}
 
-%............................................................
+% ...........................................................
 \subsubsection{Other Important Attributes}
-%............................................................
+% ...........................................................
 
 There are a number of other important attributes that are not the 6 parts discussed above. These include:
 
@@ -355,13 +355,13 @@ There are a number of other important attributes that are not the 6 parts discus
 
 The \class{Bounding Box Objects} are containers that describe the effect's shape and are used to aide in the rendering of the effect. The \class{Playback Enumerators}, \class{Playback Type} and \class{Playback State}, help describe the whether or not the particle effect loops and the current life cycle phase of the particle effect, respectively. The \class{Playback Floats} keep track of how long the particle effect has been playing. The two \class{Custom Events} that the effect uses are fired off when the particle effect fully completes (i.e. no more particles are left alive) and when a particle effect finishes emitting.
 
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Life Cycle}\label{ssec:cs_pec_lifecycle}
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 
-%............................................................
+% ...........................................................
 \subsubsection{Overview}
-%............................................................
+% ...........................................................
 
 The life cycle of a \class{Particle Effect Component} is very similar to the one that was developed by Reeves, and it can be described as 4 main phases:
 
@@ -374,15 +374,15 @@ The life cycle of a \class{Particle Effect Component} is very similar to the one
 
 \end{enumerate} 
 
-%............................................................
+% ...........................................................
 \subsubsection{Initialization Phase}
-%............................................................
+% ...........................................................
 
 During the \func{Initialization} phase, the \class{Particle Effect Component} creates the \class{Drawable}, \class{Emitter}, \class{Concurrent Particle Data}, and, if specified by the \class{Particle Effect} instance, its \class{Affectors}. It also creates the \var{Particle Array} and initializes the \class{Bounding Shapes}. 
 
-%............................................................
+% ...........................................................
 \subsubsection{Update Phase}
-%............................................................
+% ...........................................................
 
 The \func{Update} phase uses 4 states to characterize the current playback state of the particle effect, which are \func{Starting}, \func{Playing}, \func{Stopping}, and \func{Not Playing}. During the \func{Starting} state, particles are initialized to be inactive before it updates the particle effect for the first time and enters the \func{Playing} state. The \func{Playing} state is when particles are rendered and updated. If, during the \func{Playing} state, the particle effect may enter a \func{Stopping} state if the playback timer exceeds the effect's duration. However, it may go back to a \func{Playing} state if active particles still remain within the \var{Particle Array}. When the particle effect's duration time has elapsed and there are no more active particles, the particle effect finally enters the \func{Not Playing} state and the particle effect no longer does anything. The bulk of a particle effect's time is spent during the \func{Playing} state, and that is the state of the \func{Update} phase that we will be focusing on throughout our study and will be discussing at length.
 
@@ -401,9 +401,9 @@ As mentioned before in \sect{ssec:cs_pec_arch}, the \func{Particle Update Task} 
 \framecode{C++}{lifecycle}{CommitParticleData.cpp}
 {code:CommitParticleUpdate}{Pseudocode describing what \func{CommitParticleData} does when it copies its data to the \class{Concurrent Particle Data} instance.}
 
-%............................................................
+% ...........................................................
 \subsubsection{Render Phase}
-%............................................................
+% ...........................................................
 
 Unlike the \phase{Update} phase, the \phase{Render} phase is not directly called by the \class{Particle Effect Component}. Instead, it is called by the \class{Renderer} application system. The \class{Renderer} retrieves the active scene from the \class{State Manager}, filters entities added to the scene that have \var{Render Components}, and attempts to render them. 
 
@@ -412,15 +412,15 @@ The \func{Render} function uses the \class{Drawable} instance to draw the \class
 \framecode{C++}{lifecycle}{ParticleDraw.cpp}
 {code:ParticleDraw}{Pseudocode showing how a \class{Particle Effect Component} uses its \class{Drawable} to render itself.}
 
-%............................................................
+% ...........................................................
 \subsubsection{Clean Up Phase}
-%............................................................
+% ...........................................................
 
 Of all phases, this is one is by far the simplest. It releases all resources and clears allocated arrays. Specifically, it cleans up the \var{Particle Array}, the \class{Concurrent Particle Data} instance, the \class{Drawable} instance, the \class{Emitter} instance, and the array of \var{Affectors}.
 
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Usage}\label{ssec:cs_pec_usage}
-%-----------------------------------------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
 
 Creating a basic scene that uses a \class{Particle Effect Component} in ChilliSource is fairly simple. As \clis{code:CreateSceneParticleEffect} illustrates, it requires that we first create a camera along with a light source and add them both to the current \class{State}'s \class{Scene}. Although a state system, \class{Basic Entity Factory}, abstracts some of this code, \clis{code:BasicEntityFactory}\footnotemark $ $ demonstrates that utilizing ChilliSource's API to create an entity like an ambient light is still easy to use and understand. We did not need to do this, but we also used the \class{Basic Entity Factory} to create a room in our scene.
 
@@ -440,7 +440,7 @@ Once we've added a room, lighting, and a camera to our scene, we create a partic
 Compared to Reeves' particle systems, we can observe here that a \class{Particle Effect Component} is not composed of a hierarchy of child \class{Particle Effect Components}. As mentioned in \sect{ssec:cs_engine_arch}, however, \class{Entities} are made up of \class{Components} and child \class{Entities}. Thus, ChilliSource's architecture allows the developer to create parent and child \class{Particle Effect Components} by nesting \class{Entities}. 
 
 
-%=================================================================================================================================
-%End of Background
-%=================================================================================================================================
+% ================================================================================================================================
+% End of Background
+% ================================================================================================================================
 

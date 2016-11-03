@@ -1,51 +1,30 @@
-%Thesis template, last hacked by Eric Spaulding (March 2015)
-%This template was built via LaTex => DVI => PDF
-%if necessary, you can import the dvi2pdf.tco file
-%to get the right build (it's included).
 
-%divpdfm is the dvi=>pdf engine
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Thesis.tex
+% --------------------------------------------------------------------------------------------------------------------------------
+% Autumn 2016
+% Written by Angela Gross
+% Thesis template originally written by Eric Spaulding
+% --------------------------------------------------------------------------------------------------------------------------------
+% The root TEX file for a UM thesis on a particle system. See the readme for more information on the development environment used
+% during the construction of this paper.
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+% ================================================================================================================================
+% Beginning of Thesis
+% ================================================================================================================================
+
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Packages
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 \documentclass [11 pt] {report}
+
+% Custom macros defined by author
 \input{macros}
-\usepackage[maxfloats=100]{morefloats}
-\usepackage{isuthesis}
 
-%numbers produces [1] citations, with corresponding 
-%citation numbers next to refs in bibliography
-\usepackage[numbers]{natbib} %number format
-
-%\usepackage[utf8]{inputenc}
-%\usepackage[T1]{fontenc}
-%\usepackage{textcomp}
-%\usepackage{gensymb}
-
-\usepackage{lipsum}
-
-\usepackage[bottom,flushmargin,splitrule]{footmisc} % Formats footrules
-
-\usepackage{fancybox}% I use it for framing definitions
-\usepackage{csvsimple} % used to import csv files into the document as tables
-  
-\usepackage{xcolor}
-%\usepackage{color}
-
-\usepackage{amsmath, amssymb, amscd} % Contains the AMS expanded math symbols library.
-\usepackage{graphicx}
-\usepackage{rotating} % Allows figures to be rotated
-\usepackage{subfig}  % For side-by-side figs
-\usepackage{multirow} % For multirow stuff in tables
-\usepackage{nicefrac} % For slanty 3/4 type fracs
-\usepackage{flafter}
-\usepackage{enumitem} % Helps formatting lists
-
-\usepackage{courier} % Allows adding courier font
-
-
-%this handy little package puts bookmarks in your thesis.
-%there are a ton of parameters, check it out. (hyperref)
-%it hyperlinks all your \ref commands to the object it
-%references and adds the bookmarks tab to the pdf file
-%as well.  
-%comment out to remove
+% Package that adds metadata and bookmarks to the outputted PDF. Additionally, it will add links to all "\ref" commands.
+% It will work with pdflatex, but it will fall back to the dvipdfm.tco driver if need be. 
 \usepackage[pdftitle={\mytitle}, 
             pdfauthor={\me},
             pdfkeywords={game programming,
@@ -56,69 +35,125 @@
             pdfstartview=FitH,   
             pdfpagemode={None},
             driverfallback=dvipdfm,
-            hidelinks]{hyperref}  %gives bookmarks in pdf file
+            hidelinks]{hyperref}
+% Custom package bundled with this paper used specifically for theses. The manual is included under "isuthesis.pdf".
+\usepackage{isuthesis}
+% Package that helps produce a bibliography given a .bib file. The "numbers" parameter will produce [$num] citations that 
+% correspond to the refs in bibliography.
+\usepackage[numbers]{natbib}
+% Package that adds the ability to embed formatted code into the document.
+\usepackage{minted} 
+% Package that assists in formatting footnotes. Specifically, this will ensure that footnotes are on the bottom of pages 
+% and are flush with the margin.
+\usepackage[bottom,flushmargin,splitrule]{footmisc}
+% Package that increases the size of floats
+\usepackage[maxfloats=100]{morefloats}
+% Package used for framing definitions
+\usepackage{fancybox}
+% Package used to import CSV files into the document as tables
+\usepackage{csvsimple}
+% Provides driver-independent access to colors
+\usepackage{xcolor}
+% Packages that contains the AMS expanded math symbols library.
+\usepackage{amsmath, amssymb, amscd} 
+% Package that provides key-value interface for optional arguments to the "\includegraphics" command
+\usepackage{graphicx}
+% Package that allows figures to be rotated
+\usepackage{rotating}
+% Package that allows side-by-side figs 
+\usepackage{subfig}
+% Package that includes multirow content in tables  
+\usepackage{multirow} 
+% Package for slanty 3/4 type fracs
+\usepackage{nicefrac} 
+% Package that makes a float appear after their definition
+\usepackage{flafter}
+% Package that helps formatting lists
+\usepackage{enumitem} 
+% Package that adds the courier font
+\usepackage{courier} 
 
 
-\usepackage{minted} % This is for code listings
-\definecolor{mintedbackground}{rgb}{0.95,0.95,0.95}
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Rewriting Commands
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+% Updating code listing commands
 \renewcommand\listoflistingscaption{CODE LISTINGS}
 \renewcommand{\listingscaption}{\fontsize{9}{11}\selectfont Code Listing}
 
+% Updating the bibliography name command
+\renewcommand{\bibname}{BIBLIOGRAPHY}
 
-% makeatletter block is necessary to get
-% listings to stop ignoring the abovecaptionskip setting
+% "makeatletter block" is necessary to get listings to stop ignoring the "abovecaptionskip" setting
 \makeatletter
 \let\@ORGmakecaption\@makecaption
 \long\def\@makecaption#1#2{\@ORGmakecaption{#1}{#2}\vskip\belowcaptionskip\relax}
 \makeatother
 
+% Page fraction commands
 \renewcommand\floatpagefraction{.9}
 \renewcommand\topfraction{.9}
 \renewcommand\bottomfraction{.9}
 \renewcommand\textfraction{.1}
 
-%any files inside {} below will be compiled, rest
-%will not.  separate multiple files with commas
-%ex.  
-%\includeonly{abstract, acknow, chapter2} will 
-%build only those files into .pdf file
-%note:  only files inserted via \include{} are
-%affected by this.  
-%=========== include only ======================
-%\includeonly{background}
-%===============================================
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Document Formatting
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+% Any files inside {} below will be compiled into a PDF, the rest will not. Separate multiple files with commas: 
+%    ex.\includeonly{abstract, acknow, chapter2}
+% NOTE: Only files inserted via \include{} are affected by this.  
+%\includeonly{preface}
+
+% Graphics types
 \DeclareGraphicsExtensions{.png,.pdf,.jpg}
 
-%=============== comment this out to eliminate section, subsection numbering
+% Use IEEE Tran for bibliography style. Note that this only works with the "numbers" option of natlib.
+\bibliographystyle{ieeetran}
+
+% Adds section, subsection numbering
 \alternate
-%==================================================================
+% Adds sub sub sections in table of contents
+\setcounter{tocdepth}{3}
 
+% Adds paragraph indents
 \parindent 12pt
-\bibliographystyle{ieeetran} %only works with [numbers] option of natbib
-\renewcommand{\bibname}{BIBLIOGRAPHY}
 
-\setcounter{tocdepth}{3} %include sub sub sections in toc
+% Adds a color for minted to use for code styling (can't be included in macros, unfortunately)
+\definecolor{mintedbackground}{rgb}{0.95,0.95,0.95}
 
-%-------------------------------------------------------
 
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Main Document
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \begin{document}
 
-%------------ title, copyright, toc, listings --------------
+% ----------------------------------------------------------------------------------------------------------------------------
+% PREFACE
+% ----------------------------------------------------------------------------------------------------------------------------
 
 \include{preface}
 
-%-------------------------------------------------------
+% ----------------------------------------------------------------------------------------------------------------------------
+% TRANSITION 
+% ----------------------------------------------------------------------------------------------------------------------------
 
+% Force a new page
 \newpage
 
-\textheight 8.5in %8.5+.5headsep=9in. This leaves 1 in margin in the thesis body
+% 8.5+.5headsep=9in. This leaves 1 in margin in the thesis body
+\textheight 8.5in 
+
+% Arabic numerals for page numbering
 \pagenumbering{arabic}
+
+% Page number is top right, and it is possible to control the rest of the header.
 \pagestyle{myheadings}
 
-
-%------------ main body section -----------------------
+% ----------------------------------------------------------------------------------------------------------------------------
+% MAIN BODY
+% ----------------------------------------------------------------------------------------------------------------------------
 
 \include{intro}
 \include{background}
@@ -127,23 +162,31 @@
 \include{case_studies}
 \include{observations}
 
-%-------------------------------------------------------
-
-
-%------------- appendix section ------------------------
-% uncomment this to add appendices to paper
+% ----------------------------------------------------------------------------------------------------------------------------
+% APPENDIX
+% ----------------------------------------------------------------------------------------------------------------------------
+% Uncomment this to add appendices to paper
 %\input{appendices}
-%-------------------------------------------------------
 
-%------------ bibliography section ---------------------
-%This will remove "APPENDIX" from the Bibliography title:
+% ----------------------------------------------------------------------------------------------------------------------------
+% BIBLIOGRAPHY
+% ----------------------------------------------------------------------------------------------------------------------------
+
+% This will remove "APPENDIX" from the Bibliography title:
 \unappendixtitle
 
-%Include bibliography in the Table of Contents
+% Include bibliography in the table of contents
 \phantomsection\addcontentsline{toc}{chapter}{BIBLIOGRAPHY}
+
+% Cite every citation within the database
 \nocite{*}
+
+% List bibliography from the "references" .bib file here.
 \bibliography{references}
-%-------------------------------------------------------
 
 
 \end{document}
+
+%=================================================================================================================================
+%End of Thesis
+%=================================================================================================================================
