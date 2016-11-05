@@ -223,33 +223,35 @@
 % ADD SUBFIGURE
 %
 % parameter 1 == file name (no extension)
-% parameter 2 == percent of text width 
-% parameter 3 == toc entry text (if blank, will use value for parameter 4)
-% parameter 4 == caption text
-% parameter 5 == label for referencing 
+% parameter 2 == width that figure will take up
+% parameter 3 == percent of text width 
+% parameter 4 == toc entry text (if blank, will use value for parameter 5)
+% parameter 5 == caption text
+% parameter 6 == label for referencing 
+%
 %
 % Adds a figure using the graphicsx package. You can have a separate name for caption and toc entry. If no 3rd value, toc 
 % entry is same as caption. Otherwise, 3rd value is toc entry.
 % ----------------------------------------------------------------------------------------------------------------------------
-\newcommand{\addsubfigure}[5]
+\newcommand{\addsubfigure}[6]
 {
-	\begin{subfigure}[htbp]{0.5\textwidth}
+	\begin{subfigure}[htbp]{#2\textwidth}
 		
 		\centering
 		\singlespacing
 		\footnotesize
 		
-		\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
+		\includegraphics*[width=#3\textwidth]{\figdir#1.\figformat}
 		
-		\ifthenelse{\equal{#3}{}} % if 3 is blank
+		\ifthenelse{\equal{#4}{}} % if 4 is blank
 		{% then
-			\isucaption[#4]{#4}
+			\isucaption[#5]{#5}
 		}%
 		{% else
-			\isucaption[#3]{#4}
+			\isucaption[#4]{#5}
 		}%
 		
-		\label{#5}
+		\label{#6}
 		
 	\end{subfigure}
 }
@@ -258,33 +260,34 @@
 % ADD TOP SUBFIGURE
 %
 % parameter 1 == file name (no extension)
-% parameter 2 == percent of text width 
-% parameter 3 == toc entry text (if blank, will use value for parameter 4)
-% parameter 4 == caption text
-% parameter 5 == label for referencing 
+% parameter 2 == width that figure will take up
+% parameter 3 == percent of text width 
+% parameter 4 == toc entry text (if blank, will use value for parameter 5)
+% parameter 5 == caption text
+% parameter 6 == label for referencing 
 %
 % Adds a figure using the graphicsx package, and it tries to add it to the top of the page if it can. You can have a separate 
 % name for caption and toc entry. If no 3rd value, toc entry is same as caption. Otherwise, 3rd value is toc entry.
 % ----------------------------------------------------------------------------------------------------------------------------
-\newcommand{\addtopsubfigure}[5]
+\newcommand{\addtopsubfigure}[6]
 {
-	\begin{subfigure}[t]{0.5\textwidth}
+	\begin{subfigure}[t]{#2\textwidth}
 		
 		\centering
 		\singlespacing
 		\footnotesize
 		
-		\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
+		\includegraphics*[width=#3\textwidth]{\figdir#1.\figformat}
 		
-		\ifthenelse{\equal{#3}{}} % if 3 is blank
+		\ifthenelse{\equal{#4}{}} % if 4 is blank
 		{% then
-			\isucaption[#4]{#4}
+			\isucaption[#5]{#5}
 		}%
 		{% else
-			\isucaption[#3]{#4}
+			\isucaption[#4]{#5}
 		}%
 		
-		\label{#5}
+		\label{#6}
 		
 	\end{subfigure}
 }
@@ -293,33 +296,34 @@
 % ADD BOTTOM SUBFIGURE
 %
 % parameter 1 == file name (no extension)
-% parameter 2 == percent of text width 
-% parameter 3 == toc entry text (if blank, will use value for parameter 4)
-% parameter 4 == caption text
-% parameter 5 == label for referencing 
+% parameter 2 == width that figure will take up
+% parameter 3 == percent of text width 
+% parameter 4 == toc entry text (if blank, will use value for parameter 5)
+% parameter 5 == caption text
+% parameter 6 == label for referencing 
 %
 % Adds a figure using the graphicsx package, and it tries to add it to the bottom of the page if it can. You can have a
 % separate name for caption and toc entry. If no 3rd value, toc entry is same as caption. Otherwise, 3rd value is toc entry.
 % ----------------------------------------------------------------------------------------------------------------------------
-\newcommand{\addbottomsubfigure}[5]
+\newcommand{\addbottomsubfigure}[6]
 {
-	\begin{subfigure}[b]{0.5\textwidth}
+	\begin{subfigure}[b]{#2\textwidth}
 		
 		\centering
 		\singlespacing
 		\footnotesize
 		
-		\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}
+		\includegraphics*[width=#3\textwidth]{\figdir#1.\figformat}
 		
-		\ifthenelse{\equal{#3}{}} %if 3 is blank
+		\ifthenelse{\equal{#4}{}} % if 4 is blank
 		{% then
-			\isucaption[#4]{#4}
+			\isucaption[#5]{#5}
 		}%
 		{% else
-			\isucaption[#3]{#4}
+			\isucaption[#4]{#5}
 		}%
 		
-		\label{#5}
+		\label{#6}
 		
 	\end{subfigure}
 }
