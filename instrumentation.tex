@@ -281,7 +281,7 @@ At first, the metadata was stored all within the titles of the CSV (e.g. metrics
 Although the metadata problem was solved, bundles of CSVs were not a particularly tidy approach when it came to distribution. However, any other method of outputting the data in C++ would be far too complicated and out of scope for the purposes of our studies. Outputting the data in another format using python, however, would not be as complex. A python script was created to import the three bundled CSVs into what is called an HDF5 file. HDF5, i.e. Hierarchical Data Format 5, is "a unique open source technology suite for managing data collections of all sizes and complexity,"\cite{HDFGroupHDF5Introduction}, but it was truly designed to support large, complex datasets that could be used on every size and type of system. HDF5 is hierarchical, high-performance, portable, can be used in numerous languages, and it is self-describing. Admittedly, HDF5 may be overkill for our tens of CSVs, but its ability to efficiently bundle all of our output files with metadata built right in is still incredibly useful.
 
 \addfigure{instrumentation_hdf5_example}
-{0.9}
+{0.7}
 {An example of an HDF5 file containing sample metrics, timing, and metadata information. }
 {An example of an HDF5 file containing sample metrics, timing, and metadata information.}
 {fig:HDF5OutputExample}
