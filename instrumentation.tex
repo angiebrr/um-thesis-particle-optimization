@@ -21,6 +21,7 @@ In order to numerically quantify what occurs during games that are ran by CSAPon
 \subsection{Metadata}\label{ssec:instr_metrics_system_metadata}
 
 \begin{figure}
+\addtocounter{figure}{-1}
 	\addsubfigure{instrumentation_metrics_system_metadata_example}
 	{0.5}{1.0}
 	{An example of metadata output by the \class{Metrics System}.}
@@ -189,7 +190,7 @@ As we mentioned in \ch{ch:background}, \class{Particle Effects} that are passed 
 \subsection{Visual Studio}\label{ssec:instr_timing_system_vs}
 
 \begin{figure}
-
+\addtocounter{figure}{-1}
 	\addsubfigure{instrumentation_visual_studio_call_tree}
 	{1.0}{1.0}
 	{Shows an example of Visual Studio's generated call tree for CPU instrumentation when ran using the metadata from \fig{fig:MetricsSystemMetadataExample}.}
@@ -201,7 +202,6 @@ As we mentioned in \ch{ch:background}, \class{Particle Effects} that are passed 
 	{Shows the same call tree from \fig{fig:VisualStudioCallTree}, but sorted and filtered.}
 	{Shows the same call tree from \fig{fig:VisualStudioCallTree}, but sorted and filtered. The level is $ \geq 8 $, the function name begins with "ChilliSource::", the inclusive samples \% is $ \geq 6\% $, and it is sorted by the inclusive samples \% in descending order. These parameters were used to ensure that the results were low-level ChilliSource function calls with a high inclusive sample percent.}
 	{fig:VisualStudioCallTreeSorted}
-
 \end{figure}
 
 ChilliSource generates a Visual Studio solution file for the developer to use when we create a project, and so we utilized Visual Studio as an IDE during development on a Windows machine. Visual Studio boasts a wide array of profiling tools which include (but is certainly not limited to) CPU sampling and function instrumentation. The CPU sampling was considerably helpful during the initial stages of our studies. The inclusive (includes samples from all functions calls within it) and exclusive (only includes samples from itself) sampling pointed us in the direction of hot spots within the \class{Particle Effect Component} to investigate. The call trees that the sampling produced (see figures \fig{fig:VisualStudioCallTree} and \fig{fig:VisualStudioCallTreeSorted}) also solidified our understanding on how the engine worked. Although this information is helpful, the CPU sampling does not provide concrete times. The function instrumentation that Visual Studio provides should have filled that gap, but we did not use it simply because we could not get it to reliably and smoothly work. It would slow down the game considerably during execution, and then would take a great deal of time to process after execution. Even if it did work, it did not have the flexibility to instrument custom sections, and it also could not be used to instrument the game on other platforms such as iOS or Android.
@@ -248,7 +248,7 @@ The \class{Timing System} was borne from dissatisfaction with the Visual Studio 
 \end{singlespace}
 
 \begin{figure}[t]
-
+\addtocounter{figure}{-1}
 	\addsubfigure{instrumentation_timing_system_timing_example}
 	{0.52}{1.0}
 	{An example of timing output by the \class{Timing System} based on the metadata from \fig{fig:MetricsSystemMetadataExample}.}
@@ -260,7 +260,6 @@ The \class{Timing System} was borne from dissatisfaction with the Visual Studio 
 	{The same example as \fig{fig:TimingSystemTimingExample}, but this series of games did not have the inner loop timed.}
 	{The same example as \fig{fig:TimingSystemTimingExample}, but this series of games did not have the inner loop timed.}
 	{fig:TimingSystemTimingExampleNoInner}
-
 \end{figure}
 
 Although the \class{Timing System} does suit our needs, it is not as efficient as Shiny. Figures \ref{fig:TimingSystemTimingExample} and \ref{fig:TimingSystemTimingExampleNoInner} show the amount of overhead that timing the inner particle iteration loop takes. This is most likely due to the creation and deletion of a timer for every \func{StartTimer} and \func{StopTimer} function call. However, this trade-off does not negatively our studies as the drawbacks of Shiny and Visual Studio did. This is because the timing outputs that we receive all share the same overhead from the system, and thus the outputs should be able to be compared fairly.
@@ -293,7 +292,7 @@ Although the metadata problem was solved, bundles of CSVs were not a particularl
 \section{Initial Results}\label{sec:instr_initial_results}
 
 \begin{figure}
-
+\addtocounter{figure}{-1}
 	\addsubfigure{instrumentation_initial_results_visual_studio_call_tree_sorted_filtered}
 	{1.0}{0.9}
 	{A Visual Studio call tree sorted in the same way as \fig{fig:VisualStudioCallTreeSorted}, but from the games based on the metadata in \fig{fig:InitialResultsMetrics}.}
@@ -311,7 +310,6 @@ Although the metadata problem was solved, bundles of CSVs were not a particularl
 	{Timing output based on the metadata in \fig{fig:InitialResultsMetrics}.}
 	{Timing output based on the metadata in \fig{fig:InitialResultsMetrics}.}
 	{fig:InitialResultsTiming}
-
 \end{figure}
 
 A variety of automated games were ran and their outputs were examined on Windows, iOS, and Android platforms. This was done in an effort to find an area within the \class{Particle Effect Component} class that needed optimization. In the beginning of our studies, the only available datasets were from the \class{Metrics System} and the Visual Studio CPU sampling profiles, as the timing instrumentation was still not complete. We found that a particular automated game in which the \idefine{total maximum particles} and \idefine{particles per emission} values were the same\footnotemark $ $ caused the game to visually lag, or "skip frames". Armed with only the metrics information and CPU sampling (see \fig{fig:InitialResultsVisualStudioCallTreeSorted}, all we knew is that the following \class{Particle Effect Component} methods had a considerable number of samples:
