@@ -28,22 +28,175 @@
 \subsection{Results}\label{ssec:studies_mutexes_results}
 % ----------------------------------------------------------------------------------------------------------------------------
 
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{more_than_one_mutex/1PE_0-50K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{More Than One Mutex Case Study: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Mutex1PERenderBallFunctionCalls}
+
+	\addlargesubfigure{more_than_one_mutex/1PE_0-50K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{More Than One Mutex Case Study: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Mutex1PEParticlesActuallyRendered}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{more_than_one_mutex/1PE_50K_Section-Calls}
+	{1.0}{1.2}
+	{More Than One Mutex Case Study: A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{fig:Mutex1PESectionCalls}
+
+	\addlargesubfigure{more_than_one_mutex/1PE_50K_Timed-Sections}
+	{1.0}{1.2}
+	{More Than One Mutex Case Study: A graph showing the time spent in various sections of code for a single particle effect.}
+	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{fig:Mutex1PETimedSections}
+
+\end{figure}
+
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Using a Lock Free Data Structure
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Using A Lock Free Data Structure}\label{sec:studies_lock_free}
 
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Code}\label{ssec:studies_mutexes_code}
+\subsection{Code}\label{ssec:studies_lock_free_code}
 % ----------------------------------------------------------------------------------------------------------------------------
 
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Discussion}\label{ssec:studies_mutexes_discussion}
+\subsection{Discussion}\label{ssec:studies_lock_free_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Results}\label{ssec:studies_mutexes_results}
+\subsection{Results}\label{ssec:studies_lock_free_results}
 % ----------------------------------------------------------------------------------------------------------------------------
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{lock_free/1PE_0-50K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{Lock Free Case Study: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:LockFree1PERenderBallFunctionCalls}
+
+	\addlargesubfigure{lock_free/1PE_0-50K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{Lock Free Case Study: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:LockFree1PEParticlesActuallyRendered}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{lock_free/1PE_50K_Section-Calls}
+	{1.0}{1.2}
+	{Lock Free Case Study: A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{fig:LockFree1PESectionCalls}
+
+	\addlargesubfigure{lock_free/1PE_50K_Timed-Sections}
+	{1.0}{1.2}
+	{Lock Free Case Study: A graph showing the time spent in various sections of code for a single particle effect.}
+	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{fig:LockFree1PETimedSections}
+
+\end{figure}
+
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Unexpected Results with Multiple Particle Effects
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\section{Unexpected Results with Multiple Particle Effects}\label{sec:studies_unexpected_results}
+
+% ----------------------------------------------------------------------------------------------------------------------------
+\subsection{Discussion}\label{ssec:studies_unexpected_results_discussion}
+% ----------------------------------------------------------------------------------------------------------------------------
+
+% ----------------------------------------------------------------------------------------------------------------------------
+\subsection{Using More Than One Mutex Results}\label{ssec:studies_unexpected_results_mutex}
+% ----------------------------------------------------------------------------------------------------------------------------
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{more_than_one_mutex/10PE_0-5K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{More Than One Mutex Case Study: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
+	{fig:Mutex10PERenderBallFunctionCalls}
+
+	\addlargesubfigure{more_than_one_mutex/10PE_0-5K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{More Than One Mutex Case Study: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
+	{fig:Mutex10PEParticlesActuallyRendered}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{more_than_one_mutex/10PE_5K_Section-Calls}
+	{1.0}{1.2}
+	{More Than One Mutex Case Study: A graph showing the number of section calls for various sections of code for ten particle effects.}
+	{A graph showing the number of section calls for various sections of code for ten particle effects.}
+	{fig:Mutex10PESectionCalls}
+
+	\addlargesubfigure{more_than_one_mutex/10PE_5K_Timed-Sections}
+	{1.0}{1.2}
+	{More Than One Mutex Case Study: A graph showing the time spent in various sections of code for ten particle effects.}
+	{A graph showing the time spent in various sections of code for ten particle effects.}
+	{fig:Mutex10PETimedSections}
+
+\end{figure}
+
+% ----------------------------------------------------------------------------------------------------------------------------
+\subsection{Lock Free Results}\label{ssec:studies_unexpected_results_lock_free}
+% ----------------------------------------------------------------------------------------------------------------------------
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{lock_free/10PE_0-5K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{Lock Free Case Study: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a ten particle effects.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a ten particle effects.}
+	{fig:LockFree10PERenderBallFunctionCalls}
+
+	\addlargesubfigure{lock_free/10PE_0-5K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{Lock Free Case Study: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a ten particle effects.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a ten particle effects.}
+	{fig:LockFree10PEParticlesActuallyRendered}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{lock_free/10PE_5K_Section-Calls}
+	{1.0}{1.2}
+	{Lock Free Case Study: A graph showing the number of section calls for various sections of code for a ten particle effects.}
+	{A graph showing the number of section calls for various sections of code for a ten particle effects.}
+	{fig:LockFree10PESectionCalls}
+
+	\addlargesubfigure{lock_free/10PE_5K_Timed-Sections}
+	{1.0}{1.2}
+	{Lock Free Case Study: A graph showing the time spent in various sections of code for a ten particle effects.}
+	{A graph showing the time spent in various sections of code for a ten particle effects.}
+	{fig:LockFree10PETimedSections}
+
+\end{figure}
 
 % ================================================================================================================================
 % End of Case Studies
