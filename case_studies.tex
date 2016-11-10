@@ -7,9 +7,26 @@
 \chapter{CHILLISOURCE PARTICLE EFFECT COMPONENT CASE STUDIES}\label{ch:case_studies}
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-% Overview
+% Counting Contention
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-\section{Overview}\label{sec:studies_overview}
+\section{Counting Contention}\label{sec:studies_counting_contention}
+
+\addbottomfigure{case-studies_counting-contention}
+{0.8}
+{The results of "counting the contention" between the background and main threads in \class{Concurrent Particle Data}.}
+{The results of "counting the contention" between the background and main threads in \class{Concurrent Particle Data}.}
+{fig:CountingContention}
+
+From our initial results, we found that \func{CommitParticleData} was experiencing a great deal of contention. \fig{fig:InitialResultsTiming} showed that, of the 31.5 seconds that \func{CommitParticleData} took, 29.4 seconds was spent waiting for a lock to release. This tells us, then, that it only needed about 2 seconds to do any meaningful work and, if we could reduce this contention, we could speed up that function drastically. The first step in reducing this contention, however, is knowing for certain what is making the background thread in \func{CommitParticleData} wait. 
+
+The simplest way to ascertain what is causing the contention is to do some counting. In \class{Concurrent Particle Data}, we can keep track of an atomic \var{thread counter} which will keep track of how many threads are contending for resources. This \var{thread counter} will be incremented right before a thread attempts to gain access to a lock, and it will be decremented right before it relinquishes access to that lock. The \func{IncrementCounter} and \func{DecrementCounter} methods will print a message when the thread counter is greater than one. During incrementation, a \var{thread counter} that is greater than one means that the current thread is waiting to retrieve the lock. During decrementation, a \var{thread counter} that is greater than one means that another thread is waiting for the current thread to release the lock. Since we have only scheduled one background thread, we know that the \var{thread counter} should never be greater than two.
+
+This "contention counting" was done using the same metadata from \fig{fig:InitialResultsMetrics} in our initial results, and the data collected can be found in \fig{fig:CountingContention}. The functions in which either the background or main thread waited for a lock to release were \func{StartUpdate}\footnotemark $ $ (301 times), \func{Lock} (1 time), and \func{CommitParticleData} (521 times). The functions in which the background or main thread had the other thread waiting for a lock to release were \func{Unlock} (521 times) and \func{CommitParticleData} (302 times). This tells us, then, that \func{StartUpdate} and \func{Lock} were waiting on \func{CommitParticleData} since $ 301 + 1 = 302 $, and that \func{CommitParticleData} was waiting on \func{Unlock} since their counts were both 521.
+
+\footnotetext{Although not a part of the pseudocode provided for the \func{ParticleEffectComponent::OnUpdate} method in earlier chapters, this simple function merely lets the caller know whether or not particle data has been committed since the last time it was called.}
+
+With these results in mind, recall from \sect{ssec:cs_pec_lifecycle} that the \func{Lock} function is used by the \class{Particle Drawable} when drawing the particles in order to lock \func{ConcurrentParticleData}. We know from our study of the system that the \class{Particle Drawable} is the only one who uses this \func{Lock} function, and so we know exactly where and how the contention is taking place. We also know that the \class{Particle Drawable} reads information from \class{Concurrent Particle Data}'s particle and new particle indices array. Thus, it's reasonable to say that it is unnecessary to lock both of those data structures at once and, instead, we could try using more than one mutex in \func{CommitParticleData} and \func{Draw} and see if that reduces the contention.
+
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Using more than one mutex
@@ -19,6 +36,16 @@
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Code}\label{ssec:studies_mutexes_code}
 % ----------------------------------------------------------------------------------------------------------------------------
+
+\framecode{C++}{case_studies}{MoreThanOneMutex_CommitParticleData.cpp}
+{code:MutexCommitParticleData}
+{Pseudocode illustrating the changes needed to utilize more than one mutex in the \func{CommitParticleData} function.}
+
+\framecode{C++}{case_studies}{MoreThanOneMutex_ParticleDraw.cpp}
+{code:MutexParticleDraw}
+{Pseudocode illustrating the changes needed to utilize more than one mutex in the \func{Draw} function.}
+
+
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Discussion}\label{ssec:studies_mutexes_discussion}
@@ -70,6 +97,14 @@
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Code}\label{ssec:studies_lock_free_code}
 % ----------------------------------------------------------------------------------------------------------------------------
+
+\framecode{C++}{case_studies}{LockFree_CommitParticleData.cpp}
+{code:LockFreeCommitParticleData}
+{Pseudocode illustrating the changes needed to make the \var{particles array} a lock free data structure in the \func{CommitParticleData} function.}
+
+\framecode{C++}{case_studies}{LockFree_ParticleDraw.cpp}
+{code:LockFreeParticleDraw}
+{Pseudocode illustrating the changes needed to make the \var{particles array} a lock free data structure in the \func{Draw} function.}
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Discussion}\label{ssec:studies_lock_free_discussion}
