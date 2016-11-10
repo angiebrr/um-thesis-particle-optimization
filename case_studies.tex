@@ -37,23 +37,28 @@ With these results in mind, recall from \sect{ssec:cs_pec_lifecycle} that the \f
 \subsection{Code}\label{ssec:studies_mutexes_code}
 % ----------------------------------------------------------------------------------------------------------------------------
 
+The changes needed to add mutexes for the two data structures and remaining variables that are copied are fairly minimal. The \var{particlesMutex}, \var{newParticlesIndicesMutex}, and the \var{normalMutex} are added as member variables to \class{Concurrent Particle Data}. Each mutex is locked when their respective variables need to be read or written to. When a mutex is locked within \class{Concurrent Particle Data}, it is done by directly accessing the mutex (see \clis{code:MutexCommitParticleData}). When a mutex is locked within the \class{Particle Drawable}, it is done by utilizing special locking functions\footnotemark $ $ provided by \class{Concurrent Particle Data} (see \clis{code:MutexParticleDraw}).
+
+\footnotetext{In actuality, a single locking function is used. An enumerator is passed to the function specifying which mutex needs to be locked. Although this is better practice, it obfuscates the actual meaning of the code by making it more verbose.}
+
+One of the potential issues with these changes is that, even though a particle is currently active, it may not be available for rendering by the time the \func{DrawParticles} function is called. To more concretely understand, imagine that the \class{Particle Drawable} is taking in new particle indices to activate within the static billboard to make it available for rendering. At the same time, \func{CommitParticleData} was copying new particle data and there happened to be newly emitted particle indices. Since the \class{Particle Drawable} had old information that did not include these newly emitted particles, these new particles will not be rendered because, even though they are marked as active, they are not activated in the static billboard. Although this sounds like a significant problem, we can argue that the inconsistent state cannot possibly be perceived by the user since a large number of updates happen within a short amount of time. If we look at \fig{fig:Mutex1PESectionCalls}, for example, the number of calls to the \func{Draw} function is about 800, and that is within approximately a $ 20 * 5 = 100 $ second timespan. This means that this function was called about 8 times per second, and it is highly doubtful that a person could notice the inconsistent state of the particle effect within \nicefrac[]{1}{8}th to \nicefrac[]{1}{4}th of a second. Thus, it is not something that we will worry about.
+
+
 \framecode{C++}{case_studies}{MoreThanOneMutex_CommitParticleData.cpp}
 {code:MutexCommitParticleData}
 {Pseudocode illustrating the changes needed to utilize more than one mutex in the \func{CommitParticleData} function.}
-
+\vspace{-1.5cm}
 \framecode{C++}{case_studies}{MoreThanOneMutex_ParticleDraw.cpp}
 {code:MutexParticleDraw}
 {Pseudocode illustrating the changes needed to utilize more than one mutex in the \func{Draw} function.}
 
 
-
-% ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Discussion}\label{ssec:studies_mutexes_discussion}
-% ----------------------------------------------------------------------------------------------------------------------------
-
+\vspace{-0.5cm}
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Results}\label{ssec:studies_mutexes_results}
 % ----------------------------------------------------------------------------------------------------------------------------
+
+The following four figures are the result of running a series of automated games in two scenarios: 1 particle effect, particles range from 0 - 50K, 5K step, 5 runs per effect with 5 seconds per game; and 1 particle effect, 50K, 0 step, 20 runs with 5 seconds per game. Both of these scenarios were ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP). In addition, these four series of automated games were ran with and without the above changes to the source code. This totals to 8 series of automated games. The first scenario is shown in figures \ref{fig:Mutex1PERenderBallFunctionCalls} and \ref{fig:Mutex1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:Mutex1PESectionCalls} and \ref{fig:Mutex1PETimedSections}.
 
 \begin{figure}
 \addtocounter{figure}{-1}
@@ -78,16 +83,30 @@ With these results in mind, recall from \sect{ssec:cs_pec_lifecycle} that the \f
 	\addlargesubfigure{more_than_one_mutex/1PE_50K_Section-Calls}
 	{1.0}{1.2}
 	{More Than One Mutex Case Study: A graph showing the number of section calls for various sections of code for a single particle effect.}
-	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect. Note that the "ParticleUpdateTask CommitParticleData Lock" section is timing the particle array lock for the "$ > 1$ Mutex" data series.}
 	{fig:Mutex1PESectionCalls}
 
 	\addlargesubfigure{more_than_one_mutex/1PE_50K_Timed-Sections}
 	{1.0}{1.2}
 	{More Than One Mutex Case Study: A graph showing the time spent in various sections of code for a single particle effect.}
-	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{A graph showing the time spent in various sections of code for a single particle effect. Note that the "ParticleUpdateTask CommitParticleData Lock" section is timing the particle array lock for the "$ > 1$ Mutex" data series.}
 	{fig:Mutex1PETimedSections}
 
 \end{figure}
+
+
+\newpage
+
+% ----------------------------------------------------------------------------------------------------------------------------
+\subsection{Discussion}\label{ssec:studies_mutexes_discussion}
+% ----------------------------------------------------------------------------------------------------------------------------
+
+The figures focusing on the particle metrics \idefine{render ball function calls} and \idefine{particles actually rendered} does not exhibit a great deal of improvement from the original. For both of those figures, improvement would mean higher values. This is because, when more particles are rendered or the ball is rendered more often, the game appears to run more smoothly. Or, in other words, the "frames per second" improves. 
+
+The figures focusing on the particle timing, on the other hand, show considerable improvement. For 0.1 TMP, \func{CommitParticleData} went down from 47 seconds to 24. For 1.0 TMP, \func{ParticleUpdateTask} went down from 50 seconds to 31. This is approximately a 40\% increase in speed! However, we can see that there is still a large amount of contention for the particle array. For 0.1 TMP, 19 of those 24 seconds was spent waiting for the particle array's mutex to unlock. For 1.0 TMP, 29 of those 31 seconds was spent waiting for the particle array's mutex to unlock. It is clear, then, that we should go further in our attempt to reduce contention for the particle array. Instead of adding more mutexes, we could try taking one away and creating a lock free data structure.
+
+A lock free data structure could mitigate the contention for the particle array by getting rid of its mutex completely. Similar to our "multiple mutex" solution, this has the potential problem of the particle array being in an inconsistent state during rendering. however, an analogous argument can be made. Even though the particles array might have partially up to date information during any given render, the renderer is going to update again very shortly and the particles array should be up to date by then. We can know this because \func{CommitParticleData} is called frequently (see \fig{fig:Mutex1PESectionCalls}) and, without waiting for locks to release, \func{CommitParticleData} runs fairly quickly. Therefore, the inconsistent state of particles should not be noticeable to the end user.  
+
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Using a Lock Free Data Structure
@@ -98,17 +117,16 @@ With these results in mind, recall from \sect{ssec:cs_pec_lifecycle} that the \f
 \subsection{Code}\label{ssec:studies_lock_free_code}
 % ----------------------------------------------------------------------------------------------------------------------------
 
+
+
 \framecode{C++}{case_studies}{LockFree_CommitParticleData.cpp}
 {code:LockFreeCommitParticleData}
 {Pseudocode illustrating the changes needed to make the \var{particles array} a lock free data structure in the \func{CommitParticleData} function.}
-
+\vspace{-1.5cm}
 \framecode{C++}{case_studies}{LockFree_ParticleDraw.cpp}
 {code:LockFreeParticleDraw}
 {Pseudocode illustrating the changes needed to make the \var{particles array} a lock free data structure in the \func{Draw} function.}
-
-% ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Discussion}\label{ssec:studies_lock_free_discussion}
-% ----------------------------------------------------------------------------------------------------------------------------
+\vspace{-0.5cm}
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Results}\label{ssec:studies_lock_free_results}
@@ -148,14 +166,19 @@ With these results in mind, recall from \sect{ssec:cs_pec_lifecycle} that the \f
 
 \end{figure}
 
+
+\newpage
+
+% ----------------------------------------------------------------------------------------------------------------------------
+\subsection{Discussion}\label{ssec:studies_lock_free_discussion}
+% ----------------------------------------------------------------------------------------------------------------------------
+
+LOREM
+
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Unexpected Results with Multiple Particle Effects
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Unexpected Results with Multiple Particle Effects}\label{sec:studies_unexpected_results}
-
-% ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Discussion}\label{ssec:studies_unexpected_results_discussion}
-% ----------------------------------------------------------------------------------------------------------------------------
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Using More Than One Mutex Results}\label{ssec:studies_unexpected_results_mutex}
@@ -232,6 +255,12 @@ With these results in mind, recall from \sect{ssec:cs_pec_lifecycle} that the \f
 	{fig:LockFree10PETimedSections}
 
 \end{figure}
+
+% ----------------------------------------------------------------------------------------------------------------------------
+\subsection{Discussion}\label{ssec:studies_unexpected_results_discussion}
+% ----------------------------------------------------------------------------------------------------------------------------
+
+LOREM
 
 % ================================================================================================================================
 % End of Case Studies
