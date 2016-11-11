@@ -30,7 +30,7 @@ StaticBillboardDrawable::DrawParticles(particleArray, camera)
     while(gotOwnershipOfParticle is false)
     {
       gotOwnershipOfParticle = currParticle.isContended
-                                           .CompareAndSet(false, true);
+                                           .CompareExchange(false, true);
     }
 
     // Render the particle if it is active and is activated in the billboard

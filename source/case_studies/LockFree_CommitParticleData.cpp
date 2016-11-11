@@ -14,7 +14,7 @@ ConcurrentParticleData::CommitParticleData(particleArray,
     while(gotOwnershipOfParticle is false)
     {
       gotOwnershipOfParticle = currParticle.isContended
-                                      .CompareAndSet(false, true);
+                                      .CompareExchange(false, true);
     }
 
     // Copy the particle now that we have ownership of it
