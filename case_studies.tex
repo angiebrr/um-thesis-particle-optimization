@@ -60,6 +60,8 @@ One of the potential issues with these changes is that, even though a particle i
 
 The following four figures are the result of running a series of automated games in two scenarios: 1 particle effect, particles range from 0 - 50K, 5K step, 5 runs per effect with 5 seconds per game; and 1 particle effect, 50K, 0 step, 20 runs with 5 seconds per game. Both of these scenarios were ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP). In addition, these four series of automated games were ran with and without the above changes to the source code. This totals to 8 series of automated games. The first scenario is shown in figures \ref{fig:Mutex1PERenderBallFunctionCalls} and \ref{fig:Mutex1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:Mutex1PESectionCalls} and \ref{fig:Mutex1PETimedSections}.
 
+When examining these results, we should note that the "Original 0.1 TMP" series should be directly compared with the ">1 Mutex 0.1 TMP" series and the "Original 1.0 TMP" series should be directly compared with the ">1 Mutex 1.0 TMP" series. This is because comparing the two series that "played the same game" will yield more accurate conclusions than cross-comparisons would.
+
 \begin{figure}
 \addtocounter{figure}{-1}
 
@@ -101,7 +103,7 @@ The following four figures are the result of running a series of automated games
 \subsection{Discussion}\label{ssec:studies_mutexes_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-The figures focusing on the particle metrics \idefine{render ball function calls} and \idefine{particles actually rendered} does not exhibit a great deal of improvement from the original. For both of those figures, improvement would mean higher values. This is because, when more particles are rendered or the ball is rendered more often, the game appears to run more smoothly. Or, in other words, the "frames per second" improves. 
+The figures that focus on the particle metrics \idefine{render ball function calls} and \idefine{particles actually rendered} do not exhibit a great deal of improvement from the original. For both of those figures, improvement would mean higher values. This is because, when more particles are rendered or the ball is rendered more often, the game appears to run more smoothly. Or, in other words, the "frames per second" improves. 
 
 The figures focusing on the particle timing, on the other hand, show considerable improvement. For 0.1 TMP, \func{CommitParticleData} went down from 47 seconds to 24. For 1.0 TMP, \func{ParticleUpdateTask} went down from 50 seconds to 31. This is approximately a 40\% increase in speed! However, we can see that there is still a large amount of contention for the particle array. For 0.1 TMP, 19 of those 24 seconds was spent waiting for the particle array's mutex to unlock. For 1.0 TMP, 29 of those 31 seconds was spent waiting for the particle array's mutex to unlock. It is clear, then, that we should go further in our attempt to reduce contention for the particle array. Instead of adding more mutexes, we could try taking one away.
 
@@ -140,7 +142,7 @@ In order to take advantage of the \idefine{atomic\_compare\_exchange} function, 
 \subsection{Results}\label{ssec:studies_lock_free_results}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-The following four figures are the result of running a series of automated games in two scenarios: 1 particle effect, particles range from 0 - 50K, 5K step, 5 runs per effect with 5 seconds per game; and 1 particle effect, 50K, 0 step, 20 runs with 5 seconds per game. Both of these scenarios were ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP). In addition, these four series of automated games were ran with and without the above changes to the source code. This totals to 8 series of automated games. The first scenario is shown in figures \ref{fig:LockFree1PERenderBallFunctionCalls} and \ref{fig:LockFree1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:LockFree1PESectionCalls} and \ref{fig:LockFree1PETimedSections}.
+Just like in the first case study, the following four figures are the result of running a series of automated games in two scenarios: 1 particle effect, particles range from 0 - 50K, 5K step, 5 runs per effect with 5 seconds per game; and 1 particle effect, 50K, 0 step, 20 runs with 5 seconds per game. Both of these scenarios were ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP). In addition, these four series of automated games were ran with and without the above changes to the source code. This totals to 8 series of automated games. The first scenario is shown in figures \ref{fig:LockFree1PERenderBallFunctionCalls} and \ref{fig:LockFree1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:LockFree1PESectionCalls} and \ref{fig:LockFree1PETimedSections}.
 
 \begin{figure}
 \addtocounter{figure}{-1}
@@ -183,7 +185,18 @@ The following four figures are the result of running a series of automated games
 \subsection{Discussion}\label{ssec:studies_lock_free_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
+The \var{particles actually rendered} and \var{render ball function calls} figures, similar to the first case study, do not show significant improvement from the original. However, the \var{Lock Free} data series in the \var{particles actually rendered} figure seem to have slightly lower numbers than the original, but it is not a significant enough difference to say with absolution that the \var{Lock Free} code results in fewer particles being rendered.
 
+As predicted, the timing metrics figures show that \func{CommitParticleData} experienced a healthy performance boost. For 0.1 TMP, the function went down from 47 seconds to 15. For 1.0 TMP, it went down from 50 seconds to 7. This is, respectively, about an 68\% and 86\% boost! We see a larger boost in the latter scenario due to the fact that the there are more active particles earlier in the game(s), and so we should expect to see more contention since the draw function needs to render more particles. This blocks the \func{CommitParticleData} for longer, and minimizing that increased wait time will result in better run times. 
+
+Although these are excellent initial results for the the \var{Lock Free} case study, there are two problems:
+
+\begin{itemize}[nolistsep,topsep=0pt]
+	\item The particle metrics figures did not improve. 
+	\item The timing metrics are only favorable for a single particle effect.
+\end{itemize}
+
+The first problem is worrying because these optimizations should have aided in rendering more particles since updating them in a background task took less time. As we will come to understand in the next section, the two case studies behave quite differently when the games are ran with multiple particle effects instead of just one.
 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -194,6 +207,14 @@ The following four figures are the result of running a series of automated games
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Using More Than One Mutex Results}\label{ssec:studies_unexpected_results_mutex}
 % ----------------------------------------------------------------------------------------------------------------------------
+
+LOREM LOREM
+
+LOREM LOREM
+
+LOREM LOREM
+
+LOREM LOREM
 
 \begin{figure}
 \addtocounter{figure}{-1}
@@ -229,9 +250,19 @@ The following four figures are the result of running a series of automated games
 
 \end{figure}
 
+\newpage
+
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Lock Free Results}\label{ssec:studies_unexpected_results_lock_free}
 % ----------------------------------------------------------------------------------------------------------------------------
+
+LOREM LOREM
+
+LOREM LOREM
+
+LOREM LOREM
+
+LOREM LOREM
 
 \begin{figure}
 \addtocounter{figure}{-1}
@@ -267,11 +298,19 @@ The following four figures are the result of running a series of automated games
 
 \end{figure}
 
+\newpage
+
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Discussion}\label{ssec:studies_unexpected_results_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM
+LOREM LOREM
+
+LOREM LOREM
+
+LOREM LOREM
+
+LOREM LOREM
 
 % ================================================================================================================================
 % End of Case Studies
