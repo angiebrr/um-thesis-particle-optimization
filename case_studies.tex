@@ -58,9 +58,22 @@ One of the potential issues with these changes is that, even though a particle i
 \subsection{Results}\label{ssec:studies_mutexes_results}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-The following four figures are the result of running a series of automated games in two scenarios: 1 particle effect, particles range from 0 - 50K, 5K step, 5 runs per effect with 5 seconds per game; and 1 particle effect, 50K, 0 step, 20 runs with 5 seconds per game. Both of these scenarios were ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP). In addition, these four series of automated games were ran with and without the above changes to the source code. This totals to 8 series of automated games. The first scenario is shown in figures \ref{fig:Mutex1PERenderBallFunctionCalls} and \ref{fig:Mutex1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:Mutex1PESectionCalls} and \ref{fig:Mutex1PETimedSections}.
+The following four figures are the result of running a series of automated games in two scenarios: 
 
-When examining these results, we should note that the "Original 0.1 TMP" series should be directly compared with the ">1 Mutex 0.1 TMP" series and the "Original 1.0 TMP" series should be directly compared with the ">1 Mutex 1.0 TMP" series. This is because comparing the two series that "played the same game" will yield more accurate conclusions than cross-comparisons would.
+\begin{enumerate}[nolistsep,topsep=5pt]
+	\item 1 particle effect, particles range from 0 - 50K, 5K step, 5 5-second runs per effect.
+	\item 1 particle effect, 50K, 0 step, 20 5-second runs.
+\end{enumerate}
+
+Both of these scenarios were ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP). In addition, these four series of automated games were ran with and without the above changes to the source code. This totals to 8 series of automated games. \fig{fig:CaseStudyMetadata} shows the specific metadata values that were used. The first scenario is shown in figures \ref{fig:Mutex1PERenderBallFunctionCalls} and \ref{fig:Mutex1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:Mutex1PESectionCalls} and \ref{fig:Mutex1PETimedSections}.
+
+\addbottomfigure{case-studies_1PE-metadata}
+{0.7}
+{The metadata used for the 8 series of automated games for the case study.}
+{The metadata used for the 8 series of automated games for the case study.}
+{fig:CaseStudyMetadata}
+
+When examining these results, the yellow "Original 0.1 TMP" series should be directly compared with the blue "$>1$ Mutex 0.1 TMP" series and the orange "Original 1.0 TMP" series should be directly compared with the green "$>1$ Mutex 1.0 TMP" series. This is because comparing the two series that "played the same game" will yield more accurate conclusions than cross-comparisons would.
 
 \begin{figure}
 \addtocounter{figure}{-1}
@@ -142,7 +155,16 @@ In order to take advantage of the \idefine{atomic\_compare\_exchange} function, 
 \subsection{Results}\label{ssec:studies_lock_free_results}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-Just like in the first case study, the following four figures are the result of running a series of automated games in two scenarios: 1 particle effect, particles range from 0 - 50K, 5K step, 5 runs per effect with 5 seconds per game; and 1 particle effect, 50K, 0 step, 20 runs with 5 seconds per game. Both of these scenarios were ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP). In addition, these four series of automated games were ran with and without the above changes to the source code. This totals to 8 series of automated games. The first scenario is shown in figures \ref{fig:LockFree1PERenderBallFunctionCalls} and \ref{fig:LockFree1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:LockFree1PESectionCalls} and \ref{fig:LockFree1PETimedSections}.
+Just as in the first case study, the lock free case study produced the following four figures running a series of automated games in two scenarios: 
+
+\begin{enumerate}[nolistsep,topsep=5pt]
+	\item 1 particle effect, particles range from 0 - 50K, 5K step, 5 5-second runs per effect.
+	\item 1 particle effect, 50K, 0 step, 20 5-second runs.
+\end{enumerate}
+
+Again, both of these scenarios were ran with PPE values that were 10\% and 100\% of TMP. These four series of automated games were ran with and without the above changes to the source code, and this totals to 8 series of automated games. The first scenario is shown in figures \ref{fig:LockFree1PERenderBallFunctionCalls} and \ref{fig:LockFree1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:LockFree1PESectionCalls} and \ref{fig:LockFree1PETimedSections}. We can refer to \fig{fig:CaseStudyMetadata} for the specific metadata values used.
+
+As before, we should compare the two series that "played the same game" in order to ensure that we draw the correct conclusions.
 
 \begin{figure}
 \addtocounter{figure}{-1}
@@ -196,7 +218,7 @@ Although these are excellent initial results for the the \var{Lock Free} case st
 	\item The timing metrics are only favorable for a single particle effect.
 \end{itemize}
 
-The first problem is worrying because these optimizations should have aided in rendering more particles since updating them in a background task took less time. As we will come to understand in the next section, the two case studies behave quite differently when the games are ran with multiple particle effects instead of just one.
+The first problem is an issue because these optimizations should have aided in rendering more particles since updating them takes less time. As for the second problem, we will come to understand in the next section that the two case studies behave quite differently when the games are ran with multiple particle effects instead of just one.
 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
