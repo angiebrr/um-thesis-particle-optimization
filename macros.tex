@@ -219,6 +219,111 @@
 }
 
 % ----------------------------------------------------------------------------------------------------------------------------
+% ADD LARGE FIGURE
+%
+% parameter 1 == file name (no extension)
+% parameter 2 == percent of text width 
+% parameter 3 == toc entry text (if blank, will use value for parameter 4)
+% parameter 4 == caption text
+% parameter 5 == label for referencing 
+%
+% Adds a figure using the graphicsx package, and it tries to add it to the bottom of the page if it can. You can have a
+% separate name for caption and toc entry. If no 3rd value, toc entry is same as caption. Otherwise, 3rd value is toc entry.
+% ----------------------------------------------------------------------------------------------------------------------------
+\newcommand{\addlargefigure}[5]
+{
+	\begin{figure}[htbp]
+		
+		\centering
+		\singlespacing
+		\footnotesize
+		
+		\centerline{\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}}
+		
+		\ifthenelse{\equal{#3}{}} %if 3 is blank
+		{% then
+			\isucaption[#4]{#4}
+		}%
+		{% else
+			\isucaption[#3]{#4}
+		}%
+		
+		\label{#5}
+		
+	\end{figure}
+}
+
+% ----------------------------------------------------------------------------------------------------------------------------
+% ADD LARGE TOP FIGURE
+%
+% parameter 1 == file name (no extension)
+% parameter 2 == percent of text width 
+% parameter 3 == toc entry text (if blank, will use value for parameter 4)
+% parameter 4 == caption text
+% parameter 5 == label for referencing 
+%
+% Adds a figure using the graphicsx package, and it tries to add it to the bottom of the page if it can. You can have a
+% separate name for caption and toc entry. If no 3rd value, toc entry is same as caption. Otherwise, 3rd value is toc entry.
+% ----------------------------------------------------------------------------------------------------------------------------
+\newcommand{\addlargetopfigure}[5]
+{
+	\begin{figure}[t]
+		
+		\centering
+		\singlespacing
+		\footnotesize
+		
+		\centerline{\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}}
+		
+		\ifthenelse{\equal{#3}{}} %if 3 is blank
+		{% then
+			\isucaption[#4]{#4}
+		}%
+		{% else
+			\isucaption[#3]{#4}
+		}%
+		
+		\label{#5}
+		
+	\end{figure}
+}
+
+% ----------------------------------------------------------------------------------------------------------------------------
+% ADD LARGE BOTTOM FIGURE
+%
+% parameter 1 == file name (no extension)
+% parameter 2 == percent of text width 
+% parameter 3 == toc entry text (if blank, will use value for parameter 4)
+% parameter 4 == caption text
+% parameter 5 == label for referencing 
+%
+% Adds a figure using the graphicsx package, and it tries to add it to the bottom of the page if it can. You can have a
+% separate name for caption and toc entry. If no 3rd value, toc entry is same as caption. Otherwise, 3rd value is toc entry.
+% ----------------------------------------------------------------------------------------------------------------------------
+\newcommand{\addlargebottomfigure}[5]
+{
+	\begin{figure}[b]
+		
+		\centering
+		\singlespacing
+		\footnotesize
+		
+		\centerline{\includegraphics*[width=#2\textwidth]{\figdir#1.\figformat}}
+		
+		\ifthenelse{\equal{#3}{}} %if 3 is blank
+		{% then
+			\isucaption[#4]{#4}
+		}%
+		{% else
+			\isucaption[#3]{#4}
+		}%
+		
+		\label{#5}
+		
+	\end{figure}
+}
+
+% ----------------------------------------------------------------------------------------------------------------------------
 % ADD SUBFIGURE
 %
 % parameter 1 == file name (no extension)

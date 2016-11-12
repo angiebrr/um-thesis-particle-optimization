@@ -118,7 +118,9 @@ When examining these results, the yellow "Original 0.1 TMP" series should be dir
 
 The figures that focus on the particle metrics \idefine{render ball function calls} and \idefine{particles actually rendered} do not exhibit a great deal of improvement from the original. For both of those figures, improvement would mean higher values. This is because, when more particles are rendered or the ball is rendered more often, the game appears to run more smoothly. Or, in other words, the "frames per second" improves. 
 
-The figures focusing on the particle timing, on the other hand, show considerable improvement. For 0.1 TMP, \func{CommitParticleData} went down from 47 seconds to 24. For 1.0 TMP, \func{ParticleUpdateTask} went down from 50 seconds to 31. This is approximately a 40\% increase in speed! However, we can see that there is still a large amount of contention for the particle array. For 0.1 TMP, 19 of those 24 seconds was spent waiting for the particle array's mutex to unlock. For 1.0 TMP, 29 of those 31 seconds was spent waiting for the particle array's mutex to unlock. It is clear, then, that we should go further in our attempt to reduce contention for the particle array. Instead of adding more mutexes, we could try taking one away.
+The figures focusing on the particle timing, on the other hand, show considerable improvement. For 0.1 TMP, \func{CommitParticleData} went down from 47 seconds to 24. For 1.0 TMP, \func{ParticleUpdateTask} went down from 50 seconds to 31. This is approximately a 40\% increase in speed!\footnotemark However, we can see that there is still a large amount of contention for the particle array. For 0.1 TMP, 19 of those 24 seconds was spent waiting for the particle array's mutex to unlock. For 1.0 TMP, 29 of those 31 seconds was spent waiting for the particle array's mutex to unlock. It is clear, then, that we should go further in our attempt to reduce contention for the particle array. Instead of adding more mutexes, we could try taking one away.
+
+\footnotetext{See \fig{fig:1PECaseStudyLockFreeResults} in \sect{sec:studies_unexpected_results} for a summary table of these timed sections.}
 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -209,7 +211,9 @@ As before, we should compare the two series that "played the same game" in order
 
 The \var{particles actually rendered} and \var{render ball function calls} figures, similar to the first case study, do not show significant improvement from the original. However, the Lock Free data series in the \var{particles actually rendered} figure seem to have slightly lower numbers than the original, but it is not a significant enough difference to say with absolution that the Lock Free code results in fewer particles being rendered.
 
-As predicted, the timing metrics figures show that \func{CommitParticleData} experienced a healthy performance boost. For 0.1 TMP, the function went down from 47 seconds to 15. For 1.0 TMP, it went down from 50 seconds to 7. This is, respectively, about an 68\% and 86\% boost! We see a larger boost in the latter scenario due to the fact that the there are more active particles earlier in the game(s), and so we should expect to see more contention since the draw function needs to render more particles. This blocks the \func{CommitParticleData} for longer, and minimizing that increased wait time will result in better run times. 
+As predicted, the timing metrics figures show that \func{CommitParticleData} experienced a healthy performance boost. For 0.1 TMP, the function went down from 47 seconds to 15. For 1.0 TMP, it went down from 50 seconds to 7. This is, respectively, about an 68\% and 86\% boost!\footnotemark We see a larger boost in the latter scenario due to the fact that the there are more active particles earlier in the game(s), and so we should expect to see more contention since the draw function needs to render more particles. This blocks the \func{CommitParticleData} for longer, and minimizing that increased wait time will result in better run times. 
+
+\footnotetext{See \fig{fig:1PECaseStudyLockFreeResults} in \sect{sec:studies_unexpected_results} for a summary table of these timed sections.}
 
 Although these are excellent initial results for the the Lock Free case study, there are two problems:
 
@@ -320,13 +324,57 @@ In order to exhibit the unexpected results for the Multiple Mutex and Lock Free 
 \subsection{Discussion}\label{ssec:studies_unexpected_results_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM LOREM
+The most interesting (and, perhaps, frustrating) part of these results is that all of the data series that "played the same game" look essentially the same. The ball is rendered nearly as many times for the four scenarios for both case studies, and the \var{particles actually rendered} are also similar for both case studies. However, just like in the Lock Free case study results, there are slightly less particles rendered than the original. To try to understand what happened, let us examine figures \ref{fig:1PECaseStudyLockFreeResults} and \ref{fig:10PECaseStudyLockFreeResults}. In particular, let us focus on the "1.0 TMP" scenario with the Original and Lock Free implementations.
 
-LOREM LOREM
+\begin{figure}
+\addtocounter{figure}{-1}
 
-LOREM LOREM
+	\vspace{-1.2cm}
+	\addlargesubfigure{case-studies_1PE-unexpected-results}
+	{1.0}{1.2}
+	{A summary of the timed sections for the unexpected results for the Lock Free and $> 1$ Mutex case studies for a single particle effect.}
+	{A summary of the timed sections for the unexpected results for the Lock Free and $> 1$ Mutex case studies for a single particle effect.}
+	{fig:1PECaseStudyLockFreeResults}
 
-LOREM LOREM
+	\vspace{-0.5cm}
+	\addlargesubfigure{case-studies_10PE-unexpected-results}
+	{1.0}{1.2}
+	{A summary of the timed sections for the unexpected results for the Lock Free and $> 1$ Mutex case studies for 10 particle effects.}
+	{A summary of the timed sections for the unexpected results for the Lock Free and $> 1$ Mutex case studies for 10 particle effects.}
+	{fig:10PECaseStudyLockFreeResults}
+
+\end{figure}
+
+Within the 1.0 TMP Original results for a single particle effect, about 50 of the 104\footnotemark $ $ seconds spent in the function \func{ParticleUpdateTask} are dedicated to calling \func{CommitParticleData}. Further, about 46 of those 50 seconds in \func{CommitParticleData} are spent waiting for a lock to release. Within the 1.0 TMP Lock Free results for a single particle effect, about 7 of the 58 seconds spent in the function \func{ParticleUpdateTask} are spent calling \func{CommitParticleData}.
+
+\footnotetext{It may not make sense why there are greater than 100 seconds here since we ran 20 runs for 5 seconds, but it is mostly due to the timer starting only when the ball is activated after the entire scene has been created.}
+
+Within the 1.0 TMP Original results for ten particle effects, about 9 of the 75 seconds spent in the function \func{ParticleUpdateTask} are dedicated to calling \func{CommitParticleData}. Further, about 5 of these 9 seconds in \func{CommitParticleData} are spent waiting for a lock to release. Within the 1.0 TMP Lock Free results for a single particle effect, about 9 of the 75 seconds spent in the function \func{ParticleUpdateTask} are spent calling \func{CommitParticleData}.
+
+\begin{figure}[t]
+\addtocounter{figure}{-1}
+
+	\addtopsubfigure{case-studies_unexpected-results_1PE-lifetime}
+	{0.5}{1.0}
+	{The lifetime of a single particle effect in relation to its scheduled background thread and the main thread.}
+	{The lifetime of a single particle effect in relation to its scheduled background thread and the main thread.}
+	{fig:1PELifetime}
+	%
+	\addtopsubfigure{case-studies_unexpected-results_many-PEs-lifetime}
+	{0.5}{1.0}
+	{The lifetime of a many particle effects in relation to their scheduled background threads and the main thread.}
+	{The lifetime of a many particle effects in relation to their scheduled background threads and the main thread.}
+	{fig:ManyPEsLifetime}
+
+\end{figure}
+
+For a single effect, we see that the Lock Free implementation does an excellent job in reducing contention for a large data structure between a background thread writing to it and a main thread reading from it. For ten effects, the Lock Free implementation does little to reduce the contention because there was no contention to begin with. This can be observed by the fact that the results from the Original implementation with ten effects show that, compared with a single effect, an insignificant amount of time is spent waiting for a lock to release.
+
+This behavior can be better understood if we consider the lifetime of particle effects in two scenarios: one with many effects, and one with a single effect. The one with many particle effects would have its particles distributed across many \class{Particle Effect Components} and, thus, many \class{Particle Drawables}. The \class{Renderer} running on the main thread, then, will render each \class{Particle Effect Component} separately. When the main thread requests to lock any given effect's particle array mutex, it has a reduced chance of waiting for it. This is because each \class{Particle Effect Component} has its own background thread and each one is only responsible for a fraction of the particles. The one with a single particle effect, on the other hand, has one \class{Particle Effect Component} with a large array of particles that it has to manage on its own. It can only schedule one background thread at a time and is responsible for updating every single particle. When the \class{Renderer} running on the main thread requests to lock the effect's particle array mutex, it has a greater chance of waiting for it. 
+
+The unexpected results of these case studies demonstrated the differences between managing contention for a single, large data structure and for many pieces or "shards" of a fragmented data structure. The former is likely to have contention if there is writing involved between two threads, and a solution that utilizes "lock free" atomic read-modify-write operations can significantly reduce contention. The latter, however, is unlikely to have contention between two threads, and so the developer can get away with naively using mutexes to synchronize their data.
+
+
 
 % ================================================================================================================================
 % End of Case Studies
