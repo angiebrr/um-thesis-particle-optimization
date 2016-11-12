@@ -65,13 +65,13 @@ The following four figures are the result of running a series of automated games
 	\item 1 particle effect, 50K, 0 step, 20 5-second runs.
 \end{enumerate}
 
-Both of these scenarios were ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP). In addition, these four series of automated games were ran with and without the above changes to the source code. This totals to 8 series of automated games. \fig{fig:CaseStudyMetadata} shows the specific metadata values that were used. The first scenario is shown in figures \ref{fig:Mutex1PERenderBallFunctionCalls} and \ref{fig:Mutex1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:Mutex1PESectionCalls} and \ref{fig:Mutex1PETimedSections}.
+Both of these scenarios were ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP). In addition, these four series of automated games were ran with and without the above changes to the source code. This totals to 8 series of automated games. \fig{fig:1PECaseStudyMetadata} shows the specific metadata values that were used. The first scenario is shown in figures \ref{fig:Mutex1PERenderBallFunctionCalls} and \ref{fig:Mutex1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:Mutex1PESectionCalls} and \ref{fig:Mutex1PETimedSections}.
 
 \addbottomfigure{case-studies_1PE-metadata}
 {0.7}
-{The metadata used for the 8 series of automated games for the case study.}
-{The metadata used for the 8 series of automated games for the case study.}
-{fig:CaseStudyMetadata}
+{The metadata used for the 8 series of automated games for the case studies.}
+{The metadata used for the 8 series of automated games for the case studies.}
+{fig:1PECaseStudyMetadata}
 
 When examining these results, the yellow "Original 0.1 TMP" series should be directly compared with the blue "$>1$ Mutex 0.1 TMP" series and the orange "Original 1.0 TMP" series should be directly compared with the green "$>1$ Mutex 1.0 TMP" series. This is because comparing the two series that "played the same game" will yield more accurate conclusions than cross-comparisons would.
 
@@ -140,7 +140,7 @@ In order to take advantage of the \idefine{atomic\_compare\_exchange} function, 
 
 \framecode{C++}{case_studies}{LockFree_ConcurrentParticleStruct.cpp}
 {code:LockFreeConcurrentParticleStruct}
-{The struct that is used to within the particle array in \class{Concurrent Particle Data} during the lock free case study.}
+{The struct that is used to within the particle array in \class{Concurrent Particle Data} during the Lock Free case study.}
 \vspace{-1.5cm}
 \framecode{C++}{case_studies}{LockFree_CommitParticleData.cpp}
 {code:LockFreeCommitParticleData}
@@ -162,7 +162,7 @@ Just as in the first case study, the lock free case study produced the following
 	\item 1 particle effect, 50K, 0 step, 20 5-second runs.
 \end{enumerate}
 
-Again, both of these scenarios were ran with PPE values that were 10\% and 100\% of TMP. These four series of automated games were ran with and without the above changes to the source code, and this totals to 8 series of automated games. The first scenario is shown in figures \ref{fig:LockFree1PERenderBallFunctionCalls} and \ref{fig:LockFree1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:LockFree1PESectionCalls} and \ref{fig:LockFree1PETimedSections}. We can refer to \fig{fig:CaseStudyMetadata} for the specific metadata values used.
+Again, both of these scenarios were ran with PPE values that were 10\% and 100\% of TMP. These four series of automated games were ran with and without the above changes to the source code, and this totals to 8 series of automated games. The first scenario is shown in figures \ref{fig:LockFree1PERenderBallFunctionCalls} and \ref{fig:LockFree1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:LockFree1PESectionCalls} and \ref{fig:LockFree1PETimedSections}. We can refer to \fig{fig:1PECaseStudyMetadata} for the specific metadata values used.
 
 As before, we should compare the two series that "played the same game" in order to ensure that we draw the correct conclusions.
 
@@ -207,11 +207,11 @@ As before, we should compare the two series that "played the same game" in order
 \subsection{Discussion}\label{ssec:studies_lock_free_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-The \var{particles actually rendered} and \var{render ball function calls} figures, similar to the first case study, do not show significant improvement from the original. However, the \var{Lock Free} data series in the \var{particles actually rendered} figure seem to have slightly lower numbers than the original, but it is not a significant enough difference to say with absolution that the \var{Lock Free} code results in fewer particles being rendered.
+The \var{particles actually rendered} and \var{render ball function calls} figures, similar to the first case study, do not show significant improvement from the original. However, the Lock Free data series in the \var{particles actually rendered} figure seem to have slightly lower numbers than the original, but it is not a significant enough difference to say with absolution that the Lock Free code results in fewer particles being rendered.
 
 As predicted, the timing metrics figures show that \func{CommitParticleData} experienced a healthy performance boost. For 0.1 TMP, the function went down from 47 seconds to 15. For 1.0 TMP, it went down from 50 seconds to 7. This is, respectively, about an 68\% and 86\% boost! We see a larger boost in the latter scenario due to the fact that the there are more active particles earlier in the game(s), and so we should expect to see more contention since the draw function needs to render more particles. This blocks the \func{CommitParticleData} for longer, and minimizing that increased wait time will result in better run times. 
 
-Although these are excellent initial results for the the \var{Lock Free} case study, there are two problems:
+Although these are excellent initial results for the the Lock Free case study, there are two problems:
 
 \begin{itemize}[nolistsep,topsep=0pt]
 	\item The particle metrics figures did not improve. 
@@ -220,26 +220,27 @@ Although these are excellent initial results for the the \var{Lock Free} case st
 
 The first problem is an issue because these optimizations should have aided in rendering more particles since updating them takes less time. As for the second problem, we will come to understand in the next section that the two case studies behave quite differently when the games are ran with multiple particle effects instead of just one.
 
-
+\newpage
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Unexpected Results with Multiple Particle Effects
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Unexpected Results with Multiple Particle Effects}\label{sec:studies_unexpected_results}
 
-% ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Using More Than One Mutex Results}\label{ssec:studies_unexpected_results_mutex}
-% ----------------------------------------------------------------------------------------------------------------------------
+\addfigure{case-studies_10PE-metadata}
+{0.7}
+{The metadata used for the 8 series of automated games for the unexpected results from the case studies.}
+{The metadata used for the 8 series of automated games for the unexpected results from the case studies.}
+{fig:10PECaseStudyMetadata}
 
-LOREM LOREM
-
-LOREM LOREM
-
-LOREM LOREM
-
-LOREM LOREM
+In order to exhibit the unexpected results for the Multiple Mutex and Lock Free case studies, we will run 8 automated games per case study as we did before. This time, however, we will distribute the particles across 10 particle effects. For example, the scenario that had a particle range of 0 to 50K will now have one of 0 to 5K per particle effect. For clarification, please refer to \fig{fig:10PECaseStudyMetadata}.
 
 \begin{figure}
 \addtocounter{figure}{-1}
+
+\vspace{-1.0cm}
+% ----------------------------------------------------------------------------------------------------------------------------
+\subsection{Using More Than One Mutex Results}\label{ssec:studies_unexpected_results_mutex}
+% ----------------------------------------------------------------------------------------------------------------------------
 
 	\addlargesubfigure{more_than_one_mutex/10PE_0-5K_Render-Ball-Function-Calls}
 	{1.0}{1.2}
@@ -272,22 +273,15 @@ LOREM LOREM
 
 \end{figure}
 
-\newpage
-
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Lock Free Results}\label{ssec:studies_unexpected_results_lock_free}
-% ----------------------------------------------------------------------------------------------------------------------------
-
-LOREM LOREM
-
-LOREM LOREM
-
-LOREM LOREM
-
-LOREM LOREM
 
 \begin{figure}
 \addtocounter{figure}{-1}
+
+\vspace{-1.0cm}
+% ----------------------------------------------------------------------------------------------------------------------------
+\subsection{Lock Free Results}\label{ssec:studies_unexpected_results_lock_free}
+% ----------------------------------------------------------------------------------------------------------------------------
 
 	\addlargesubfigure{lock_free/10PE_0-5K_Render-Ball-Function-Calls}
 	{1.0}{1.2}
