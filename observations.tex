@@ -31,7 +31,16 @@ LOREM LOREM
 \subsubsection{Removing ConcurrentParticleData}
 % ...........................................................
 
-LOREM LOREM
+\vspace{-0.5cm}
+\framecode{C++}{observations}{Copies_WithoutConcurrentParticleData_ParticleUpdateTask.cpp}
+{code:WithoutCPDParticleUpdate}
+{Pseudocode .}
+\vspace{-1.5cm}
+\framecode{C++}{observations}{Copies_WithoutConcurrentParticleData_Render.cpp}
+{code:WithoutCPDParticleRender}
+{Pseudocode .}
+
+
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Results}\label{ssec:observe_copies_results}
@@ -129,6 +138,15 @@ LOREM LOREM
 
 LOREM LOREM
 
+\vspace{-0.5cm}
+\framecode{C++}{observations}{Tasks_TaskScheduler_ScheduleTask.cpp}
+{code:TaskSchedulerScheduleTask}
+{Pseudocode .}
+\vspace{-0.5cm}
+\framecode{C++}{observations}{Tasks_TaskScheduler_ExecuteMainThreadTasks.cpp}
+{code:TaskSchedulerExecuteMainThread}
+{Pseudocode .}
+
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Code}\label{ssec:observe_threads_code}
 % ----------------------------------------------------------------------------------------------------------------------------
@@ -139,17 +157,32 @@ LOREM LOREM
 
 LOREM LOREM
 
+\vspace{-0.5cm}
+\framecode{C++}{observations}{Tasks_Small_ParticleUpdateTask.cpp}
+{code:SmallTaskParticleUpdate}
+{Pseudocode .}
+
 % ...........................................................
 \subsubsection{Game Logic Task Type}
 % ...........................................................
 
 LOREM LOREM
 
+\vspace{-0.5cm}
+\framecode{C++}{observations}{Tasks_GameLogic_ParticleUpdateTask.cpp}
+{code:GameLogicTaskParticleUpdate}
+{Pseudocode .}
+
 % ...........................................................
 \subsubsection{No Task Scheduled (Not Threaded)}
 % ...........................................................
 
 LOREM LOREM
+
+\vspace{-0.5cm}
+\framecode{C++}{observations}{Tasks_NoTask_ParticleUpdateTask.cpp}
+{code:GameNoTaskParticleUpdate}
+{Pseudocode .}
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Results}\label{ssec:observe_threads_results}
