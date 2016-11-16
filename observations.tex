@@ -7,9 +7,9 @@
 \chapter{CHILLISOURCE PARTICLE EFFECT COMPONENT OBSERVATIONS}\label{ch:observations}
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-% Using copies to reduce contention
+% Using copies
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-\section{Using Copies to Reduce Contention}\label{sec:observe_copies}
+\section{Copying Data with ConcurrentParticleData}\label{sec:observe_copies}
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Overview}\label{ssec:observe_copies_overview}
@@ -18,8 +18,18 @@
 LOREM LOREM
 
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Using the Concurrent Particle Data Object}\label{ssec:observe_copies_code}
+\subsection{Code}\label{ssec:observe_copies_code}
 % ----------------------------------------------------------------------------------------------------------------------------
+
+% ...........................................................
+\subsubsection{Using ConcurrentParticleData}
+% ...........................................................
+
+LOREM LOREM
+
+% ...........................................................
+\subsubsection{Removing ConcurrentParticleData}
+% ...........................................................
 
 LOREM LOREM
 
@@ -122,6 +132,22 @@ LOREM LOREM
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Code}\label{ssec:observe_threads_code}
 % ----------------------------------------------------------------------------------------------------------------------------
+
+% ...........................................................
+\subsubsection{Small Task Type}
+% ...........................................................
+
+LOREM LOREM
+
+% ...........................................................
+\subsubsection{Game Logic Task Type}
+% ...........................................................
+
+LOREM LOREM
+
+% ...........................................................
+\subsubsection{No Task Scheduled (Not Threaded)}
+% ...........................................................
 
 LOREM LOREM
 
@@ -267,6 +293,40 @@ LOREM LOREM
 % ----------------------------------------------------------------------------------------------------------------------------
 
 LOREM LOREM
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{emission_failure/solution/1PE_0-50K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{Emission Failure Solution Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:FailureSolution1PERenderBallFunctionCalls}
+
+	\addlargesubfigure{emission_failure/solution/1PE_0-50K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{Emission Failure Solution Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:FailureSolution1PEParticlesActuallyRendered}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{emission_failure/solution/10PE_0-5K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{Emission Failure Solution Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:FailureSolution10PERenderBallFunctionCalls}
+
+	\addlargesubfigure{emission_failure/solution/10PE_0-5K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{Emission Failure Solution Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:FailureSolution10PEParticlesActuallyRendered}
+
+\end{figure}
 
 % ================================================================================================================================
 % End of Observations
