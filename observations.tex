@@ -18,19 +18,86 @@
 LOREM LOREM
 
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Using the Concurrent Particle Data Object}\label{ssec:observe_copies_using_object}
+\subsection{Using the Concurrent Particle Data Object}\label{ssec:observe_copies_code}
 % ----------------------------------------------------------------------------------------------------------------------------
 
 LOREM LOREM
 
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Not Using the Concurrent Particle Data Object}\label{ssec:observe_copies_not_using_object}
+\subsection{Results}\label{ssec:observe_copies_results}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM LOREM
+\begin{figure}
+\addtocounter{figure}{-1}
 
+	\addlargesubfigure{copies/1PE_0-50K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{Using Copies Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Copies1PERenderBallFunctionCalls}
+
+	\addlargesubfigure{copies/1PE_0-50K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{Using Copies Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Copies1PEParticlesActuallyRendered}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{copies/10PE_0-5K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{Using Copies Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Copies10PERenderBallFunctionCalls}
+
+	\addlargesubfigure{copies/10PE_0-5K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{Using Copies Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Copies10PEParticlesActuallyRendered}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{copies/1PE_50K_Section-Calls}
+	{1.0}{1.2}
+	{Using Copies Observation: A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{fig:Copies1PESectionCalls}
+
+	\addlargesubfigure{copies/1PE_50K_Timed-Sections}
+	{1.0}{1.2}
+	{Using Copies Observation: A graph showing the time spent in various sections of code for a single particle effect.}
+	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{fig:Copies1PETimedSections}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{copies/10PE_5K_Section-Calls}
+	{1.0}{1.2}
+	{Using Copies Observation: A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{fig:Copies10PESectionCalls}
+
+	\addlargesubfigure{copies/10PE_5K_Timed-Sections}
+	{1.0}{1.2}
+	{Using Copies Observation: A graph showing the time spent in various sections of code for a single particle effect.}
+	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{fig:Copies10PETimedSections}
+
+\end{figure}
+
+\newpage
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Comparison}\label{ssec:observe_copies_comparison}
+\subsection{Discussion}\label{ssec:observe_copies_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
 LOREM LOREM
@@ -53,25 +120,86 @@ LOREM LOREM
 LOREM LOREM
 
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Using the Small Task}\label{ssec:observe_threads_small}
+\subsection{Code}\label{ssec:observe_threads_code}
 % ----------------------------------------------------------------------------------------------------------------------------
 
 LOREM LOREM
 
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Using the GameLogic Task}\label{ssec:observe_threads_gamelogic}
+\subsection{Results}\label{ssec:observe_threads_results}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM LOREM
+\begin{figure}
+\addtocounter{figure}{-1}
 
-% ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Using No Background Task}\label{ssec:observe_threads_gamelogic}
-% ----------------------------------------------------------------------------------------------------------------------------
+	\addlargesubfigure{task_scheduling/1PE_0-50K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{Task Scheduling Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Tasks1PERenderBallFunctionCalls}
 
-LOREM LOREM
+	\addlargesubfigure{task_scheduling/1PE_0-50K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{Task Scheduling Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Tasks1PEParticlesActuallyRendered}
 
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{task_scheduling/10PE_0-5K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{Task Scheduling Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Tasks10PERenderBallFunctionCalls}
+
+	\addlargesubfigure{task_scheduling/10PE_0-5K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{Task Scheduling Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Tasks10PEParticlesActuallyRendered}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{task_scheduling/1PE_50K_Section-Calls}
+	{1.0}{1.2}
+	{Task Scheduling Observation: A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{fig:Tasks1PESectionCalls}
+
+	\addlargesubfigure{task_scheduling/1PE_50K_Timed-Sections}
+	{1.0}{1.2}
+	{Task Scheduling Observation: A graph showing the time spent in various sections of code for a single particle effect.}
+	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{fig:Tasks1PETimedSections}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{task_scheduling/10PE_5K_Section-Calls}
+	{1.0}{1.2}
+	{Task Scheduling Observation: A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{fig:Tasks10PESectionCalls}
+
+	\addlargesubfigure{task_scheduling/10PE_5K_Timed-Sections}
+	{1.0}{1.2}
+	{Task Scheduling Observation: A graph showing the time spent in various sections of code for a single particle effect.}
+	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{fig:Tasks10PETimedSections}
+
+\end{figure}
+
+\newpage
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Comparison}\label{ssec:observe_threads_comparison}
+\subsection{Discussion}\label{ssec:observe_threads_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
 LOREM LOREM
@@ -93,6 +221,41 @@ LOREM LOREM
 
 LOREM LOREM
 
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{emission_failure/1PE_0-50K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Failure1PERenderBallFunctionCalls}
+
+	\addlargesubfigure{emission_failure/1PE_0-50K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Failure1PEParticlesActuallyRendered}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{emission_failure/10PE_0-5K_Render-Ball-Function-Calls}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Failure10PERenderBallFunctionCalls}
+
+	\addlargesubfigure{emission_failure/10PE_0-5K_Particles-Actually-Rendered}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{fig:Failure10PEParticlesActuallyRendered}
+
+\end{figure}
+
+\newpage
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Emission Failure Source}\label{ssec:observe_emit_failure_source}
 % ----------------------------------------------------------------------------------------------------------------------------
