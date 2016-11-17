@@ -3,10 +3,10 @@ ParticleEffectComponent::Render(camera)
   // Use the Particle Drawable to draw particles to the screen
   if(this.playbackState == playing or this.playbackState == stopping)
   {
-    // Lock the member mutex to keep particles and new particles safe
+    // Lock the member mutex to keep particles and new particle indices safe
     using lock(this.mutex)
     {
-      this.drawable->Draw(camera, this.GetNewParticleIndices());
+      this.drawable->Draw(camera, this.TakeNewParticleIndices());
     }
   }
 }

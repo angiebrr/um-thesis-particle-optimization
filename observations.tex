@@ -7,6 +7,13 @@
 \chapter{CHILLISOURCE PARTICLE EFFECT COMPONENT OBSERVATIONS}\label{ch:observations}
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Overview
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\section{Overview}\label{sec:observe_overview}
+
+The case studies that were performed focused primarily on understanding the contention between the main thread that rendered particles and the background thread that updated them. This chapter will explore various other aspects of \class{Particle Effect Components}. Topics that will be examined include the importance of the \var{ConcurrentParticleData} object, the relationship between ChilliSource's \class{Task Scheduler} and \class{Particle Effect Components}, and the perplexing scenarios in which particle effects do not visually emit particles.
+
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Using copies
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Copying Data with ConcurrentParticleData}\label{sec:observe_copies}
@@ -15,36 +22,62 @@
 \subsection{Overview}\label{ssec:observe_copies_overview}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM LOREM
+As discussed in prior chapters, the \var{ConcurrentParticleData} object contains copies of primitives, objects, and data structures needed by the \class{Particle Drawable} to render the particles. It also handles all of the locking necessary in order to synchronize the background and main threads. This section will address what occurs when \var{ConcurrentParticleData} is not used and, instead, the member variables within \class{Particle Effect Component} are used directly by the \class{Particle Drawable}.
 
+\vspace{-0.3cm}
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Code}\label{ssec:observe_copies_code}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-% ...........................................................
-\subsubsection{Using ConcurrentParticleData}
-% ...........................................................
+There are a considerable number of changes that are needed to remove \var{ConcurrentParticleData} from the \class{Particle Effect Component} and \class{Particle Drawable} classes:
 
-LOREM LOREM
+\begin{itemize}[nolistsep,topsep=10pt]
 
-% ...........................................................
-\subsubsection{Removing ConcurrentParticleData}
-% ...........................................................
+	\item Modify the \class{Particle Drawable} to use pointers from the \class{Particle Effect Component} and remove the \var{ConcurrentParticleData} member variable.
+	\item Add variables that \var{ConcurrentParticleData} was keeping track of.
+	\item Add functions that \var{ConcurrentParticleData} provided. (Which primarily include accessor and locking/unlocking functions)
+	\item Modify \func{ParticleUpdateTask} to update member variables from the \class{Particle Effect Component} .
+	\item Modify the \class{Particle Effect Component} and \class{Particle Drawable} to utilize locks and mutexes in order to ensure thread safety.
+
+\end{itemize}
+
+The majority of the above changes are described in Code Listings \ref{code:WithoutCPDParticleUpdate} and \ref{code:WithoutCPDParticleRender}, but it is also necessary to expand on some points. 
+
+In addition to keeping track of information needed for rendering, \var{ConcurrentParticleData} has two booleans that the \class{Particle Effect Component} used for scheduling updates: \var{hasActiveParticles} and \var{isUpdating}. These booleans describe whether or not there are any particles active in the effect and if \func{ParticleUpdateTask} is running, respectively. If \var{hasActiveParticles} is false when the component is updating on the main thread, then the component stops\footnotemark $ $. If \var{isUpdating} is false when the component is updating on the main thread, then the component will schedule a \func{ParticleUpdateTask}. In order to replace this functionality from \var{ConcurrentParticleData}, these booleans are added to \class{Particle Effect Component} as atomic booleans that are passed by reference to the \func{ParticleUpdateTask} function.\footnotemark
+
+\addtocounter{footnote}{-1}\footnotetext{The particle effect will only completely stop if \var{looping} is false as well.}
+\addtocounter{footnote}{+1}\footnotetext{These booleans are not shown in the pseudocode for simplicity, but their behavior is simple; \var{hasActiveParticles} will switch to false if it did not update any particles in \func{ParticleUpdateTask}, and \var{isUpdating} will switch to false at the end of \func{ParticleUpdateTask}.}
+
+Since the \class{Particle Effect Component} uses the bounding information objects on the main thread and the \class{Drawable} does not, two mutexes will be created for the bounding information and the rest of the rendering data. 
+
+As shown by \clis{code:WithoutCPDParticleUpdate}, the \func{ParticleUpdateTask} is locked by a member variable mutex. It is also passes references to new particle indicies (i.e. \var{copiedAtts.newParticleIndices}) and to the bounding information (i.e. \var{copiedAtts.AABB} and \var{copiedAtts.Sphere}).
 
 \vspace{-0.5cm}
 \framecode{C++}{observations}{Copies_WithoutConcurrentParticleData_ParticleUpdateTask.cpp}
 {code:WithoutCPDParticleUpdate}
-{Pseudocode .}
-\vspace{-1.5cm}
+{Pseudocode describing the important changes needed to remove the \var{ConcurrentParticleData} instance from the \class{Particle Effect Component}.}
+\vspace{-0.5cm}
+
+\clis{code:WithoutCPDParticleRender} shows that the \class{Particle Drawable} did not change significantly. The most notable change is that the \func{Draw} function is now locked by \class{Particle Effect Component}'s mutex within the \func{Render} function. Additionally, the particles array is not passed to the \func{DrawParticles} function. Instead, the array is passed into the drawable when it is created by the \class{Particle Effect Component}.
+
+\vspace{-0.5cm}
 \framecode{C++}{observations}{Copies_WithoutConcurrentParticleData_Render.cpp}
 {code:WithoutCPDParticleRender}
-{Pseudocode .}
-
-
+{Pseudocode describing the important changes needed to remove the \var{ConcurrentParticleData} instance from the \var{Particle Drawable}.}
+\vspace{-0.7cm}
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Results}\label{ssec:observe_copies_results}
 % ----------------------------------------------------------------------------------------------------------------------------
+
+The metrics that are presented are the result of running a series of automated games in four scenarios:
+
+\begin{enumerate}[nolistsep,topsep=0pt]
+	\item 1 particle effect, particles range from 0 - 50K, 5K step, 5 5-second runs per game.
+	\item 1 particle effect, 50K, 0 step, 20 5-second runs.
+	\item 10 particle effects, particles range from 0 - 5K, 500 step, 5 5-second runs per game.
+	\item 10 particle effects, 5K, 0 step, 20 5-second runs.
+\end{enumerate}
 
 \begin{figure}
 \addtocounter{figure}{-1}
@@ -114,12 +147,13 @@ LOREM LOREM
 
 \end{figure}
 
-\newpage
+All of these scenarios were ran with PPE values that were 10\% and 100\% of TMP. These eight series of automated games were ran with and without the above changes to the source code, and this totals to 16 series of automated games.
+
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Discussion}\label{ssec:observe_copies_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM LOREM
+LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Multithreading and task scheduling
