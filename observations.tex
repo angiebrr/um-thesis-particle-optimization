@@ -153,7 +153,10 @@ All of these scenarios were ran with PPE values that were 10\% and 100\% of TMP.
 \subsection{Discussion}\label{ssec:observe_copies_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM LOREM LOREM LOREM LOREM LOREM LOREM LOREM
+The \var{particles actually rendered} and \var{render ball function calls} charts for 1 particle effect show something interesting. The "No Object" data series renders the ball fewer times than the original, and it also renders its particles fewer times. An examination of the timing metrics for 1 particle effect shows why this is occurring. Instead of the background thread waiting for the mutex to release in \func{ParticleUpdateTask}, the contention has moved to the \class{Particle Drawable} in the \func{Draw} function. This increase in wait-time disallows the renderer to render as many particles and, as a result, it also takes away rendering time from everything else (including the ball).
+
+The charts for 10 particle effects, however, do not demonstrate this. Both the original and "No Object" data series show nearly identical results. This is because there is less overall contention when the particles are distributed across effects, as discovered in the previous chapter. Although the benefits of using a \var{ConcurrentParticleData} object is not as significant when using many particle effects, it is appealing from a software engineering perspective. Encapsulating the thread synchronization to a single class is clearer and more maintainable, and that will be useful if the developer desires to refactor the \class{ParticleEffectComponent}.
+
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Multithreading and task scheduling
