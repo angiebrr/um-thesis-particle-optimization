@@ -10,9 +10,7 @@ ParticleUpdateTask(copiedAtts)
   {
     PROFILE_SHARED_BEGIN(ParticleIter_InnerLoop);
     if(particle.isActive)
-    {
       particle.UpdateValues();
-    }
     PROFILE_END();
   }
    PROFILE_END();

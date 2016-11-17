@@ -16,9 +16,7 @@ ParticleUpdateTask(copiedAtts)
   for(particle : copiedAtts.particleArray)
   {
     if(particle.isActive)
-    {
       particle.UpdateValues();
-    }
   }
   
   // Apply affectors

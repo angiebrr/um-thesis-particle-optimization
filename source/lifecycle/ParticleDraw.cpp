@@ -2,9 +2,7 @@ ParticleEffectComponent::Render(camera)
 {
   // Use the Particle Drawable to draw particles to the screen
   if(this.playbackState == playing or this.playbackState == stopping)
-  {
     this.drawable->Draw(camera);
-  }
 }
 
 Drawable::Draw(camera)

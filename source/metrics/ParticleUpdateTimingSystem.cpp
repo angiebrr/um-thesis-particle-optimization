@@ -11,9 +11,7 @@ ParticleUpdateTask(copiedAtts)
   {
     pInIterTimerKey = TimingSystem::Start("ParticleIter_InnerLoop");
     if(particle.isActive)
-    {
       particle.UpdateValues();
-    }
     TimingSystem::Stop("ParticleIter_InnerLoop", pInIterTimerKey);
   }
   TimingSystem::Stop("ParticleIter_OuterLoop", pOutIterTimerKey);
