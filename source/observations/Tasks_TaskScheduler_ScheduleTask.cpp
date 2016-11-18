@@ -4,15 +4,11 @@ TaskScheduler::ScheduleTask(taskType, task)
 	{
 		// Add a task to the small thread task pool
 		case TaskType::small: 
-			this.smallTaskPool->AddTask(task); break;
-
-		// Add a task to the large thread task pool
-		case TaskType::large: 
-			this.largeTaskPool->AddTask(task); break;
+			this.smallTaskPool.AddTask(task); break;
 
 		// Add a task to the main thread task pool
 		case TaskType::mainThread: 
-			this.mainThreadTaskPool->AddTask(task); break;
+			this.mainThreadTaskPool.AddTask(task); break;
 
 		// Schedule the task as a small task, but be sure to notify when
 		// all game logic tasks have been completed
@@ -28,6 +24,6 @@ TaskScheduler::ScheduleTask(taskType, task)
 
 			break;
 
-		// File tasks can also be scheduled, but how they work is unimportant
+		// File and large tasks can also be scheduled, but they are outside of our scope
 	}
 }

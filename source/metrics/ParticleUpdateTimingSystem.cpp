@@ -7,7 +7,7 @@ ParticleUpdateTask(copiedAtts)
   // Use the timing system to keep track of the outer and inner loop
   // times during particle iteration.
   pOutIterTimerKey = TimingSystem::Start("ParticleIter_OuterLoop");
-  for(particle : copiedAtts.particleArray)
+  for(particle in copiedAtts.particleArray)
   {
     pInIterTimerKey = TimingSystem::Start("ParticleIter_InnerLoop");
     if(particle.isActive)

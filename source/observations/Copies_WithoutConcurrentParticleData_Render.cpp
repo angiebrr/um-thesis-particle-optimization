@@ -1,12 +1,12 @@
 ParticleEffectComponent::Render(camera)
 {
   // Use the Particle Drawable to draw particles to the screen
-  if(this.playbackState == playing or this.playbackState == stopping)
+  if(this.playbackState is playing or this.playbackState is stopping)
   {
     // Lock the member mutex to keep particles and new particle indices safe
     using lock(this.mutex)
     {
-      this.drawable->Draw(camera, this.TakeNewParticleIndices());
+      this.drawable.Draw(camera, this.TakeNewParticleIndices());
     }
   }
 }
@@ -14,9 +14,9 @@ ParticleEffectComponent::Render(camera)
 Drawable::Draw(camera, newParticleIndices)
 {
   // Activate the newly emitted particles in the static billboard  
-  for(int index : newParticleIndices)
+  for(particleIndex in newParticleIndices)
   {
-    ActivateParticleInBillboard(index);
+    ActivateParticleInBillboard(particleIndex);
   }
 
   // Iterate through all of the particles and draw each one

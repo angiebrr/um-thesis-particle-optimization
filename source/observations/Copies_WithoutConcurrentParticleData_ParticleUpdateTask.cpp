@@ -17,14 +17,14 @@ ParticleEffectComponent::OnUpdate()
 ParticleUpdateTask(copiedAtts)
 {
   // Update particles if they are active
-  for(particle : copiedAtts.particleArray)
+  for(particle in copiedAtts.particleArray)
   {
     if(particle.isActive)
       particle.UpdateValues();
   }
   
   // Apply affectors
-  for(affector : copiedAtts.particleAffectors)
+  for(affector in copiedAtts.particleAffectors)
   {
     affector.AffectParticles();
   }
