@@ -4,7 +4,7 @@ TaskScheduler::ExecuteMainThreadTasks()
 	// until we are notified to continue.
 	using lock(this.gameLogicMutex) as lock
 	{
-		while(this.gameLogicTaskCount != 0)
+		while(this.gameLogicTaskCount is not 0)
 			this.gameLogicCondition.wait(lock);
 	}
 

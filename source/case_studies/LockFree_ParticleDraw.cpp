@@ -1,19 +1,19 @@
 Drawable::Draw(camera)
 {
   // Lock the concurrent particle data object
-  this.concurrentParticleData->Lock();
+  this.concurrentParticleData.Lock();
 
   // Activate the newly emitted particles in the static billboard  
-  for(int index : this.concurrentParticleData->GetNewParticleIndices())
+  for(particleIndex in this.concurrentParticleData.GetNewParticleIndices())
   {
-    ActivateParticleInBillboard(index);
+    ActivateParticleInBillboard(particleIndex);
   }
 
   // Unlock the concurrent particle data object
-  this.concurrentParticleData->Unlock();
+  this.concurrentParticleData.Unlock();
 
   // Iterate through all of the particles and draw each one
-  DrawParticles(this.concurrentParticleData->GetParticleArray(), camera);
+  DrawParticles(this.concurrentParticleData.GetParticleArray(), camera);
 }
 
 StaticBillboardDrawable::DrawParticles(particleArray, camera)
@@ -34,7 +34,7 @@ StaticBillboardDrawable::DrawParticles(particleArray, camera)
     }
 
     // Render the particle if it is active and is activated in the billboard
-    if(currentParticle is active and currentParticle is in particleBillboard)
+    if(currentParticle.isActive and currentParticle is in particleBillboard)
     {
       Render(currentParticle);
     }
