@@ -309,7 +309,12 @@ Similar to prior sections, each of these four scenarios were ran with PPE values
 \subsection{Discussion}\label{ssec:observe_threads_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM LOREM
+For a single particle effect, the Not Threaded and GameLogicTask data series share nearly identical values. They render the same amount of particles, they render the ball just as many times, and they spend the same amount of time in various parts of the code. This shows us that, at least in the case of a single effect, the main thread waits about the same amount of time for the \idefine{game logic task} as if it was not even threaded.
+
+For multiple particle effects, on the other hand, the overall performance of the Not Threaded data series is worse than the GameLogicTask data series. Although the timing metrics between the two data series are not too different, the particle metrics show that the Not Threaded data series rendered less particles and the ball was not rendered as many times. These results reveal that being able to process multiple effects at the same time before executing the main thread tasks proved to be more efficient than processing them sequentially. 
+
+The results of this particular study demonstrate that scheduling background tasks may not necessarily be faster than its single-threaded implementation. Although it seems obvious, it shows that being able to process many small tasks at once is more efficient than processing a single large task. As a software engineer, it is important to understand the lesson that this teaches. In general, a multi-threaded program often requires a considerable amount of overhead and is challenging to debug. Forcing a multi-threaded solution on a problem that does not easily lend itself to doing many small tasks at once may not yield optimal results. Thus, it is critical to structure multi-threaded programs such that it leverages these strengths.
+
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Taxing the system and emission failure
