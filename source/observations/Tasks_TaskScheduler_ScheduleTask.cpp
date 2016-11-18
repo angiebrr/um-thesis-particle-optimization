@@ -24,6 +24,7 @@ TaskScheduler::ScheduleTask(taskType, task)
 
 			break;
 
-		// File and large tasks can also be scheduled, but they are outside of our scope
+		// File and large tasks can also be scheduled, but they are outside 
+		// of this paper's scope
 	}
 }

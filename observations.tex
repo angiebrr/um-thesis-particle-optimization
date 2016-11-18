@@ -22,7 +22,7 @@ The case studies that were performed focused primarily on understanding the cont
 \subsection{Overview}\label{ssec:observe_copies_overview}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-As discussed in prior chapters, the \var{ConcurrentParticleData} object contains copies of primitives, objects, and data structures needed by the \class{Particle Drawable} to render the particles. It also handles all of the locking necessary in order to synchronize the background and main threads. This section will address what occurs when \var{ConcurrentParticleData} is not used and, instead, the member variables within \class{Particle Effect Component} are used directly by the \class{Particle Drawable}.
+As discussed in prior chapters, the \var{ConcurrentParticleData} object contains copies of primitives, objects, and data structures needed by the \class{Particle Drawable} to render the particles. It also handles all of the locking necessary in order to synchronize the background and main threads. This section will address what occurs when \var{ConcurrentParticleData} is not used and the member variables within \class{Particle Effect Component} are instead directly used by the \class{Particle Drawable}.
 
 \vspace{-0.3cm}
 % ----------------------------------------------------------------------------------------------------------------------------
@@ -164,62 +164,61 @@ The charts for 10 particle effects, however, do not demonstrate this. Both the o
 \section{Multithreading and Task Scheduling}\label{sec:observe_threads}
 
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Overview}\label{ssec:observe_threads_overview}
-% ----------------------------------------------------------------------------------------------------------------------------
-
-LOREM LOREM
-
-% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{The ChilliSource Task Scheduler}\label{ssec:observe_threads_scheduler}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM LOREM
+As mentioned earlier in the paper, \func{ParticleUpdateTask} is scheduled as a background thread by ChilliSource's \class{Task Scheduler}. The \class{Task Scheduler} can schedule a variety of task types, and this section will delve into the different outcomes when \func{ParticleUpdateTask} is scheduled as a \idefine{small task}, a \idefine{game logic task}, and if it is not scheduled at all and runs on the main thread.
 
 \vspace{-0.5cm}
 \framecode{C++}{observations}{Tasks_TaskScheduler_ScheduleTask.cpp}
 {code:TaskSchedulerScheduleTask}
-{Pseudocode .}
+{Pseudocode showing how ChilliSource's \class{Task Scheduler} schedules \idefine{small tasks}, \idefine{game logic tasks}, and \idefine{main thread tasks}.}
+
+A \idefine{small task} is considered to be a task with a short execution time such that it can be processed within a single frame. If a \idefine{small task} runs too long, then the task will have a significantly negative impact on the overall performance of the program. A \idefine{game logic task} is a special kind of small task that is guaranteed to be executed prior \idefine{main thread tasks}. It is easy to see, then, that long running \idefine{game logic tasks} will drastically affect the program's performance. \idefine{Main thread tasks} are also small tasks that are executed on the main thread after \idefine{game logic tasks}. All of these tasks are added to \class{Task Pools}, which are a collection of tasks that are performed by one of the worker threads owned by the pool. These pools will continue to perform tasks until they are deallocated and, if there are no tasks to perform, they will sleep until another task is added.
+
 \vspace{-0.5cm}
 \framecode{C++}{observations}{Tasks_TaskScheduler_ExecuteMainThreadTasks.cpp}
 {code:TaskSchedulerExecuteMainThread}
-{Pseudocode .}
+{Pseudocode showing how \idefine{game logic tasks} force the main thread to wait until they are finished before allowing the main thread to continue.}
+
+
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Code}\label{ssec:observe_threads_code}
 % ----------------------------------------------------------------------------------------------------------------------------
 
+Scheduling the different types of tasks is fairly straightforward; the task type is simply passed into the \func{ScheduleTask} method. This was not included in previous code listings in order to simplify them, but the code listings below illustrate the different ways the \func{ParticleUpdateTask} function was scheduled for this study. It should be noted that, by default, the \class{Particle Effect Component} scheduled \func{ParticleUpdateTask} as a \idefine{small task}. Thus, during this study, the "Small Task" data series is analogous to the "Original" data series in previous sections.
+
 % ...........................................................
 \subsubsection{Small Task Type}
 % ...........................................................
 
-LOREM LOREM
-
-\vspace{-0.5cm}
+\vspace{-1.2cm}
 \framecode{C++}{observations}{Tasks_Small_ParticleUpdateTask.cpp}
 {code:SmallTaskParticleUpdate}
-{Pseudocode .}
+{Pseudocode showing how \func{ParticleUpdateTask} was scheduled as a \idefine{small task}.}
 
+\vspace{-1.2cm}
 % ...........................................................
 \subsubsection{Game Logic Task Type}
 % ...........................................................
 
-LOREM LOREM
-
-\vspace{-0.5cm}
+\vspace{-1.2cm}
 \framecode{C++}{observations}{Tasks_GameLogic_ParticleUpdateTask.cpp}
 {code:GameLogicTaskParticleUpdate}
-{Pseudocode .}
+{Pseudocode showing how \func{ParticleUpdateTask} was scheduled as a \idefine{game logic task}.}
 
+\vspace{-1.2cm}
 % ...........................................................
 \subsubsection{No Task Scheduled (Not Threaded)}
 % ...........................................................
 
-LOREM LOREM
+The sequential version of \func{ParticleUpdateTask} is performed in a similar fashion to the other tasks in that a struct is passed to it and the \var{ConcurrentParticleData} object is still used. Although these things are not strictly needed, they are included primarily to "level the playing field" so that the results from all three versions are easier to compare.
 
 \vspace{-0.5cm}
 \framecode{C++}{observations}{Tasks_NoTask_ParticleUpdateTask.cpp}
 {code:GameNoTaskParticleUpdate}
-{Pseudocode .}
+{Pseudocode showing how \func{ParticleUpdateTask} was not scheduled and was simply ran on the main thread.}
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Results}\label{ssec:observe_threads_results}
