@@ -101,14 +101,14 @@ The metrics that are presented are the result of running a series of automated g
 
 	\addlargesubfigure{copies/10PE_0-5K_Render-Ball-Function-Calls}
 	{1.0}{1.2}
-	{Using Copies Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
-	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{Using Copies Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
 	{fig:Copies10PERenderBallFunctionCalls}
 
 	\addlargesubfigure{copies/10PE_0-5K_Particles-Actually-Rendered}
 	{1.0}{1.2}
-	{Using Copies Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
-	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{Using Copies Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
 	{fig:Copies10PEParticlesActuallyRendered}
 
 \end{figure}
@@ -135,14 +135,14 @@ The metrics that are presented are the result of running a series of automated g
 
 	\addlargesubfigure{copies/10PE_5K_Section-Calls}
 	{1.0}{1.2}
-	{Using Copies Observation: A graph showing the number of section calls for various sections of code for a single particle effect.}
-	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{Using Copies Observation: A graph showing the number of section calls for various sections of code for ten particle effects.}
+	{A graph showing the number of section calls for various sections of code for ten particle effects.}
 	{fig:Copies10PESectionCalls}
 
 	\addlargesubfigure{copies/10PE_5K_Timed-Sections}
 	{1.0}{1.2}
-	{Using Copies Observation: A graph showing the time spent in various sections of code for a single particle effect.}
-	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{Using Copies Observation: A graph showing the time spent in various sections of code for ten particle effects.}
+	{A graph showing the time spent in various sections of code for ten particle effects.}
 	{fig:Copies10PETimedSections}
 
 \end{figure}
@@ -180,7 +180,7 @@ A \idefine{small task} is considered to be a task with a short execution time su
 \framecode{C++}{observations}{Tasks_TaskScheduler_ExecuteMainThreadTasks.cpp}
 {code:TaskSchedulerExecuteMainThread}
 {Pseudocode showing how \idefine{game logic tasks} force the main thread to wait until they are finished before allowing the main thread to continue.}
-
+\vspace{-0.7cm}
 
 
 % ----------------------------------------------------------------------------------------------------------------------------
@@ -189,6 +189,7 @@ A \idefine{small task} is considered to be a task with a short execution time su
 
 Scheduling the different types of tasks is fairly straightforward; the task type is simply passed into the \func{ScheduleTask} method. This was not included in previous code listings in order to simplify them, but the code listings below illustrate the different ways the \func{ParticleUpdateTask} function was scheduled for this study. It should be noted that, by default, the \class{Particle Effect Component} scheduled \func{ParticleUpdateTask} as a \idefine{small task}. Thus, during this study, the "Small Task" data series is analogous to the "Original" data series in previous sections.
 
+\vspace{-0.5cm}
 % ...........................................................
 \subsubsection{Small Task Type}
 % ...........................................................
@@ -215,14 +216,24 @@ Scheduling the different types of tasks is fairly straightforward; the task type
 
 The sequential version of \func{ParticleUpdateTask} is performed in a similar fashion to the other tasks in that a struct is passed to it and the \var{ConcurrentParticleData} object is still used. Although these things are not strictly needed, they are included primarily to "level the playing field" so that the results from all three versions are easier to compare.
 
-\vspace{-0.5cm}
+\vspace{-0.7cm}
 \framecode{C++}{observations}{Tasks_NoTask_ParticleUpdateTask.cpp}
 {code:GameNoTaskParticleUpdate}
 {Pseudocode showing how \func{ParticleUpdateTask} was not scheduled and was simply ran on the main thread.}
+\vspace{-0.74cm}
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Results}\label{ssec:observe_threads_results}
 % ----------------------------------------------------------------------------------------------------------------------------
+
+The following four scenarios were used when generating metrics for the small task type, the game logic task type, and the series without a task scheduled:
+
+\begin{enumerate}[nolistsep,topsep=0pt]
+	\item 1 particle effect, particles range from 0 - 50K, 5K step, 5 5-second runs per game.
+	\item 1 particle effect, 50K, 0 step, 20 5-second runs.
+	\item 10 particle effects, particles range from 0 - 5K, 500 step, 5 5-second runs per game.
+	\item 10 particle effects, 5K, 0 step, 20 5-second runs.
+\end{enumerate}
 
 \begin{figure}
 \addtocounter{figure}{-1}
@@ -246,14 +257,14 @@ The sequential version of \func{ParticleUpdateTask} is performed in a similar fa
 
 	\addlargesubfigure{task_scheduling/10PE_0-5K_Render-Ball-Function-Calls}
 	{1.0}{1.2}
-	{Task Scheduling Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
-	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{Task Scheduling Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
 	{fig:Tasks10PERenderBallFunctionCalls}
 
 	\addlargesubfigure{task_scheduling/10PE_0-5K_Particles-Actually-Rendered}
 	{1.0}{1.2}
-	{Task Scheduling Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
-	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{Task Scheduling Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
 	{fig:Tasks10PEParticlesActuallyRendered}
 
 \end{figure}
@@ -280,19 +291,20 @@ The sequential version of \func{ParticleUpdateTask} is performed in a similar fa
 
 	\addlargesubfigure{task_scheduling/10PE_5K_Section-Calls}
 	{1.0}{1.2}
-	{Task Scheduling Observation: A graph showing the number of section calls for various sections of code for a single particle effect.}
-	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{Task Scheduling Observation: A graph showing the number of section calls for various sections of code for ten particle effects.}
+	{A graph showing the number of section calls for various sections of code for ten particle effects.}
 	{fig:Tasks10PESectionCalls}
 
 	\addlargesubfigure{task_scheduling/10PE_5K_Timed-Sections}
 	{1.0}{1.2}
-	{Task Scheduling Observation: A graph showing the time spent in various sections of code for a single particle effect.}
-	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{Task Scheduling Observation: A graph showing the time spent in various sections of code for ten particle effects.}
+	{A graph showing the time spent in various sections of code for ten particle effects.}
 	{fig:Tasks10PETimedSections}
 
 \end{figure}
 
-\newpage
+Similar to prior sections, each of these four scenarios were ran with PPE values that were 10\% and 100\% of TMP. Thus, this totals to 24 series of games that were executed in order to generate these figures.
+
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Discussion}\label{ssec:observe_threads_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
