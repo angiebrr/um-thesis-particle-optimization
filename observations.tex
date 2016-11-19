@@ -317,21 +317,37 @@ The results of this particular study demonstrate that scheduling background task
 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-% Taxing the system and emission failure
+% Particles Failing to Visually Emit
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-\section{Taxing the Engine and Emission Failure}\label{sec:observe_emit_failure}
-
-% ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Overview}\label{ssec:observe_emit_failure_overview}
-% ----------------------------------------------------------------------------------------------------------------------------
-
-LOREM LOREM
+\section{Particles Failing to Visually Emit}\label{sec:observe_emit_failure}
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Emission Failure}\label{ssec:observe_emit_failure_failure}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM LOREM
+\class{Particle Effect Components} sometimes failed to visually emit particles during automated games. When this behavior was observed, particle metrics "particles actually rendered" and "particles actually emitted" were added to the instrumentation systems in order to numerically quantify (and, perhaps, understand) the failure. Two main variants of this failure emerged:
+
+\begin{enumerate}[nolistsep,topsep=0pt]
+	\item Particles were slow to emit, and it may look like it never emitted if the game's duration was too short
+	\item Particles never emitted even if the game's duration was lengthened significantly
+\end{enumerate}
+
+The first variant usually exhibits a low "render ball function call" metric, i.e. a low frames per second, while the second variant does not seem to suffer from a performance hit in the slightest. The first kind is, in a way, expected for particle effects with a large number of particles simply because the renderer is slowed by the sheer number of iterations it is forced to make every update cycle. The second kind, on the other hand, is puzzling because it is not expected behavior.
+
+% ----------------------------------------------------------------------------------------------------------------------------
+\subsection{Emission Failure Source}\label{ssec:observe_emit_failure_source}
+% ----------------------------------------------------------------------------------------------------------------------------
+
+In order to demonstrate and understand this particle failure, metrics were generated using the same four scenarios as we used in the past:
+
+\begin{enumerate}[nolistsep,topsep=0pt]
+	\item 1 particle effect, particles range from 0 - 50K, 5K step, 5 5-second runs per game.
+	\item 1 particle effect, 50K, 0 step, 20 5-second runs.
+	\item 10 particle effects, particles range from 0 - 5K, 500 step, 5 5-second runs per game.
+	\item 10 particle effects, 5K, 0 step, 20 5-second runs.
+\end{enumerate}
+
+Again, all of these scenarios were ran with PPE values that were 10\% and 100\% of TMP. The two data series, Non-Looping and Looping, are \class{Particle Effect Components} that have \var{isLooping} set to false and true, respectively.
 
 \begin{figure}
 \addtocounter{figure}{-1}
@@ -367,18 +383,62 @@ LOREM LOREM
 
 \end{figure}
 
-\newpage
-% ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Emission Failure Source}\label{ssec:observe_emit_failure_source}
-% ----------------------------------------------------------------------------------------------------------------------------
+\begin{figure}
+\addtocounter{figure}{-1}
 
-LOREM LOREM
+	\addlargesubfigure{emission_failure/1PE_50K_Section-Calls}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{fig:Failure1PESectionCalls}
+
+	\addlargesubfigure{emission_failure/1PE_50K_Timed-Sections}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing the time spent in various sections of code for a single particle effect.}
+	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{fig:Failure1PETimedSections}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{emission_failure/10PE_5K_Section-Calls}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing the number of section calls for various sections of code for ten particle effects.}
+	{A graph showing the number of section calls for various sections of code for ten particle effects.}
+	{fig:Failure10PESectionCalls}
+
+	\addlargesubfigure{emission_failure/10PE_5K_Timed-Sections}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing the time spent in various sections of code for ten particle effects.}
+	{A graph showing the time spent in various sections of code for ten particle effects.}
+	{fig:Failure10PETimedSections}
+
+\end{figure}
+
+From these results, we can clearly see that the "Non-Looping; PPE is 1.0 of TMP" data series for a single particle effect demonstrates the catastrophic emission failure. At about 30,000 total maximum particles, zero particles are rendered and, as a result, the \var{render ball function calls} skyrocket since the renderer is not focusing on rendering particles. What is also interesting about this series is the extremely short amount of time that is spent in \func{ParticleUpdateTask}. We should expect it to take up most if not all of the $ 5 \nicefrac{seconds}{run} * 20 runs = 100 seconds $ like the other data series. Instead, it only spends about 27 seconds in \func{ParticleUpdateTask}. 
+
+The other data series do not experience the same catastrophic failure; the only one that comes close is the "Non-Looping; PPE is 1.0 of TMP" data series for multiple particle effects. For this data series, we see the \var{particles actually rendered} dip and the \var{render ball function calls} rise at 40,000 total maximum particles. Thus, this suggests that \textbf{non-looping} particle effects with a large number of particles per emission are at the heart of the issue. However, we still do not exactly know why this occurs.
+
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Emission Failure Solution}\label{ssec:observe_emit_failure_solution}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-LOREM LOREM
+Discovering why this failure occurred was a multi-step process. The automated game was set to run with a single effect with PPE at 1.0 TMP and a particle value of at least 30,000. Since this seemed to be a rendering issue, breakpoints were set in the \func{Render} function within the \class{Particle Effect Component} class. Interestingly enough, the \func{Render} function was never called during the game. To further investigate, breakpoints were placed within the renderer itself when it iterated over \class{Render Components} and, specifically, when it iterated over a \class{Particle Effect Component}. It turned out that the effect was being "culled", or ignored, because the bounding information associated with the effect was set to its initial value: \var{INTEGER\_MAX}. Since the actual, non-default value of its bounding information is set inside of \func{ParticleUpdateTask}, this suggests that \func{ParticleUpdateTask} was not being called anymore. Placing breakpoints within the \func{Update} method in the \class{Particle Effect Component} revealed that it calls the \func{Stop} function and ceased to schedule \func{ParticleUpdateTask}. This was called because the effect met two conditions:
+
+\begin{itemize}[nolistsep,topsep=0pt]
+	\item The effect's duration elapsed
+	\item There were no active particles
+\end{itemize}
+
+These conditions were met because \func{ParticleUpdateTask} had not updated or activated any particles within the effect's duration time, which was 1 second. Thus, it can be inferred that a non-looping particle effect coupled with a small duration and a large number of particles results in particle failure. Increasing the duration of a such a particle effect should fix the problem.
+
+The following figures present metrics that compare the emission failure from above with the solution to that failure. The metrics from this "Solution" data series are the result of running the same scenarios as above with a non-looping particle effect, but this non-looping particle effect has an increased duration time of 120 seconds. An examination of these results will show that this solution does indeed solve the problem. Particles are rendered from 0 to 50,000 total maximum particles, and a healthy amount of time is being spent within \func{ParticleUpdateTask}, as expected.
+
+This study has shown that, when using a non-looping particle effect with a large number of particles, a large duration value should be set as well. Although this may seem like ChilliSource should disallow this from happening, it is also true that this resulted from a misconfiguration of a particle effect. A game developer should not expect that a duration of a single second is reasonable for a particle effect with at least 30,000 particles. However, it would still be useful to at least have a warning printed to the console that informs the developer that a "failing" or "broken" particle effect may be due to a small duration time. 
+
 
 \begin{figure}
 \addtocounter{figure}{-1}
@@ -411,6 +471,40 @@ LOREM LOREM
 	{Emission Failure Solution Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
 	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
 	{fig:FailureSolution10PEParticlesActuallyRendered}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{emission_failure/solution/1PE_50K_Section-Calls}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{fig:FailureSolution1PESectionCalls}
+
+	\addlargesubfigure{emission_failure/solution/1PE_50K_Timed-Sections}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing the time spent in various sections of code for a single particle effect.}
+	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{fig:FailureSolution1PETimedSections}
+
+\end{figure}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\addlargesubfigure{emission_failure/solution/10PE_5K_Section-Calls}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing the number of section calls for various sections of code for ten particle effects.}
+	{A graph showing the number of section calls for various sections of code for ten particle effects.}
+	{fig:FailureSolution10PESectionCalls}
+
+	\addlargesubfigure{emission_failure/solution/10PE_5K_Timed-Sections}
+	{1.0}{1.2}
+	{Emission Failure Observation: A graph showing the time spent in various sections of code for ten particle effects.}
+	{A graph showing the time spent in various sections of code for ten particle effects.}
+	{fig:FailureSolution10PETimedSections}
 
 \end{figure}
 
