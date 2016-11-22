@@ -137,7 +137,7 @@ All Rights Reserved
 %(Single spaced, one page, two space paragraph indent, no more than 350 words)
 \begin{singlespace}
 
-This is the short summary of why this thesis is awesome and \emph{YOU} really want to read it!
+The majority of modern game engines utilize intricate objects called particle systems which are a collection of many particles that together represent an object without well-defined surfaces. This thesis discusses the results of studying and stressing particle systems within ChilliSource, an open-source game engine written in C++, with the goal of understanding a complex system and exploring possible optimizations that could be made to it. The studies performed were driven by metrics generated with custom profiling classes that kept track of things like the number of particles rendered, how long the engine spent rendering particles, or even how long a background thread that updated particles waited for a locked resource to release. These metrics supported experiments that revealed the inner workings of an elaborate system and aided in the creation and dissection of optimizations. The methods and results of these studies will aide anyone interested in reducing contention in large data structures either by using multiple mutexes, data structure "sharding", or hardware-based "lock free" implementations. They are also useful to any developer in need of profiling a complex system.
 
 \end{singlespace}
 
@@ -147,7 +147,7 @@ This is the short summary of why this thesis is awesome and \emph{YOU} really wa
 \phantomsection\specialchapt{ACKNOWLEDGMENTS}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-Thanks guys ...
+I would like to express my sincere gratitude to my thesis advisor, Travis Wheeler, for providing me with the support, insight, and expertise necessary to complete my research. I would also like to thank a ChilliSource developer, Ian Copland, for his willingness to assist me with my study of the engine he created. Additionally, I am incredibly grateful to Andrea Johnson and Michael Breuer for their insightful comments that certainly improved my work. Without all of you, it would not have been possible to conduct my research. 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Table of Contents
@@ -161,10 +161,7 @@ Thanks guys ...
 \listoflistings
 
 \newpage\phantomsection\specialtocchapt{LIST OF FIGURES}
-\listoffigures
-
-\newpage\phantomsection\specialtocchapt{LIST OF TABLES}
-\listoftables     
+\listoffigures   
 
 % ================================================================================================================================
 % End of Preface
