@@ -1,5 +1,6 @@
 struct Particle final
 {
+	// NEW -> Atomic boolean
     mutable std::atomic<bool> m_isContended = { false };
     bool m_isActive = false;
     Vector3 m_position;

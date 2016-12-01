@@ -1,0 +1,24 @@
+% !TEX root = .\Thesis.tex
+
+% ================================================================================================================================
+% Beginning of Conclusion
+% ================================================================================================================================
+\chapter{CONCLUSION}\label{ch:conclusion}
+
+The optimization case studies in \ch{ch:case_studies} demonstrated the differences between managing contention for a single, large data structure and for many pieces or "shards" of a fragmented data structure. The developers that designed \class{Particle Effect Components} in ChilliSource created them such that "sharding" or breaking up the effect's particles array across many \class{Particle Effect Components} resulted in less contention between reader and writer threads due to the decreased chance that either thread would be contending for the same particle array. However, a solution that utilized "lock free" atomic read-modify-write operations could significantly reduce contention if a single, large data structure needed to be used. Although a "lock free" solution only improved ChilliSource's performance when there was a single particle effect, these findings are still useful for that scenario (i.e. two threads contending for a single, large data structure).
+
+The observation studies in \ch{ch:observations} explored three aspects of the particle effect: (1) the importance of the \var{ConcurrentParticleData} object, (2) the relationship between ChilliSource's \class{Task Scheduler} and \class{Particle Effect Components}, and (3) the perplexing scenarios in which particle effects do not visually emit particles. 
+
+The first study showed that using the \var{ConcurrentParticleData} object for a single particle effect shifts the heavy contention to itself instead of the \class{Particle Drawable}. In other words, if the \var{ConcurrentParticleData} object was not used during a game with a single particle effect attached to the ball, then the \class{Particle Drawable} would take on the contention that was observed within the \func{CommitParticleData} function. For 10 particle effects, however, there was not any contention to begin with so using the \var{ConcurrentParticleData} object made little difference.
+
+The second study demonstrated that, depending on how background tasks are organized, scheduling a background task may not necessarily be faster than its single-threaded implementation. ChilliSource's \class{ParticleEffectComponent} leverages the fact that threaded solutions generally do well if many threads work on small problems at once; we have seen throughout this study that particles distributed across many \class{Particle Effect Components} (and thus many threads) consistently perform better than their single-threaded counterparts.
+
+Unlike the other studies that found results that could be applied to software engineering as a whole, the third and final study investigated a problem that was limited to ChilliSource and its \class{Particle Effect Component}. I found that, when using a non-looping particle effect with a large number of particles, a large duration value should be set as well. Otherwise, particle effects may not visually emit. Although this was partially a misconfiguration on my part, it is something that ChilliSource may want to consider fixing so that a game developer would not have to experience the same confusion as I did.
+
+Aspects of ChilliSource that I would consider for future studies would be ways to further optimize the \class{Particle Effect Component}. Although the optimization case studies improved contention in \func{CommitParticleData}, only the games that utilized one particle effect benefited since games with multiple particle effects did not experience contention in the first place. A possible avenue of optimization would be improving the performance time of \class{Particle Affectors}. Although I did not focus on the run time of \class{Particle Affectors} in this thesis, the runtime of \class{Particle Affectors} is significant enough to investigate. Any figures that listed timing metrics would demonstrate this, but a specific example of this can be found in \fig{fig:Mutex10PETimedSections}. If we consider the "Original; PPE is 0.1 of TMP" data series, then we can see that about 27 of 75 seconds of \func{ParticleUpdateTask}'s time is spent updating the effect's \class{Particle Affectors}. Since this is about 36\% of its time, it is worth a closer look.
+
+
+
+% ================================================================================================================================
+% End of Conclusion
+% ================================================================================================================================

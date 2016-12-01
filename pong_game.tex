@@ -10,19 +10,15 @@
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Overview}\label{sec:game_overview}
 
-The ChilliSource Automated Pong Game \cite{CSAPongGame2016} (i.e. CSAPong) is the application that used to aide in studying ChilliSource's \class{Particle Effect Components}. CSAPong is a derivative of CSPong \cite{ChilliSourceSample2016Repository}, a simple pong game created with ChilliSource that was developed by the ChilliWorks team. CSPong was built to illustrate as much of the engine as possible without creating a complex game, and the three main states attempt to reflect this goal. These states include the \class{Splash State}, the \class{Main Menu State}, and the \class{Game State}. These states demonstrate the engine's life cycle events, creation and utilization of custom state systems and custom events, usage of the UI app system and the \class{State Manager}, and, most importantly, how to design entities and components to add enemy AI, player interaction, physics, collision detection, and so on. All three of these states are shown in \fig{fig:CSPongGameExample}.
+The ChilliSource Automated Pong Game \cite{CSAPongGame2016} (i.e. CSAPong) is the application that I built to aide in studying ChilliSource's \class{Particle Effect Components}. CSAPong is a derivative of CSPong \cite{ChilliSourceSample2016Repository}, a simple pong game created with ChilliSource that was developed by the ChilliWorks team. CSPong was built to illustrate as much of the engine as possible without creating a complex game, and the three main states attempt to reflect this goal. These states include the \class{Splash State}, the \class{Main Menu State}, and the \class{Game State}. These states demonstrate the engine's life cycle events, creation and utilization of custom state systems and custom events, usage of the UI app system and the \class{State Manager}, and, most importantly, how to design entities and components to add enemy AI, player interaction, physics, collision detection, and so on. All three states are shown in \fig{fig:CSPongGameExample}.
 
-Unlike CSPong, CSAPong only uses a single state, the \class{Game State}. The main application instance restarts the \class{Game State} a number of times, and it automatically quits the application when it's finished. CSAPong does not have enemy AI or player interaction (i.e. enemy and player paddles), but the left and right walls do collide with the ball and keep track of the "score". Additionally, CSAPong attaches a \class{Particle Effect Component} to the ball that will emit particles as the ball moves around the arena. \fig{fig:CSAPongGameExample} shows a simple example of CSAPong in action.
+Unlike CSPong, CSAPong only uses a single state, the \class{Game State}. The main application instance restarts the \class{Game State} a number of times, and it automatically quits the application when it's finished. CSAPong does not have enemy AI or player interaction (i.e. enemy and player paddles), but the walls do collide with the ball and keep track of the "score". Additionally, CSAPong attaches a \class{Particle Effect Component} to the ball that will emit particles as the ball moves around the arena. Figures \ref{fig:CSAPongGameNoParticles}, \ref{fig:CSAPongGameParticleBurst}, and \ref{fig:CSAPongGameParticleStream} show a variety of examples of CSAPong in action. These examples are explained in more detail later on in this chapter.
+
 
 \addtopfigure{chillisource_game_example}
 {0.8}{A series of screenshots illustrating how the original pong game works.}
 {The above screenshots illustrate the original pong game. The screenshots were taken from the beginning of the application to the first goal. The top-left screenshot is from the \class{Splash State}, the top-right screenshot is from the \var{Main Menu State}, and the other three screenshots are from the \class{Game State}.}
 {fig:CSPongGameExample}
-
-\addtopfigure{chillisource_automated_game_example}
-{0.8}{A series of screenshots illustrating how the automated pong game works.}
-{The above screenshots illustrate the automated pong game. The screenshots were taken 1 second apart with the ball starting at the beginning of the arena. Due to a small bug, note that the score increments by 2 when the ball collides with the opposing "team's" wall.}
-{fig:CSAPongGameExample}
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Architecture
@@ -38,7 +34,7 @@ Unlike CSPong, CSAPong only uses a single state, the \class{Game State}. The mai
 {The basic architecture of the automated pong game.}
 {fig:CSAPongGameArch}
 
-Although it is not necessary to go over every single class that makes up CSAPong, it is essential to understand the general architecture of it. As shown in \fig{fig:CSAPongGameArch}, we can broadly describe the structure having two main parts, the ChilliSource engine\footnotemark $ $ and the CSAPong application itself. Further, CSAPong can be defined as having \class{Application Systems}, a \class{Game State}, and the \class{Game State}'s \class{State Systems}.
+Although it is not necessary to go over every single class that makes up CSAPong, it is essential to understand its general architecture. As shown in \fig{fig:CSAPongGameArch}, we can broadly describe the structure having two main parts, the ChilliSource engine\footnotemark $ $ and the CSAPong application itself. Further, CSAPong can be defined as having \class{Application Systems}, a \class{Game State}, and the \class{Game State}'s \class{State Systems}.
 
 \footnotetext{Obviously, we know that the entirety of the ChilliSource engine is part of the CSAPong application, but we will include it in our discussion of CSAPong's architecture due to the custom application systems that we created within ChilliSource specifically for CSAPong. }
 
@@ -52,9 +48,9 @@ The \class{CSAPong Application} instance creates all application systems that wi
 \subsection{Application Systems}\label{ssec:game_arch_profiling}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-Although not explicitly part of CSAPong, the \class{Profiling Application Systems} are integral to our studies. They are custom-made application systems that help keep track of engine-specific metrics such as particles per emission, particles actually emitted, particles actually rendered, time spent in \func{ParticleUpdateTask}, time spent in \func{CommitParticleData}, and so forth. The \class{Profiling Application Systems} will be discussed in more detail in \ch{ch:instrumentation}. 
+Although not explicitly part of CSAPong, the \class{Profiling Application Systems} are integral to our studies. They are application systems I created that help keep track of engine-specific metrics such as particles per emission, particles actually emitted, particles actually rendered, time spent in \func{ParticleUpdateTask}, time spent in \func{CommitParticleData}, and so forth. The \class{Profiling Application Systems} are discussed in more detail in \apx{apx:instrumentation}. 
 
-The \class{Particle Effect Component Factory Application System} generates \class{Particle Effect Components} and attaches them to entities. The user can pass it an entity, a csparticle file path, and the number of desired \class{Particle Effect Component(s)} to add, which it uses to add the desired \class{Particle Effect Component(s)} to the entity. This application system is used to generate different kinds of particle effects as CSAPong runs. 
+The \class{Particle Effect Component Factory Application System} generates $ \ $ \class{Particle Effect Components} and attaches them to entities. The user can pass it an entity, a csparticle file path, and the number of desired \class{Particle Effect Component(s)} to add, which it uses to add the desired \class{Particle Effect Component(s)} to the entity. This application system was used to generate different kinds of particle effects as CSAPong ran. 
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Game State}\label{ssec:game_arch_game_state}
@@ -84,37 +80,178 @@ The gameplay can be described as a series of "games" where the ball begins at th
 
 Another variable that can be changed is the number of "games", or the \define{maximum run number}, that will be "played". The game has the ability to change particle effect types during execution, and so the maximum run number is the number of games that are ran \textit{for each} particle effect type that we want to use. For example, if we had 3 different particle effect types and the maximum run number was set to 3, then we would expect to see 9 games played in total.
 
-When the "game" is over, the \class{CSAPong Application} instance destroys the current \class{Game State} and creates a new \class{Game State} with the same kind of particle effect type until it reaches the maximum run number. The application will then either create a new \class{Game State} with the next particle effect type or quit the application if there is not another particle effect type to "play". Once the application has finally quit, a series of files within a timestamped folder will be placed in the application's save data. These files contain the instrumentation information, and we will learn more about them in \ch{ch:instrumentation}. 
-
+When the "game" is over, the \class{CSAPong Application} instance destroys the current \class{Game State} and creates a new \class{Game State} with the same kind of particle effect type until it reaches the maximum run number. The application will then either create a new \class{Game State} with the next particle effect type or quit the application if there is not another particle effect type to "play". Once the application has finally quit, a series of files within a timestamped folder will be placed in the application's save data. These files contain the instrumentation information, and we will learn more about them later on in this chapter. 
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Examples}\label{ssec:game_gameplay_examples}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-Particle effects, as we found in the previous chapter, are considerably complicated and have many changing variables. Although many of these variables were changed during our studies, the different scenarios encountered can be generalized as the following:
-
-\begin{itemize}[nolistsep,topsep=10pt]
-	\item No particles emitting during the game
-	\item A single, giant burst of particles emitting during the game
-	\item A steady stream of particle emissions during the game
-\end{itemize}
-
-The following figures show screenshots of these three different scenarios.
-
-\addfigure{chillisource_automated_game_no_particles}
-{1.0}{A series of screenshots showing the automated game with no particles.}
+\addtopfigure{chillisource_automated_game_no_particles}
+{0.8}{A series of screenshots showing the automated game with no particles.}
 {A series of screenshots showing the automated game with no particles. The screenshots were taken 1 second apart with the ball starting at the beginning of the arena.}
 {fig:CSAPongGameNoParticles}
 
-\addfigure{chillisource_automated_game_particle_burst}
-{1.0}{A series of screenshots showing the automated game with a single, giant burst of particles.}
+\addtopfigure{chillisource_automated_game_particle_burst}
+{0.8}{A series of screenshots showing the automated game with a single, giant burst of particles.}
 {A series of screenshots showing the automated game with a single, giant burst of particles. The screenshots were taken 1 second apart with the ball starting at the beginning of the arena.}
 {fig:CSAPongGameParticleBurst}
 
-\addfigure{chillisource_automated_game_particle_stream}
-{1.0}{A series of screenshots showing the automated game with a steady stream of particle emissions.}
-{A series of screenshots showing the automated game with a steady stream of particle emissions. The screenshots were taken 1 second apart with the ball starting at the beginning of the arena.}
+\addtopfigure{chillisource_automated_game_particle_stream}
+{0.8}{A series of screenshots showing the automated game with multiple bursts of particle emissions.}
+{A series of screenshots showing the automated game with multiple bursts of particle emissions. The screenshots were taken 1 second apart with the ball starting at the beginning of the arena.}
 {fig:CSAPongGameParticleStream}
+
+Particle effects, as we found in the previous chapter, are complicated and have many changing variables that influence their behavior. Although many of these variables were changed during our studies, the different scenarios encountered can be generalized as the following:
+
+\begin{itemize}[nolistsep,topsep=0pt]
+	\item No particles emitting during the game
+	\item A single, giant burst of particles emitting during the game
+	\item Multiple bursts of particle emissions during the game
+\end{itemize}
+ 
+Figures \ref{fig:CSAPongGameNoParticles}, \ref{fig:CSAPongGameParticleBurst}, and \ref{fig:CSAPongGameParticleStream} show screenshots of these three different scenarios. The variables and configurations that drive these three scenarios are complex, (and are explained in fine detail in \apx{apx:instrumentation}), but it is important to understand the three basic variables that define these particle effects:
+
+\begin{itemize}[nolistsep,topsep=0pt]
+
+	\item Particle Min, Max, and Step 
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item These are values that determine the PPE and TMP over the course of a series of games. These help the automated game create particle effects of varying PPE and TMP over time as the series of games run. These variables do not change as the series of games are ran.
+		\end{itemize}
+
+	\item Particles Per Emission (or PPE)
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item The number of particles that will emit from the particle effect during each emission event. This changes as the series of games are ran.
+		\end{itemize}
+
+	\item Total Maximum Particles (or TMP)
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item The pool of particles that the particle effect owns. In more technical terms, this is the size of the \class{Particle Effect Component}'s \var{Particle Array}. This changes as the series of games are ran.
+		\end{itemize}
+
+\end{itemize}
+
+In order to more concretely understand how these variables work, let us consider examples for the single-giant-burst and multiple-burst scenarios\footnotemark. 
+
+\footnotetext{The first scenario's variables are trivial; the PPE, TMP, and particle min/max/step would all be 0.}
+
+The single-giant-burst scenario would always have PPE equal to TMP. In other words, the particle effect emits all of the particles that it has at once. An example of values for the above variables that would apply to this scenario would be:
+
+\begin{itemize}[nolistsep,topsep=0pt]
+
+	\item Particle Min, Max, and Step 
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item Min: 500
+			\item Max: 2000
+			\item Step: 500
+		\end{itemize}
+
+	\item Particles Per Emission
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item First game: 500
+			\item Second game: 1000
+			\item Third game: 1500
+			\item Fourth game: 2000
+		\end{itemize}
+
+	\item Total Maximum Particles
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item First game: 500
+			\item Second game: 1000
+			\item Third game: 1500
+			\item Fourth game: 2000
+		\end{itemize}
+
+\end{itemize}
+
+The multiple-burst scenario would have the PPE be a fraction of the TMP. In other words, the particle effect emits all of its particles over time. If PPE was 10\% of TMP, then the values for the main variables would be:
+
+\begin{itemize}[nolistsep,topsep=0pt]
+
+	\item Particle Min, Max, and Step 
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item Min: 500
+			\item Max: 2000
+			\item Step: 500
+		\end{itemize}
+
+	\item Particles Per Emission
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item First game: 50
+			\item Second game: 100
+			\item Third game: 150
+			\item Fourth game: 200
+		\end{itemize}
+
+	\item Total Maximum Particles
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item First game: 500
+			\item Second game: 1000
+			\item Third game: 1500
+			\item Fourth game: 2000
+		\end{itemize}
+
+\end{itemize}
+
+In addition to keeping track of these variables, information (or metrics) about the \class{Particle Effect Components} are gathered during the game. \var{Particle metrics} describe information such as the number of times every particle was drawn and the number of emissions that was made. \var{Timing metrics}, on the other hand, describe how long different sections of code take. The following is a list of the two important \var{particle metrics} that are most often used in my results:
+
+
+\begin{itemize}[nolistsep,topsep=0pt]
+
+	\item Render ball function calls
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item This describes the number of times that the ball itself was rendered. It serves as a way to gauge how visually smooth (or how many frames are being processed) the game is running.
+		\end{itemize}
+
+	\item Particles actually rendered
+		\begin{itemize}[nolistsep,topsep=0pt]
+			\item This shows how many times every single particle across all particle effects are rendered. This also serves as a way to gauge how visually smooth the game is running.
+		\end{itemize}
+
+\end{itemize}
+
+A higher value for both \var{render ball function calls} and \var{particles actually rendered} indicate better performance. This is because, when more particles are rendered or the ball is rendered more often, the game appears to run more smoothly. Or, in other words, the "frames per second" improves. 
+
+It is unnecessary to know more than the above metrics and variables to understand the results of this thesis, but \apx{apx:instrumentation} provides much more detail for those who are motivated to learn more.
+
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+% Initial Results
+% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+\section{Initial Results}\label{sec:game_initial_results}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+	\addsubfigure{instrumentation_initial_results_visual_studio_call_tree_sorted_filtered}
+	{1.0}{0.9}
+	{A Visual Studio call tree sourced from the games based on the metadata in \fig{fig:InitialResultsMetrics}.}
+	{A Visual Studio call tree sourced from the games based on the metadata in \fig{fig:InitialResultsMetrics}. The function call tree level is $ \geq 8 $, the function names begin with "ChilliSource::", the inclusive samples \% are $ \geq 6\% $, and it is sorted by the inclusive samples \% in descending order. These parameters were used to ensure that the results were low-level ChilliSource function calls with a high inclusive sample percent. The functions with the most inclusive samples are either related to rendering or updating particles.}
+	{fig:InitialResultsVisualStudioCallTreeSorted}
+
+	\addsubfigure{instrumentation_initial_results_metadata}
+	{0.4}{1.0}
+	{Metadata of a series of games that demonstrated contention in \func{CommitParticleData}.}
+	{Metadata of a series of games that demonstrated contention in \func{CommitParticleData}. The important part to understand here is that these games are similar to the scenario in which there are a single, giant burst of particles. In other words, the particle effect emits all of the particles that it has at once. We also know that it only performs this for 10,000 particles since the \var{min particles} and \var{max particles} values are the same.}
+	{fig:InitialResultsMetrics}
+	%
+	\addsubfigure{instrumentation_initial_results_timing}
+	{0.6}{1.0}
+	{Timing output based on the metadata in \fig{fig:InitialResultsMetrics}.}
+	{Timing output based on the metadata in \fig{fig:InitialResultsMetrics}. The important timing sections to focus on are \idefine{ParticleUpdateTask CommitParticleData} and \idefine{ParticleUpdateTask CommitParticleData Lock}. The former shows 31.55 seconds, and the latter shows 29.39 seconds. This tells us that the \func{CommitParticleData} function spent about 29 of its 32 seconds waiting for a lock to release.}
+	{fig:InitialResultsTiming}
+\end{figure}
+
+A variety of these automated games were run and their outputs were examined on Windows, iOS, and Android platforms. This was done in an effort to find an area within the \class{Particle Effect Component} class that needed optimization. In the beginning of these studies, the only available datasets were from the \class{Metrics System} and the Visual Studio CPU sampling profiles, as the timing instrumentation was still not complete (see \apx{apx:instrumentation} for more information). It was observed that a particular automated game in which the \idefine{total maximum particles} and \idefine{particles per emission} values were the same\footnotemark $ $ caused the game to visually lag, or skip frames. Armed with only the metrics information and CPU sampling (see \fig{fig:InitialResultsVisualStudioCallTreeSorted}), all that was known was that the following \class{Particle Effect Component} methods had a considerable number of samples:
+
+\footnotetext{Specifically, \idefine{total maximum particles} and \idefine{particles per emission} were 10,000 in Figures \ref{fig:InitialResultsVisualStudioCallTreeSorted}, \ref{fig:InitialResultsMetrics}, and \ref{fig:InitialResultsTiming}.}
+
+\begin{itemize}[nolistsep,topsep=0pt]
+	\item \func{ParticleDrawable::DrawParticles}
+	\item \func{ParticleUpdateTask}
+	\item \func{ParticleAffector::AffectParticles}
+\end{itemize}
+
+Given that these three methods were run repeatedly throughout the games, these results were unsurprising. At the time, it was tempting to pursue \func{ParticleUpdateTask} since it iterated over the entire particle array multiple times. I thought that, perhaps, creating a cache-friendly data structure that kept track of active particles would be a good initial optimization. However, as it shows in \fig{fig:InitialResultsTiming}, the functions that iterate over all of the particles were only taking $ (1.0 + 1.7 + 12.0 + 0.6)/48.4 \approx 32\% $ of \func{ParticleUpdateTask}'s time. The \func{CommitParticleData} function, on the other hand, was taking $ 31.5 / 48.4 \approx 65\% $ of \func{ParticleUpdateTask}'s time, and 29.4 of those 31.5 seconds were spent waiting for a lock to release. Thus, it is clear that, in this case, \func{ParticleUpdateTask}'s bottleneck was \func{CommitParticleData}. 
+
+These initial results not only demonstrated a possible place to optimize, but it also reinforced the importance of backing up possible optimizations with data in order to avoid optimizing into a vacuum. Without the timing data, I could have easily gone forward with optimizing particle iteration instead of focusing on the contention in \func{CommitParticleData}, and that would have been a waste of time.
 
 % ================================================================================================================================
 % End of Pong Game

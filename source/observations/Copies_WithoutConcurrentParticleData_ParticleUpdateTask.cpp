@@ -6,7 +6,7 @@ ParticleEffectComponent::OnUpdate()
   // Schedule a task to update the particle in the background
   ApplicationTaskScheduler.ScheduleTask
   ({
-    // Lock the mutex for the whole task
+    // NEW -> Lock the mutex for the whole task
     using lock(this.mutex)
     {
       ParticleUpdateTask(copiedAtts);
@@ -32,10 +32,12 @@ ParticleUpdateTask(copiedAtts)
   // Try to emit
   newParticleIndices = copiedAtts.particleEmitter.EmitParticles();
   
-  // Append the new indices to the member new indices array
+  // NEW -> Append the new indices to the member new indices array
+  // (instead of passing it to CommitParticleData)
   copiedAtts.newParticleIndices.append( newParticleIndices.copy() );
   
-  // Update member bounding shapes; lock the bounding shapes mutex
+  // NEW -> Update member bounding shapes; lock the bounding shapes mutex
+  // (instead of passing it to CommitParticleData)
   using lock(copiedAtts.boundingMutex)
   {
     copiedAtts.AABB, copiedAtts.Sphere = CalculateBoundingShapes();

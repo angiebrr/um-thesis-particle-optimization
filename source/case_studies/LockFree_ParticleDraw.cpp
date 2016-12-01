@@ -1,6 +1,6 @@
 Drawable::Draw(camera)
 {
-  // Lock the concurrent particle data object
+  // NEW -> Lock the concurrent particle data object only for new indices
   this.concurrentParticleData.Lock();
 
   // Activate the newly emitted particles in the static billboard  
@@ -9,7 +9,7 @@ Drawable::Draw(camera)
     ActivateParticleInBillboard(particleIndex);
   }
 
-  // Unlock the concurrent particle data object
+  // NEW -> Unlock the concurrent particle data object only for new indices
   this.concurrentParticleData.Unlock();
 
   // Iterate through all of the particles and draw each one
@@ -21,11 +21,11 @@ StaticBillboardDrawable::DrawParticles(particleArray, camera)
   // Copy over all particles to the member particle array
   for(i = 0 to particleArray.size())
   {
-    // Retrieve the particle, but we don't have ownership of it yet
+    // NEW -> Retrieve the particle, but we don't have ownership of it yet
     currentParticle = particleArray[i];
     gotOwnershipOfParticle = false;
 
-    // Keep spinning if *isContended* is true.
+    // NEW -> Keep spinning if *isContended* is true.
     // Set it to true once it is false.
     while(gotOwnershipOfParticle is false)
     {
@@ -39,7 +39,7 @@ StaticBillboardDrawable::DrawParticles(particleArray, camera)
       Render(currentParticle);
     }
 
-    // Release the particle
+    // NEW -> Release the particle
     currentParticle.isContended = false;
   }
 }

@@ -1,42 +1,42 @@
 % !TEX root = .\Thesis.tex
 
 % ================================================================================================================================
-% Beginning of Instrumentation
+% Beginning of Instrumentation Appendix
 % ================================================================================================================================
-
-\chapter{INSTRUMENTATION}\label{ch:instrumentation}
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Overview
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Overview}\label{sec:instr_overview}
 
-Different parts of the engine were instrumented in order to numerically quantity what occurs during CSAPong games. Various metrics (e.g. particles actually emitted) were examined, and various sections of code were timed. These two use cases were separated into two application systems that resided within the engine itself, the \class{Metrics} and \class{Timing} systems. As mentioned before, these systems will save a series of files containing the gathered information into a timestamped folder within CSAPong's save data file system. These files fueled the direction of these studies due to their ability to answer questions about the engine such as "What function in \class{Particle Effect Component} takes the longest to run?""
+Different parts of the engine were instrumented in order to numerically quantity what occurs during CSAPong games. Various metrics (e.g. particles actually emitted) were examined, and various sections of code were timed. These two use cases were separated into two application systems that I created that resided within the engine itself, the \class{Metrics} and \class{Timing} systems. As mentioned before, these systems will save a series of files containing the gathered information into a timestamped folder within CSAPong's save data file system. These files fueled the direction of these studies due to their ability to answer questions about the engine such as "What function in \class{Particle Effect Component} takes the longest to run?"
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Metrics System
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Metrics System}\label{sec:instr_metrics_system}
 
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Metadata}\label{ssec:instr_metrics_system_metadata}
+% ----------------------------------------------------------------------------------------------------------------------------
 
 \begin{figure}
 \addtocounter{figure}{-1}
 	\addsubfigure{instrumentation_metrics_system_metadata_example}
 	{0.5}{1.0}
 	{An example of metadata output by the \class{Metrics System}.}
-	{An example of metadata output by the \class{Metrics System}.}
+	{An example of metadata output by the \class{Metrics System}. The important part to understand here is that these games are fall under the multiple-burst scenario. In other words, the particle effect emits its particles over time. As \fig{fig:MetricsSystemMetadataGameExample} illustrates, the particles per emission (PPE) is always 10\% of the effect's total maximum particles (TMP) because the step values (PPE step is 50, TMP step is 500) are what dictates the amount is added to PPE and TMP for each game as time goes on.}
 	{fig:MetricsSystemMetadataExample}
 	%
 	\addsubfigure{instrumentation_metrics_system_metadata_game_example}
 	{0.5}{1.0}
 	{An example of the changing particle values during games in CSAPong.}
-	{An example of the changing particle values during games in CSAPong.}
+	{An example of the changing particle values during games in CSAPong. This shows a series of games that fall under the multiple-burst scenario with a min/max/step of 500/2000/500 and with particles per emission (PPE) emitting 10\% of the effect's total maximum particles (TMP).}
 	{fig:MetricsSystemMetadataGameExample}
 \end{figure}
 
 
-Although not structurally complicated, the \class{Metrics System} keeps track of a great deal of primitives that describe the series of games ran by CSAPong. The following is a list of the tracked primitives that remained constant throughout the games:
+Although not structurally complicated, the \class{Metrics System} keeps track of a great deal of primitives that describe the series of games run by CSAPong. The following is a list of the tracked primitives that remained constant throughout the games:
 
 \begin{singlespace}
 
@@ -58,7 +58,7 @@ Although not structurally complicated, the \class{Metrics System} keeps track of
 			\item Whether or not \idefine{total maximum particles} is changing across different particle effect types.
 		\end{itemize}
 
-		\item \define{Total maximum particles}
+		\item \define{Total maximum particles} (or TMP)
 		\begin{itemize}[nolistsep,topsep=0pt]
 			\item If \idefine{is total maximum particles changing} is false, then this will be the constant value of \idefine{total maximum particles} across particle effect types.
 		\end{itemize}
@@ -68,7 +68,7 @@ Although not structurally complicated, the \class{Metrics System} keeps track of
 			\item Whether or not \idefine{particles per emission} is changing across different particle effect types.
 		\end{itemize}
 
-		\item \define{Particles per emission}
+		\item \define{Particles per emission} (or PPE)
 		\begin{itemize}[nolistsep,topsep=0pt]
 			\item If \idefine{is particles per emission changing} is false, then this will be the constant value of \idefine{particles per emission} across particle effect types.
 		\end{itemize}
@@ -112,12 +112,17 @@ Although not structurally complicated, the \class{Metrics System} keeps track of
 
 \end{singlespace}
 
-\fig{fig:MetricsSystemMetadataExample} can be examined in order to make the distinction clear between the different particle variables. The \idefine{minimum particles} is 500, the \idefine{maximum particles} is 2000, and the \idefine{particles step} is 500. This tells us right away that there will be $ 2000 / 500 = 4 $ kinds of particle effects that will be created and played\footnotemark. This will be true regardless of the other variables' values. From the figure, we also know that \idefine{particles per emission} and \idefine{total maximum particles} are changing across particle effects and they will not be constant values. Thus, their "step" values will tell us how much each variable will be added to as the game advances. We can also see that the \idefine{total maximum particles step} is 500, or 100\% of the \idefine{particles step}, and the \idefine{particles per emission step} is 50, or 10\% of the \idefine{particles step}. \fig{fig:MetricsSystemMetadataGameExample} shows how all of these particle variables change as CSAPong executes. Note that, since there are 4 different kinds of particle effects and 2 \idefine{total number of runs}, CSAPong would play a total of $ 4 \times 2 = 8 $ times in this example.
+\fig{fig:MetricsSystemMetadataExample} can be examined in order to make the distinction clear between the different particle variables. The \idefine{minimum particles} is 500, the \idefine{maximum particles} is 2000, and the \idefine{particles step} is 500. This tells us right away that there will be $ 2000 / 500 = 4 $ particle definition files that will be created and played\footnotemark. Note that this is similar to the example shown near the end of \ch{ch:csapong_game} which also had a min/max/step of 500/2000/500.
+
+From the figure, we also know that \idefine{particles per emission} and \idefine{total maximum particles} are changing over time and they will not be constant values. Thus, their "step" values will tell us how much each variable (i.e. total maximum particles and particles per emission) will be added to as the game advances. We can also see that the \idefine{total maximum particles step} is 500, or 100\% of the \idefine{particles step}, and the \idefine{particles per emission step} is 50, or 10\% of the \idefine{particles step}. This is the same as the example variable blues given for the multiple-burst scenario in \ch{ch:csapong_game}.
+
+\fig{fig:MetricsSystemMetadataGameExample} shows how all of these particle variables change as CSAPong executes. Note that, since there are 4 different kinds of particle effects and 2 \idefine{total number of runs}, CSAPong would play a total of $ 4 \times 2 = 8 $ times in this example.
 
 \footnotetext{Note that we do not subtract 500 from 2000 since the range is inclusive.}
 
-
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Metrics}\label{ssec:instr_metrics_system_metrics}
+% ----------------------------------------------------------------------------------------------------------------------------
 
 \addbottomfigure{instrumentation_metrics_system_metrics_example}
 {1.0}
@@ -162,7 +167,9 @@ The \class{Metrics System} keeps track of three engine metrics, but it also mana
 
 \end{singlespace}
 
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Particle Effect Definition}\label{ssec:instr_metrics_pe_definition}
+% ----------------------------------------------------------------------------------------------------------------------------
 
 As mentioned in \ch{ch:background}, \class{Particle Effects} that are passed into \class{Particle Effect Components} cannot be created programmatically. They must be created with JSON particle definition files. If tens or hundreds of particle effects needed to be created, then just as many particle definition files would have to be made. This is clearly something that should be done by hand, and so a script, \func{generate\_particles.py}, was created to automate this process. An example invocation of this script is shown in \clis{code:InvokeGenerateParticles}, and that invocation will generate the particle definition files shown in \fig{fig:GenerateParticleFilesListing}. Note that these generated particle effects are the same ones that were used in \fig{fig:MetricsSystemMetadataExample}.
 
@@ -170,11 +177,11 @@ As mentioned in \ch{ch:background}, \class{Particle Effects} that are passed int
 {0.8}{Shows the parameters that the \func{generate\_particles.py} script can use.}
 {Shows the parameters that the \func{generate\_particles.py} script can use.}
 {fig:GenerateParticleFilesScript}
-\vspace{-1.0cm}
+
 \framecode{bash}{metrics}{generate_particles.sh}
 {code:InvokeGenerateParticles}
 {An example invocation of the generate particles script.}
-\vspace{-1.0cm}
+\vspace{-2.0cm}
 \addfigure{instrumentation_generate_particles_files}
 {1.0}
 {Shows the particle files that were generated by an invocation like in \clis{code:InvokeGenerateParticles}.}
@@ -187,37 +194,49 @@ As mentioned in \ch{ch:background}, \class{Particle Effects} that are passed int
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Timing System}\label{sec:instr_timing_system}
 
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Visual Studio}\label{ssec:instr_timing_system_vs}
+% ----------------------------------------------------------------------------------------------------------------------------
 
 \begin{figure}
 \addtocounter{figure}{-1}
 	\addsubfigure{instrumentation_visual_studio_call_tree}
 	{1.0}{1.0}
 	{Shows an example of Visual Studio's generated call tree for CPU instrumentation when ran using the metadata from \fig{fig:MetricsSystemMetadataExample}.}
-	{Shows an example of Visual Studio's generated call tree for CPU instrumentation when ran using the metadata from \fig{fig:MetricsSystemMetadataExample}.}
+	{Shows an example of Visual Studio's generated call tree for CPU instrumentation when ran using the metadata from \fig{fig:MetricsSystemMetadataExample}. This call tree in particular shows the "hot path" of execution, or the path that leads to the "function leaf" with the highest exclusive samples \%. In this instance, the function calls that led to \func{ParticleDrawable::DrawParticles} was the "hot path" of execution.}
 	{fig:VisualStudioCallTree}
 
 	\addsubfigure{instrumentation_visual_studio_call_tree_sorted_filtered}
 	{1.0}{1.0}
 	{Shows the same call tree from \fig{fig:VisualStudioCallTree}, but sorted and filtered.}
-	{Shows the same call tree from \fig{fig:VisualStudioCallTree}, but sorted and filtered. The level is $ \geq 8 $, the function name begins with "ChilliSource::", the inclusive samples \% is $ \geq 6\% $, and it is sorted by the inclusive samples \% in descending order. These parameters were used to ensure that the results were low-level ChilliSource function calls with a high inclusive sample percent.}
+	{Shows the same call tree from \fig{fig:VisualStudioCallTree}, but sorted and filtered. The function call tree level is $ \geq 8 $, the function names begin with "ChilliSource::", the inclusive samples \% is $ \geq 6\% $, and it is sorted by the inclusive samples \% in descending order. These parameters were used to ensure that the results were low-level ChilliSource function calls with a high inclusive sample percent. The functions with the most inclusive samples are either related to rendering or updating particles.}
 	{fig:VisualStudioCallTreeSorted}
 \end{figure}
 
 ChilliSource generates a Visual Studio solution file for the developer to use when a project is created, and so Visual Studio was utilized as an IDE during development on a Windows machine. Visual Studio boasts a wide array of profiling tools which include (but is certainly not limited to) CPU sampling and function instrumentation. The CPU sampling was considerably helpful during the initial stages of these studies. The inclusive (includes samples from all functions calls within it) and exclusive (only includes samples from itself) sampling pointed out hot spots within the \class{Particle Effect Component} to investigate. The call trees that the sampling produced (see figures \fig{fig:VisualStudioCallTree} and \fig{fig:VisualStudioCallTreeSorted}) also assisted in understanding how the engine worked. Although all of this information is helpful, the CPU sampling does not provide concrete times. The function instrumentation that Visual Studio provided should have filled that gap, but it was not used simply because it did not reliably and smoothly work. It would slow down the game considerably during execution, and then would take a great deal of time to process after execution. Even if it did work, it did not have the flexibility to instrument custom sections, and it also could not be used to instrument the game on other platforms such as iOS or Android.
 
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Shiny}\label{ssec:instr_timing_system_shiny}
+% ----------------------------------------------------------------------------------------------------------------------------
 
-Seeking a way to instrument functions and custom blocks of code across all platforms, a third party library called Shiny was used. Shiny is an older C/C++/Lua intrusive profiler created by Aidin Abedi with "very very low overhead" \cite{AbediShinyProfiler}. It allowed the user to insert macros within functions and code blocks, and it outputted a call tree very similar to Visual Studio's with how much time the named code blocks and function calls took. Although Shiny's creator asserted that Shiny is "amazingly simple to use and flexible", it took about a week to integrate Shiny within CSAPong and ChilliSource in such a way that it worked on Windows, iOS, and Android. The majority of the encountered problems had more to do with compilation errors and flags, however, than the usage of Shiny's API. The API of Shiny was actually simple and flexible to use, as shown in \clis{code:ParticleUpdateShiny}. Regrettably, Shiny had two major flaws. First, it did not reliably run if the program was multi-threaded (and ChilliSource is multi-threaded). Second, the output was not easily parsed since it was not separated by delimiters, and parsable output was required to quickly format, collate, and examine results during this thesis.
+Seeking a way to instrument functions and custom blocks of code across all platforms, a third party library called Shiny was used. Shiny is an older C/C++/Lua intrusive profiler created by Aidin Abedi with "very very low overhead" \cite{AbediShinyProfiler}. It allows the user to insert macros within functions and code blocks, and it outputs a call tree very similar to Visual Studio's with the time used by the named code blocks and function calls. Although Shiny's creator asserted that Shiny is "amazingly simple to use and flexible", it took about a week to integrate Shiny within CSAPong and ChilliSource in such a way that it worked on Windows, iOS, and Android. The majority of the encountered problems had more to do with compilation errors and flags, however, than the usage of Shiny's API. The API of Shiny is actually simple and flexible to use, as shown in \clis{code:ParticleUpdateShiny}. Regrettably, Shiny has two major flaws. First, it does not reliably run if the program is multi-threaded (and ChilliSource is multi-threaded). Second, the output is not easily parsed since it is not separated by delimiters, and parsable output was required to quickly format, collate, and examine results during this thesis.
 
 \framecode{C++}{metrics}{ParticleUpdateShiny.cpp}
 {code:ParticleUpdateShiny}
 {Using the pseudocode from \clis{code:ParticleUpdate}, this shows how \class{Shiny} could be used to instrument \func{ParticleUpdateTask}. }
 
 \vspace{-0.5cm}
+% ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Timing Application System}\label{ssec:instr_timing_system_custom}
+% ----------------------------------------------------------------------------------------------------------------------------
 
-The \class{Timing System} was borne from dissatisfaction with the Visual Studio and Shiny function profilers. This system reliably instrumented the multi-threaded engine across all platforms and returned results that were easily parsed. It used the built-in \class{Performance Timer} along with its own \func{StartTimer} and \func{StopTimer} static methods in order to time code blocks in a similar fashion to Shiny, as shown in \clis{code:ParticleUpdateTimingSystem}. To achieve this, it used three hash tables\footnotemark $ $ with the following key-value pairs:
+\addtopfigure{instrumentation_timing_system_timing_exampe_no_inner}
+{0.6}
+{An example of timing output by the \class{Timing System} with just the \func{ParticleUpdateTask} and the \idefine{Particle Iteration} times.}
+{An example of timing output by the \class{Timing System} with just the \func{ParticleUpdateTask} and the \idefine{Particle Iteration} times.}
+{fig:TimingSystemTimingExampleNoInner}
+
+I developed the \class{Timing System} due to from dissatisfaction with the Visual Studio and Shiny function profilers. This system reliably instruments the multi-threaded engine across all platforms and returns results that are easily parsed. It uses the built-in \class{Performance Timer} from ChilliSource along with its own \func{StartTimer} and \func{StopTimer} static methods in order to time code blocks in a similar fashion to Shiny, as shown in \clis{code:ParticleUpdateTimingSystem}. To achieve this, it uses three hash tables\footnotemark $ $ with the following key-value pairs:
 
 \footnotetext{In C++ 11, the closest thing to a hash table is an unordered map from the std namespace.}
 
@@ -248,23 +267,6 @@ The \class{Timing System} was borne from dissatisfaction with the Visual Studio 
 
 \end{singlespace}
 
-\begin{figure}[t]
-\addtocounter{figure}{-1}
-	\addsubfigure{instrumentation_timing_system_timing_example}
-	{0.52}{1.0}
-	{An example of timing output by the \class{Timing System} based on the metadata from \fig{fig:MetricsSystemMetadataExample}.}
-	{An example of timing output by the \class{Timing System} based on the metadata from \fig{fig:MetricsSystemMetadataExample}.}
-	{fig:TimingSystemTimingExample}
-	%
-	\addsubfigure{instrumentation_timing_system_timing_exampe_no_inner}
-	{0.52}{1.0}
-	{The same example as \fig{fig:TimingSystemTimingExample}, but this series of games did not have the inner loop timed.}
-	{The same example as \fig{fig:TimingSystemTimingExample}, but this series of games did not have the inner loop timed.}
-	{fig:TimingSystemTimingExampleNoInner}
-\end{figure}
-
-Although the \class{Timing System} did satisfy my needs, it was not as efficient as Shiny. Figures \ref{fig:TimingSystemTimingExample} and \ref{fig:TimingSystemTimingExampleNoInner} show the amount of overhead that timing the inner particle iteration loop takes. This is most likely due to the creation and deletion of a timer for every \func{StartTimer} and \func{StopTimer} function call. However, this trade-off did not negatively impact this thesis' results; the timing outputs that were generated all share the same overhead from the timing system, and thus the outputs were able to be compared fairly.
-
 \framecode{C++}{metrics}{ParticleUpdateTimingSystem.cpp}
 {code:ParticleUpdateTimingSystem}
 {Using the pseudocode from \clis{code:ParticleUpdate}, this shows how our custom \class{Timing System} could be used to instrument \func{ParticleUpdateTask}. }
@@ -279,56 +281,9 @@ From the examples that were shown above, it can be observed that the system outp
 
 At first, the metadata was stored all within the titles of the CSV (e.g. metrics\_maxRunNum = 5\_particle-effects = 1 ... [timestamp].csv). This worked well when there were only a couple of metadata values, but, as shown earlier in this chapter, there are now a great deal of metadata values. Predictably, the titles of the CSVs eventually became so unruly that Windows refused to open the files because the "file path was too long". This problem was solved by first bundling the metrics and timing CSVs into one timestamped directory, and then outputting another CSV file exclusively for metadata in that same directory. 
 
-Although the metadata problem was solved, bundles of CSVs were not a particularly tidy approach when it came to distribution. However, any other method of outputting the data in C++ would be far too complicated and out of scope for the purposes of our studies. Outputting the data in another format using python, however, would not be as complex. A python script was created to import the three bundled CSVs into what is called an HDF5 file. HDF5, i.e. Hierarchical Data Format 5, is "a unique open source technology suite for managing data collections of all sizes and complexity,"\cite{HDFGroupHDF5Introduction}, but it was truly designed to support large, complex datasets that could be used on every size and type of system. HDF5 is hierarchical, high-performance, portable, can be used in numerous languages, and it is self-describing. Admittedly, HDF5 may be overkill for my tens of CSVs, but its ability to efficiently bundle all of the output files with metadata built right in is still incredibly useful.
-
-\addfigure{instrumentation_hdf5_example}
-{0.7}
-{An example of an HDF5 file containing sample metrics, timing, and metadata information. }
-{An example of an HDF5 file containing sample metrics, timing, and metadata information.}
-{fig:HDF5OutputExample}
-
-% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-% Initial Results
-% ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-\section{Initial Results}\label{sec:instr_initial_results}
-
-\begin{figure}
-\addtocounter{figure}{-1}
-	\addsubfigure{instrumentation_initial_results_visual_studio_call_tree_sorted_filtered}
-	{1.0}{0.9}
-	{A Visual Studio call tree sorted in the same way as \fig{fig:VisualStudioCallTreeSorted}, but from the games based on the metadata in \fig{fig:InitialResultsMetrics}.}
-	{A Visual Studio call tree sorted in the same way as \fig{fig:VisualStudioCallTreeSorted}, but from the games based on the metadata in \fig{fig:InitialResultsMetrics}.}
-	{fig:InitialResultsVisualStudioCallTreeSorted}
-
-	\addsubfigure{instrumentation_initial_results_metadata}
-	{0.4}{1.0}
-	{Metadata of a series of games that demonstrated contention in \func{CommitParticleData}.}
-	{Metadata of a series of games that demonstrated contention in \func{CommitParticleData}.}
-	{fig:InitialResultsMetrics}
-	%
-	\addsubfigure{instrumentation_initial_results_timing}
-	{0.6}{1.0}
-	{Timing output based on the metadata in \fig{fig:InitialResultsMetrics}.}
-	{Timing output based on the metadata in \fig{fig:InitialResultsMetrics}.}
-	{fig:InitialResultsTiming}
-\end{figure}
-
-A variety of automated games were ran and their outputs were examined on Windows, iOS, and Android platforms. This was done in an effort to find an area within the \class{Particle Effect Component} class that needed optimization. In the beginning of these studies, the only available datasets were from the \class{Metrics System} and the Visual Studio CPU sampling profiles, as the timing instrumentation was still not complete. It was observed that a particular automated game in which the \idefine{total maximum particles} and \idefine{particles per emission} values were the same\footnotemark $ $ caused the game to visually lag, or "skip frames". Armed with only the metrics information and CPU sampling (see \fig{fig:InitialResultsVisualStudioCallTreeSorted}), all that was known was that the following \class{Particle Effect Component} methods had a considerable number of samples:
-
-\footnotetext{Specifically, \idefine{total maximum particles} and \idefine{particles per emission} were 10,000 in Figures \ref{fig:InitialResultsVisualStudioCallTreeSorted}, \ref{fig:InitialResultsMetrics}, and \ref{fig:InitialResultsTiming}.}
-
-\begin{itemize}[nolistsep,topsep=0pt]
-	\item \func{ParticleDrawable::DrawParticles}
-	\item \func{ParticleUpdateTask}
-	\item \func{ParticleAffector::AffectParticles}
-\end{itemize}
-
-Given that these three methods were ran repeatedly throughout the games, these results were unsurprising. At the time, it was tempting to pursue \func{ParticleUpdateTask} since it iterated over the entire particle array multiple times. I thought that, perhaps, creating a cache-friendly data structure that kept track of active particles would be a good initial optimization. However, as it shows in \fig{fig:InitialResultsTiming}, the functions that iterate over all of the particles were only taking $ (1.0 + 1.7 + 12.0 + 0.6)/48.4 \approx 32\% $ of \func{ParticleUpdateTask}'s time. The \func{CommitParticleData} function, on the other hand, was taking $ 31.5 / 48.4 \approx 65\% $ of \func{ParticleUpdateTask}'s time, and 29.4 of those 31.5 seconds were spent waiting for a lock to release. Thus, it is clear that, in this case, \func{ParticleUpdateTask}'s bottleneck was \func{CommitParticleData}. 
-
-These initial results not only demonstrated a possible place to optimize, but it also reinforced the importance of backing up possible optimizations with data in order to avoid optimizing into a vacuum. Without the timing data, I could have easily gone forward with optimizing particle iteration instead of focusing on the contention in \func{CommitParticleData}, and that would have been a waste of time.
+Although the metadata problem was solved, bundles of CSVs were not a particularly tidy approach when it came to distribution. However, any other method of outputting the data in C++ would be far too complicated and out of scope for the purposes of our studies. Outputting the data in another format using python, however, would not be as complex. I created a python script to import the three bundled CSVs into an HDF5 file. HDF5, i.e. Hierarchical Data Format 5, is "a unique open source technology suite for managing data collections of all sizes and complexity,"\cite{HDFGroupHDF5Introduction}, designed to support large, complex datasets that could be used on every size and type of system. HDF5 is hierarchical, high-performance, portable, can be used in numerous languages, and it is self-describing. Admittedly, HDF5 may be overkill for my tens of CSVs, but its ability to efficiently bundle all of the output files with metadata built right in is still useful.
 
 
 % ================================================================================================================================
-% End of Instrumentation
+% End of Instrumentation Appendix
 % ================================================================================================================================
-

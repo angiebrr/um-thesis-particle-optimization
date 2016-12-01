@@ -2,7 +2,7 @@ ConcurrentParticleData::CommitParticleData(particleArray,
                                            newParticleIndicesArray, 
                                            AABB, Sphere)
 {
-  // Lock the particles mutex
+  // NEW -> Lock the particles mutex
   using lock(this.particlesMutex)
   {
     // Copy over all particles to the member particle array
@@ -12,14 +12,14 @@ ConcurrentParticleData::CommitParticleData(particleArray,
     }
   }
   
-  // Lock the new particle indices mutex
+  // NEW -> Lock the new particle indices mutex
   using lock(this.newParticleIndicesMutex)
   {  
     // Append the new indices to the member new indices array
     this.newParticleIndices.append( newParticleIndices.copy() );
   }
   
-  // Lock the normal (non-data structure) mutex
+  // NEW -> Lock the normal (non-data structure) mutex
   using lock(this.normalMutex)
   {  
     // Copy the bounding information to the member variables

@@ -14,18 +14,20 @@
 \addbottomfigure{case-studies_counting-contention}
 {0.8}
 {The results of "counting the contention" between the background and main threads in \class{Concurrent Particle Data}.}
-{The results of "counting the contention" between the background and main threads in \class{Concurrent Particle Data}.}
+{The results of "counting the contention" between the background and main threads in \class{Concurrent Particle Data}. This data shows that the updating thread in \func{CommitParticleData} is waiting for the drawing thread to release the locked resource. The majority of these functions are either accessors/mutators or the \func{CommitParticleData} function itself, but the roles of the \func{Lock} and \func{Unlock} functions are a little enigmatic. \class{Concurrent Particle Data} only has a single mutex that is used between the drawing and updating threads and, since the drawing thread does not have direct access to \class{Concurrent Particle Data}'s mutex, the \func{Lock} and \func{Unlock} functions are there to lock and unlock the mutex in question.}
 {fig:CountingContention}
 
-From the initial results in the previous chapter, it was found that \func{CommitParticleData} experienced a great deal of contention. \fig{fig:InitialResultsTiming} showed that, of the 31.5 seconds that \func{CommitParticleData} took, 29.4 seconds was spent waiting for a lock to release. It can be inferred, then, that it only needed about 2 seconds to do any meaningful work and, if this contention could be reduced, then that function could be drastically sped up. The first step in reducing this contention, however, was knowing for certain what was making the background thread in \func{CommitParticleData} wait. 
+From the initial results in the previous chapter, it was found that \func{CommitParticleData} experienced a great deal of contention. \fig{fig:InitialResultsTiming} showed that, of the 31.5 seconds that \func{CommitParticleData} took, 29.4 seconds was spent waiting for a lock to release. It can be inferred, then, that it only needed about 2 seconds to do any meaningful work and, if this contention could be reduced, then that function could be drastically sped up. 
 
-The simplest way to ascertain what was causing the contention was to do some counting. In \class{Concurrent Particle Data}, an atomic \var{thread counter} was used to keep track of how many threads were contending for resources. This \var{thread counter} was incremented right before a thread attempted to gain access to a lock, and it was decremented right before it relinquished access to that lock. The \func{IncrementCounter} and \func{DecrementCounter} methods printed a message when the thread counter was greater than one. During incrementation, a \var{thread counter} that was greater than one meant that the current thread was waiting to retrieve the lock. During decrementation, a \var{thread counter} that was greater than one meant that another thread was waiting for the current thread to release the lock. Since only one background thread was scheduled, we know that the \var{thread counter} should never be greater than two.
+The unexpected results of the following studies demonstrated the differences between managing contention for a single, large data structure and for many pieces or "shards" of a fragmented data structure. The former was likely to have contention if there was writing involved between two threads, and a solution that utilized "lock free" atomic read-modify-write operations could significantly reduce contention. The latter, however, was unlikely to have contention between two threads, and so the developer could get away with naively using mutexes to synchronize their data. 
+
+The first step in reducing this contention for these case studies was knowing for certain what was making the background thread in \func{CommitParticleData} wait. The simplest way to ascertain what was causing the contention was to do some counting. In \class{Concurrent Particle Data}, an atomic \var{thread counter} was used to keep track of how many threads were contending for resources. This \var{thread counter} was incremented right before a thread attempted to gain access to a lock, and it was decremented right before it relinquished access to that lock. The \func{IncrementCounter} and \func{DecrementCounter} methods printed a message when the thread counter was greater than one. During incrementation, a \var{thread counter} that was greater than one meant that the current thread was waiting to retrieve the lock. During decrementation, a \var{thread counter} that was greater than one meant that another thread was waiting for the current thread to release the lock. Since only one background thread was scheduled, we know that the \var{thread counter} should never be greater than two.
 
 This "contention counting" was done using the same metadata from \fig{fig:InitialResultsMetrics} in my initial results, and the data collected can be found in \fig{fig:CountingContention}. The functions in which either the background or main threads waited for a lock to release were \func{StartUpdate}\footnotemark $ $ (301 times), \func{Lock} (1 time), and \func{CommitParticleData} (521 times). The functions in which the background or main thread had the other thread waiting for a lock to release were \func{Unlock} (521 times) and \func{CommitParticleData} (302 times). These results illustrated that \func{StartUpdate} and \func{Lock} were waiting on \func{CommitParticleData} since $ 301 + 1 = 302 $, and that \func{CommitParticleData} was waiting on \func{Unlock} since their counts were both 521.
 
 \footnotetext{Although not a part of the pseudocode provided for the \func{ParticleEffectComponent::OnUpdate} method in earlier chapters, this simple function merely lets the caller know whether or not particle data has been committed since the last time it was called.}
 
-With these results in mind, recall from \sect{ssec:cs_pec_lifecycle} that the \func{Lock} function was used by the \class{Particle Drawable} when drawing particles in order to lock \func{ConcurrentParticleData} and secure access to the particle array. From my study of the system, it was known from that the \class{Particle Drawable} was the only one who used this \func{Lock} function, and so exactly where and how the contention was taking place was now known. It is also known that the \class{Particle Drawable} read information from \class{Concurrent Particle Data}'s particle and new particle indices array. Thus, it was reasonable to say that it was unnecessary to lock both of those data structures at once and, instead, more than one mutex in the \func{CommitParticleData} and \func{Draw} functions could be used in an attempt to reduce the observed contention.
+With these results in mind, recall from \sect{ssec:cs_pec_lifecycle} that the \func{Lock} function was used by the \class{Particle Drawable} when drawing particles in order to lock \func{ConcurrentParticleData} and secure access to the particle array. The \class{Particle Drawable} is the only class that uses this \func{Lock} function. The \class{Particle Drawable} reads information from \class{Concurrent Particle Data}'s particle and new particle indices array. Thus, I inferred that it was unnecessary to lock both of those data structures at once and, instead, more than one mutex in the \func{CommitParticleData} and \func{Draw} functions could be used in an attempt to reduce the contention that we observed in our initial results shown in \fig{fig:InitialResultsTiming}.
 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -37,20 +39,26 @@ With these results in mind, recall from \sect{ssec:cs_pec_lifecycle} that the \f
 \subsection{Code}\label{ssec:studies_mutexes_code}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-The changes needed to add mutexes for the two data structures and remaining variables that were copied were fairly minimal. The \var{particlesMutex}, \var{newParticlesIndicesMutex}, and the \var{normalMutex} were added as member variables to \class{Concurrent Particle Data}. Each of these mutexes were locked when their respective variables needed to be read or written to. When a mutex was locked within \class{Concurrent Particle Data}, it was done by directly accessing the mutex (see \clis{code:MutexCommitParticleData}). When a mutex was locked within the \class{Particle Drawable}, it was done by utilizing special locking functions\footnotemark $ $ provided by \class{Concurrent Particle Data} (see \clis{code:MutexParticleDraw}).
+The changes needed to add mutexes for the two data structures and remaining variables that were copied were fairly minimal. \var{particlesMutex}, \var{newParticlesIndicesMutex}, and the \var{normalMutex} were added as member variables to \class{Concurrent Particle Data}. Each of these mutexes were locked when their respective variables needed to be read or written to. When a mutex was locked within \class{Concurrent Particle Data}, it was done by directly accessing the mutex (see \clis{code:MutexCommitParticleData}). When a mutex was locked within the \class{Particle Drawable}, it was done by utilizing special locking functions\footnotemark $ $ provided by \class{Concurrent Particle Data} (see \clis{code:MutexParticleDraw}).
 
 \footnotetext{In actuality, a single locking function was used. An enumerator was passed to the function specifying which mutex needed to be locked. Although this was better practice, it obfuscated the actual meaning of the code by making it more verbose. Thus, a tidier version without the enumerators are used here.}
 
-One of the potential issues with these changes was that, even though a particle may currently be active, it may not be available for rendering by the time the \func{DrawParticles} function was called. To more concretely understand, imagine that the \class{Particle Drawable} was taking in new particle indices to activate within the static billboard to make it available for rendering. At the same time, \func{CommitParticleData} was copying new particle data and there happened to be newly emitted particle indices. Since the \class{Particle Drawable} had old information that did not include these newly emitted particles, these new particles would not be rendered because, even though they were marked as active, they were not activated in the static billboard. Although this sounds like a significant problem, it can be argued that the inconsistent state cannot possibly be perceived by the user since a considerable number of updates happen within a short span of time. If we look at \fig{fig:Mutex1PESectionCalls}, for example, the number of calls to the \func{Draw} function was about 800, and that was within approximately a $ 20 \ runs * 5 \ \nicefrac[]{seconds}{run} = 100 $ second timespan. This meant that this function was called about 8 times per second, and it is highly doubtful that a person could notice the inconsistent state of the particle effect within \nicefrac[]{1}{8}th to \nicefrac[]{1}{4}th of a second. Thus, the temporary inconsistent state was not considered a problem.
+\addfigure{case-studies_more-than-one-mutex_losing-steps}
+{1.0}
+{Illustrates the relationship between locking two mutexes between the drawing and updating threads over the lifetime of a particle effect.}
+{Illustrates the relationship between locking two mutexes between the drawing and updating threads over the lifetime of a particle effect. This shows how active particles in the particle array may not be rendered immediately because they were not activated in the Drawable's billboard before rendering. This can happen if the "updating particles" thread is holding the particles lock and copying particles in \func{CommitParticleData} while the Drawable is clearing and activating "old" new particle indices from \func{CommitParticleData}. The array does not contain the "new" particle indices from the most recent update because those are not copied until after the particles mutex is released, as shown in \clis{code:MutexCommitParticleData}. It is important to emphasize that, every time a set of particle indices were ignored during rendering, it was because it was not in the Drawable's billboard, and this is shown above.}
+{fig:MutexLosingSteps}
+
+One of the potential issues with these changes was that, even though a particle may currently be active, it may not be available for rendering by the time the \func{DrawParticles} function was called. To more concretely explain, imagine that the \class{Particle Drawable} was taking in new particle indices to activate within the static billboard to make it available for rendering. At the same time, \func{CommitParticleData} was copying new particle data and there happened to be newly emitted particle indices. Since the \class{Particle Drawable} had old information that did not include these newly emitted particles, these new particles would not be rendered because, even though they were marked as active, they were not activated in the static billboard. An example of this behavior is shown in \fig{fig:MutexLosingSteps}. Although this sounds like a significant problem, it can be argued that the inconsistent state cannot possibly be perceived by the user since a considerable number of updates happen within a short span of time. If we look at \fig{fig:Mutex1PESectionCalls}, for example, the number of calls to the \func{Draw} function was about 800, and that was within approximately a $ 20 \ runs * 5 \ \nicefrac[]{seconds}{run} = 100 $ second timespan. This meant that this function was called about 8 times per second, and it is highly doubtful that a person could notice the inconsistent state of the particle effect within \nicefrac[]{1}{8}th to \nicefrac[]{1}{4}th of a second. Thus, the temporary inconsistent state was not considered a problem.
 
 \vspace{-0.5cm}
 \framecode{C++}{case_studies}{MoreThanOneMutex_CommitParticleData.cpp}
 {code:MutexCommitParticleData}
-{Pseudocode illustrating the changes needed to utilize more than one mutex in the \func{CommitParticleData} function.}
+{Pseudocode illustrating the changes needed to utilize more than one mutex in the \func{CommitParticleData} function. Note that, instead of locking only one mutex, three different mutexes were locked at different times depending on the resource needed (i.e. the particles array, the new particle indices array, or the non-data structure array).}
 \vspace{-1.5cm}
 \framecode{C++}{case_studies}{MoreThanOneMutex_ParticleDraw.cpp}
 {code:MutexParticleDraw}
-{Pseudocode illustrating the changes needed to utilize more than one mutex in the \func{Draw} function.}
+{Pseudocode illustrating the changes needed to utilize more than one mutex in the \func{Draw} function. Note that, instead of locking only one mutex, two different mutexes were locked at different times depending on the resource needed (i.e. the particles array or the new particle indices array).}
 
 
 \vspace{-0.5cm}
@@ -67,23 +75,40 @@ One of the potential issues with these changes was that, even though a particle 
 The following four figures are the result of running a series of automated games in two scenarios: 
 
 \begin{enumerate}[nolistsep,topsep=2pt]
-	\item 1 particle effect, particles range from 0 - 50K, 5K step, 5 5-second runs per effect.
-	\item 1 particle effect, 50K, 0 step, 20 5-second runs.
+
+	\item Scenario used for particle metrics (\fig{fig:Mutex1PERenderBallFunctionCalls} and \fig{fig:Mutex1PEParticlesActuallyRendered})
+	\begin{itemize}[nolistsep,topsep=0pt]
+		\item Min: 0
+		\item Max: 50,000
+		\item Step: 5,000
+		\item Each game was 5 seconds long
+		\item This scenario ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
+	\end{itemize}
+
+	\item Scenario used for timing metrics (\fig{fig:Mutex1PESectionCalls} and \fig{fig:Mutex1PETimedSections})
+	\begin{itemize}[nolistsep,topsep=0pt]
+		\item Min: 50,000
+		\item Max: 50,000
+		\item Each game was 5 seconds long
+		\item This scenario ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
+	\end{itemize}
+
 \end{enumerate}
 
 \begin{figure}
 \addtocounter{figure}{-1}
 
+	\vspace{-1.5cm}
 	\addlargesubfigure{more_than_one_mutex/1PE_0-50K_Render-Ball-Function-Calls}
 	{1.0}{1.2}
 	{More Than One Mutex Case Study: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
-	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect. This shows that changing \class{Concurrent Particle Data} to use multiple mutexes does not impact the number of times that the ball is rendered. The multiple-burst and single-burst (0.1 and 1.0 TMP, respectively) scenarios for the $ > 1 $ Mutex data series are almost the same as the ones for the data series without any changes to the source code (i.e. the Original data series). }
 	{fig:Mutex1PERenderBallFunctionCalls}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{more_than_one_mutex/1PE_0-50K_Particles-Actually-Rendered}
 	{1.0}{1.2}
 	{More Than One Mutex Case Study: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
-	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect. This shows that changing \class{Concurrent Particle Data} to use multiple mutexes also does not impact the number of times that particles are rendered. As in \fig{fig:Mutex1PERenderBallFunctionCalls}, the $ > 1 $ Mutex data series is almost the same as the ones for the data series without any changes to the source code (i.e. the Original data series).}
 	{fig:Mutex1PEParticlesActuallyRendered}
 
 \end{figure}
@@ -91,22 +116,20 @@ The following four figures are the result of running a series of automated games
 \begin{figure}
 \addtocounter{figure}{-1}
 
+	\vspace{-1.5cm}
 	\addlargesubfigure{more_than_one_mutex/1PE_50K_Section-Calls}
 	{1.0}{1.2}
 	{More Than One Mutex Case Study: A graph showing the number of section calls for various sections of code for a single particle effect.}
-	{A graph showing the number of section calls for various sections of code for a single particle effect. Note that the "ParticleUpdateTask CommitParticleData Lock" section is timing the particle array lock for the "$ > 1$ Mutex" data series.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect. Note that the "ParticleUpdateTask CommitParticleData Lock" section is timing the particle array lock for the $ > 1$ Mutex data series. This shows that, between the $ > 1$ Mutex and Original data series, the drawing functions had approximately the same number of section calls. The Original data series for the particle update functions, however, show more calls. }
 	{fig:Mutex1PESectionCalls}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{more_than_one_mutex/1PE_50K_Timed-Sections}
 	{1.0}{1.2}
 	{More Than One Mutex Case Study: A graph showing the time spent in various sections of code for a single particle effect.}
-	{A graph showing the time spent in various sections of code for a single particle effect. Note that the "ParticleUpdateTask CommitParticleData Lock" section is timing the particle array lock for the "$ > 1$ Mutex" data series.}
+	{A graph showing the time spent in various sections of code for a single particle effect. Note that the "ParticleUpdateTask CommitParticleData Lock" section is timing the particle array lock for the $ > 1$ Mutex data series. The $ > 1 $ Mutex data series shows improvement in the \func{CommitParticleData} function from the Original. For 0.1 TMP, \func{CommitParticleData} went down from 47 seconds to 24. For 1.0 TMP, \func{CommitParticleData} went down from 50 seconds to 31. This was approximately a 40\% increase in speed. }
 	{fig:Mutex1PETimedSections}
 
 \end{figure}
-
-
-Both of these scenarios were ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP). In addition, these four series of automated games were ran with and without the above changes to the source code. This totals to 8 series of automated games. \fig{fig:1PECaseStudyMetadata} shows the specific metadata values that were used. The first scenario is shown in figures \ref{fig:Mutex1PERenderBallFunctionCalls} and \ref{fig:Mutex1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:Mutex1PESectionCalls} and \ref{fig:Mutex1PETimedSections}.
 
 When examining these results, the yellow "Original 0.1 TMP" series should be directly compared with the blue "$>1$ Mutex 0.1 TMP" series and the orange "Original 1.0 TMP" series should be directly compared with the green "$>1$ Mutex 1.0 TMP" series. This is because comparing the two series that "played the same game" will yield more accurate conclusions than cross-comparisons would.
 
@@ -116,7 +139,7 @@ When examining these results, the yellow "Original 0.1 TMP" series should be dir
 
 The figures that focus on the particle metrics \idefine{render ball function calls} and \idefine{particles actually rendered} do not exhibit a great deal of improvement from the original. For both of those figures, improvement would mean higher values. This is because, when more particles are rendered or the ball is rendered more often, the game appears to run more smoothly. Or, in other words, the "frames per second" improves. 
 
-The figures focusing on the particle timing, on the other hand, show considerable improvement. For 0.1 TMP, \func{CommitParticleData} went down from 47 seconds to 24. For 1.0 TMP, \func{ParticleUpdateTask} went down from 50 seconds to 31. This was approximately a 40\% increase in speed!\footnotemark However, there was still a large amount of contention for the particle array. For 0.1 TMP, 19 of those 24 seconds was spent waiting for the particle array's mutex to unlock. For 1.0 TMP, 29 of those 31 seconds was spent waiting for the particle array's mutex to unlock. It was clear, then, that more must be done to reduce contention for the particle array. Instead of adding more mutexes, one could be taken away.
+The figures focusing on the particle timing, on the other hand, show considerable improvement. For 0.1 TMP, \func{CommitParticleData} went down from 47 seconds to 24. For 1.0 TMP, \func{CommitParticleData} went down from 50 seconds to 31. This was approximately a 40\% increase in speed!\footnotemark However, there was still a large amount of contention for the particle array. For 0.1 TMP, 19 of those 24 seconds was spent waiting for the particle array's mutex to unlock. For 1.0 TMP, 29 of those 31 seconds was spent waiting for the particle array's mutex to unlock. It was clear, then, that more must be done to reduce contention for the particle array. Instead of adding more mutexes, one could be taken away.
 
 \footnotetext{See \fig{fig:1PECaseStudyLockFreeResults} in \sect{sec:studies_unexpected_results} for a summary table of these timed sections.}
 
@@ -130,15 +153,23 @@ The figures focusing on the particle timing, on the other hand, show considerabl
 \subsection{Code}\label{ssec:studies_lock_free_code}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-A lock free data structure could mitigate the contention for the particle array by getting rid of its mutex completely. Similar to the "multiple mutex" solution, this had the potential problem of the particle array being in an inconsistent state during rendering. However, an analogous argument can be made. Even though the particle array might have partially up to date information during any given render, the renderer was going to update again very shortly and the particle array should be up to date by then. This is known because \func{CommitParticleData} was called frequently (see \fig{fig:Mutex1PESectionCalls}) and, without waiting for locks to release, \func{CommitParticleData} would run fairly quickly. Therefore, the potentially inconsistent state of particles should not be noticeable to the end user. 
+A lock free data structure could mitigate the contention for the particle array by getting rid of its mutex completely. Similar to the "multiple mutex" solution, this had the potential problem of the particle array being in an inconsistent state during rendering. However, an argument analogous to the one made above in the multiple mutex solution can be used. Even though the particle array might have partially up to date information during any given render, the renderer was going to update again very shortly and the particle array should be up to date by then. We know this because \func{CommitParticleData} was called frequently (see \fig{fig:Mutex1PESectionCalls}) and, without waiting for locks to release, \func{CommitParticleData} would run fairly quickly. Therefore, the potentially inconsistent state of particles should not be noticeable to the end user. 
 
-To make the particle array a lock free data structure, which threads are reading and which ones are writing must be identified. It is known that the main thread (the one that was drawing) was only reading the particles, and it is also known that the background thread was writing to the particles. Without a mutex guarding the particle array, there was a possibility that the main thread read a particle just as the background thread was writing to it. This may have resulted in corrupted data. Thus, a solution in which the two threads could both simultaneously access the array but not the same particle was needed.
+To make the particle array a lock free data structure, which threads are reading and which ones are writing must be identified. A "reader" thread only wants to know the value of a contended resource, and a "writer" thread wants to modify the value of a contended resource. This is an important distinction to make because many reader threads can access a contended resource simultaneously, but anytime a writer thread wants to modify the resource's value it must have exclusive access.  
 
-There were a variety of strategies that could be employed, but the simplest was to rely on an atomic instruction that was used to achieve synchronization. Specifically, something that is called a \define{compare-and-swap} operation was used. A \define{compare-and-swap} is an atomic read-modify-write operation on a memory location that can only be implemented using special hardware instructions \cite{Mullender2008Semaphores}. In one atomic action, it compares the value of a variable with what is expected and, once the variable has that expected value, it swaps that expected value with the desired value. Once the atomic operation is attempted, it generally returns a boolean indicating whether or not the operation is successful. A \define{compare-and-swap} operation is typically wrapped within a while loop since it may return false if a concurrent or spurious write occurs. The latter may occur if the value of the variable is actually the expected value but the operation fails anyway. This could happen if we utilized the weak version of \idefine{atomic\_compare\_exchange} \cite{CPPReferenceAtomicCompareExchange}, which was a \define{compare-and-swap} operation defined in the \func{std::atomic} library in C++11. The strong version of \idefine{atomic\_compare\_exchange} could be used in order to avoid spurious writes, but the checks needed within the strong version were expensive. Additionally, it was known that the weak version can yield better performance if the operation was wrapped within a loop. Due to the infrequency of spurious writes and the small number of threads, the weak version would be the best option in this case. Given that this operation was supported on all of the platforms that ChilliSource supported, the weak version of \idefine{atomic\_compare\_exchange} was used. 
+We know that the main thread (the one that is drawing) is only reading the particles, and we also know that the background thread is writing to the particles. Without a mutex guarding the particle array, there is a possibility that the main thread read a particle just as the background thread is writing to it. This may have result in corrupted data. Thus, a solution in which the two threads could both simultaneously access the array but not the same particle was needed.
 
-In order to take advantage of the \idefine{atomic\_compare\_exchange} function, an atomic variable must be used. An atomic boolean was incorporated into \class{Concurrent Particle Data}'s particle struct, as shown in \clis{code:LockFreeConcurrentParticleStruct}. This atomic boolean, \var{isContended}, served as the variable that the \define{compare-and-swap} operation examined. It indicated whether or not another thread was using this particle struct. When a thread wanted access to the particle struct, it called the \idefine{atomic\_compare\_exchange} function. It then compared \var{isContended} with "false" and, if it was false, would swap \var{isContended} with "true". The normal particle operations would take place, and then \var{isContended} would be set back to false. Code listings \ref{code:LockFreeCommitParticleData} and \ref{code:LockFreeParticleDraw} illustrate the needed changes in the \func{CommitParticleData} and \func{Draw} functions.
+There were a variety of strategies that could be employed, but the simplest was to rely on an atomic instruction to achieve synchronization. Specifically, something the \define{compare-and-swap} operation was used. A \define{compare-and-swap} is an atomic read-modify-write operation on a memory location that can only be implemented using special hardware instructions \cite{Mullender2008Semaphores}. In one atomic action, it compares the value of a variable with what is expected and, if the variable has that expected value, it swaps that expected value with the desired value (see \clis{code:LockFreeCompareAndSwap}). Once the atomic operation is attempted, it returns a boolean indicating whether or not the operation is successful. The operation will not be successful if there is another writer using the contended resource. A \define{compare-and-swap} operation is typically wrapped within a while loop since it may return false if a concurrent or spurious write occurs. The latter may occur if the value of the variable is actually the expected value (i.e. the resource is not contended) but the operation fails anyway. This could happen if we utilized the weak version of \idefine{atomic\_compare\_exchange} \cite{CPPReferenceAtomicCompareExchange}, which was a \define{compare-and-swap} operation defined in the \func{std::atomic} library in C++11. The strong version of \idefine{atomic\_compare\_exchange} could be used in order to avoid spurious writes, but the checks needed within the strong version are expensive. The weak version can yield better performance if the operation is wrapped within a loop \cite{CPPReferenceAtomicCompareExchange}. Given that this operation was supported on all of the platforms that ChilliSource supported, the weak version of \idefine{atomic\_compare\_exchange} was used. Due to the infrequency of spurious writes and the small number of threads, the weak version would be the best option in this case.
 
+\vspace{-0.5cm}
+\framecode{C++}{case_studies}{LockFree_CompareAndSwapExample.cpp}
+{code:LockFreeCompareAndSwap}
+{Pseudocode illustrating the behavior that a compare-and-swap operation. Although it is shown as a function here to demonstrate how it works, it is executed atomically via special hardware instructions.}
+\vspace{-0.5cm}
 
+In order to take advantage of the \idefine{atomic\_compare\_exchange} function, an atomic variable must be used. An atomic boolean was incorporated into \class{Concurrent Particle Data}'s particle struct, as shown in \clis{code:LockFreeConcurrentParticleStruct}. This atomic boolean, \var{isContended}, serves as the variable that the \define{compare-and-swap} operation examines. It indicates whether or not another thread is using this particle struct. When a thread wants access to the particle struct, it calls the \idefine{atomic\_compare\_exchange} function. It then compares \var{isContended} with "false" and, if it is false, will swap \var{isContended} with "true". The normal particle operations will take place, and then \var{isContended} will be set back to false. Code listings \ref{code:LockFreeCommitParticleData} and \ref{code:LockFreeParticleDraw} illustrate the needed changes in the \func{CommitParticleData} and \func{Draw} functions.
+
+\vspace{-0.5cm}
 \framecode{C++}{case_studies}{LockFree_ConcurrentParticleStruct.cpp}
 {code:LockFreeConcurrentParticleStruct}
 {The struct that is used to within the particle array in \class{Concurrent Particle Data} during the Lock Free case study.}
@@ -158,46 +189,63 @@ In order to take advantage of the \idefine{atomic\_compare\_exchange} function, 
 
 Just as in the first case study, the lock free case study produced the following four figures running a series of automated games in two scenarios: 
 
-\begin{enumerate}[nolistsep,topsep=5pt]
-	\item 1 particle effect, particles range from 0 - 50K, 5K step, 5 5-second runs per effect.
-	\item 1 particle effect, 50K, 0 step, 20 5-second runs.
+\begin{enumerate}[nolistsep,topsep=2pt]
+
+	\item Scenario used for particle metrics (\fig{fig:LockFree1PERenderBallFunctionCalls} and \fig{fig:LockFree1PEParticlesActuallyRendered})
+	\begin{itemize}[nolistsep,topsep=0pt]
+		\item Min: 0
+		\item Max: 50,000
+		\item Step: 5,000
+		\item Each game was 5 seconds long
+		\item This scenario ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
+	\end{itemize}
+
+	\item Scenario used for timing metrics (\fig{fig:LockFree1PESectionCalls} and \fig{fig:LockFree1PETimedSections})
+	\begin{itemize}[nolistsep,topsep=0pt]
+		\item Min: 50,000
+		\item Max: 50,000
+		\item Each game was 5 seconds long
+		\item This scenario ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
+	\end{itemize}
+
 \end{enumerate}
 
 \begin{figure}
 \addtocounter{figure}{-1}
 
+	\vspace{-1.5cm}
 	\addlargesubfigure{lock_free/1PE_0-50K_Render-Ball-Function-Calls}
 	{1.0}{1.2}
 	{Lock Free Case Study: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
-	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect. This shows that changing \class{Concurrent Particle Data} to use a lock free data structure does not impact the number of times that the ball is rendered. The multiple-burst and single-burst (0.1 and 1.0 TMP, respectively) scenarios for the Lock Free data series are almost the same as the ones for the data series without any changes to the source code (i.e. the Original data series).}
 	{fig:LockFree1PERenderBallFunctionCalls}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{lock_free/1PE_0-50K_Particles-Actually-Rendered}
 	{1.0}{1.2}
 	{Lock Free Case Study: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
-	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect. This shows that changing \class{Concurrent Particle Data} to use a lock free data structure does not positively impact the number of times that particles are rendered. The multiple-burst and single-burst (0.1 and 1.0 TMP, respectively) scenarios for the Lock Free data series are lower (which means worse performance) than the ones for the Original data series.}
 	{fig:LockFree1PEParticlesActuallyRendered}
 
 \end{figure}
 
 \begin{figure}
 \addtocounter{figure}{-1}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{lock_free/1PE_50K_Section-Calls}
 	{1.0}{1.2}
 	{Lock Free Case Study: A graph showing the number of section calls for various sections of code for a single particle effect.}
-	{A graph showing the number of section calls for various sections of code for a single particle effect.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect. This shows that, between the Lock Free and Original data series, the drawing functions had approximately the same number of section calls. The Original data series for the particle update functions also had approximately the same number of function calls; however, the Lock Free data series for 0.1 TMP had a little less section calls than the Original.}
 	{fig:LockFree1PESectionCalls}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{lock_free/1PE_50K_Timed-Sections}
 	{1.0}{1.2}
 	{Lock Free Case Study: A graph showing the time spent in various sections of code for a single particle effect.}
-	{A graph showing the time spent in various sections of code for a single particle effect.}
+	{A graph showing the time spent in various sections of code for a single particle effect. \func{CommitParticleData} for the Lock Free data series, as expected, experienced a performance boost. For 0.1 TMP, the function went down from 47 seconds to 15. For 1.0 TMP, it went down from 50 seconds to 7. This was, respectively, about an 68\% and 86\% increase in performance.}
 	{fig:LockFree1PETimedSections}
 
 \end{figure}
 
-Again, both of these scenarios were ran with PPE values that were 10\% and 100\% of TMP. These four series of automated games were ran with and without the above changes to the source code, and this totals to 8 series of automated games. The first scenario is shown in figures \ref{fig:LockFree1PERenderBallFunctionCalls} and \ref{fig:LockFree1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:LockFree1PESectionCalls} and \ref{fig:LockFree1PETimedSections}. We can refer to \fig{fig:1PECaseStudyMetadata} for the specific metadata values used.
+These four series of automated games were run with and without the above changes to the source code, a total of 8 series of automated games. The first scenario is shown in figures \ref{fig:LockFree1PERenderBallFunctionCalls} and \ref{fig:LockFree1PEParticlesActuallyRendered}, and the second scenario is shown in figures \ref{fig:LockFree1PESectionCalls} and \ref{fig:LockFree1PETimedSections}. We can refer to \fig{fig:1PECaseStudyMetadata} for the specific metadata values used.
 
 As before, the two series that "played the same game" should be compared in order to ensure that the correct conclusions are drawn.
 
@@ -205,7 +253,7 @@ As before, the two series that "played the same game" should be compared in orde
 \subsection{Discussion}\label{ssec:studies_lock_free_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-The \var{particles actually rendered} and \var{render ball function calls} figures, similar to the first case study, do not show significant improvement from the original. However, the Lock Free data series in the \var{particles actually rendered} figure seemed to show slightly lower numbers than the original, but it was not a significant enough difference to say with absolution that the Lock Free code results in fewer particles being rendered.
+The \var{particles actually rendered} and \var{render ball function calls} figures, similar to the first case study, do not show significant improvement from the original. However, the Lock Free data series in the \var{particles actually rendered} figure seemed to show slightly lower numbers than the original.
 
 As predicted, the timing metric figures show that \func{CommitParticleData} experienced a healthy performance boost. For 0.1 TMP, the function went down from 47 seconds to 15. For 1.0 TMP, it went down from 50 seconds to 7. This was, respectively, about an 68\% and 86\% boost!\footnotemark A larger boost was seen in the latter scenario due to the fact that the there were more active particles earlier in the game(s), and more contention was expected since the draw function needed to render more particles. This blocked \func{CommitParticleData} for longer, and minimizing that increased wait time resulted in better run times. 
 
@@ -218,7 +266,7 @@ Although these were excellent initial results for the the Lock Free case study, 
 	\item The timing metric were only favorable for a single particle effect.
 \end{itemize}
 
-The first problem was an issue because these optimizations should have aided in rendering more particles since updating them took less time. As for the second problem, the next section will aide in understanding how the two case studies behaved quite differently when the games were ran with multiple particle effects instead of just one.
+The first problem was an issue because these optimizations should have aided in rendering more particles since updating them took less time. As for the second problem, the next section will aide in understanding how the two case studies behaved quite differently when the games were run with multiple particle effects instead of just one.
 
 \newpage
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -232,43 +280,45 @@ The first problem was an issue because these optimizations should have aided in 
 {The metadata used for the 8 series of automated games for the unexpected results from the case studies.}
 {fig:10PECaseStudyMetadata}
 
-In order to exhibit the unexpected results for the Multiple Mutex and Lock Free case studies,  8 automated games were ran per case study as we did before. This time, however, the particles were distributed across 10 particle effects. For example, the scenario that had a particle range of 0 to 50K would now have 0 to 5K per particle effect. For clarification, please refer to \fig{fig:10PECaseStudyMetadata}.
+In order to exhibit the unexpected results for the Multiple Mutex and Lock Free case studies,  8 automated games were run per case study as we did before. This time, however, the particles were distributed across 10 particle effects. For example, the scenario that had a particle range of 0 to 50K would now have 0 to 5K per particle effect. For clarification, please refer to \fig{fig:10PECaseStudyMetadata}.
+
+Sections \ref{ssec:studies_unexpected_results_mutex} and \ref{ssec:studies_unexpected_results_lock_free} both show the results of running the same games as before but with 10 particle effects attached to the ball instead of just 1.
 
 \begin{figure}
 \addtocounter{figure}{-1}
 
-\vspace{-1.0cm}
+\vspace{-1.5cm}
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Using More Than One Mutex Results}\label{ssec:studies_unexpected_results_mutex}
 % ----------------------------------------------------------------------------------------------------------------------------
-
+	\vspace{-0.5cm}
 	\addlargesubfigure{more_than_one_mutex/10PE_0-5K_Render-Ball-Function-Calls}
 	{1.0}{1.2}
 	{More Than One Mutex Case Study: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
-	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects. The two data series, $ > 1 $ Mutex and Original, show no stark differences; their \idefine{render ball function calls} values are nearly the same for the multiple-burst (0.1 TMP) and single-burst (1.0 TMP) games.}
 	{fig:Mutex10PERenderBallFunctionCalls}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{more_than_one_mutex/10PE_0-5K_Particles-Actually-Rendered}
 	{1.0}{1.2}
 	{More Than One Mutex Case Study: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
-	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects. The two data series, $ > 1 $ Mutex and Original, show no stark differences; their \idefine{particles actually rendered} values are nearly the same for the multiple-burst (0.1 TMP) and single-burst (1.0 TMP) games.}
 	{fig:Mutex10PEParticlesActuallyRendered}
 
 \end{figure}
 
 \begin{figure}
 \addtocounter{figure}{-1}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{more_than_one_mutex/10PE_5K_Section-Calls}
 	{1.0}{1.2}
 	{More Than One Mutex Case Study: A graph showing the number of section calls for various sections of code for ten particle effects.}
-	{A graph showing the number of section calls for various sections of code for ten particle effects.}
+	{A graph showing the number of section calls for various sections of code for ten particle effects. The two data series, $ > 1 $ Mutex and Original, show no stark differences; the section call values are the same for the multiple-burst (0.1 TMP) and single-burst (1.0 TMP) games.}
 	{fig:Mutex10PESectionCalls}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{more_than_one_mutex/10PE_5K_Timed-Sections}
 	{1.0}{1.2}
 	{More Than One Mutex Case Study: A graph showing the time spent in various sections of code for ten particle effects.}
-	{A graph showing the time spent in various sections of code for ten particle effects.}
+	{A graph showing the time spent in various sections of code for ten particle effects. Unlike in the single particle effect results, this shows not only no significant improvement to the \func{CommitParticleData} function, but it also shows that there was little contention to begin with in the Original data series.}
 	{fig:Mutex10PETimedSections}
 
 \end{figure}
@@ -278,38 +328,39 @@ In order to exhibit the unexpected results for the Multiple Mutex and Lock Free 
 \begin{figure}
 \addtocounter{figure}{-1}
 
-\vspace{-1.0cm}
+\vspace{-1.5cm}
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Lock Free Results}\label{ssec:studies_unexpected_results_lock_free}
 % ----------------------------------------------------------------------------------------------------------------------------
 
+	\vspace{-0.5cm}
 	\addlargesubfigure{lock_free/10PE_0-5K_Render-Ball-Function-Calls}
 	{1.0}{1.2}
 	{Lock Free Case Study: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
-	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects. Although they are very similar, the Lock Free data series exhibits slightly lower \idefine{render ball function calls} values than the Original data series.}
 	{fig:LockFree10PERenderBallFunctionCalls}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{lock_free/10PE_0-5K_Particles-Actually-Rendered}
 	{1.0}{1.2}
 	{Lock Free Case Study: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
-	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects. Similar to the single particle effect results, the multiple-burst and single-burst (0.1 and 1.0 TMP, respectively) scenarios for the Lock Free data series are lower than the ones for the Original data series.}
 	{fig:LockFree10PEParticlesActuallyRendered}
 
 \end{figure}
 
 \begin{figure}
 \addtocounter{figure}{-1}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{lock_free/10PE_5K_Section-Calls}
 	{1.0}{1.2}
 	{Lock Free Case Study: A graph showing the number of section calls for various sections of code for ten particle effects.}
-	{A graph showing the number of section calls for various sections of code for ten particle effects.}
+	{A graph showing the number of section calls for various sections of code for ten particle effects. The two data series, Lock Free and Original, show no stark differences. However, the Original data series seems to have a slightly higher section call count than the Lock Free data series for both the multiple-burst (0.1 TMP) and single-burst (1.0 TMP) games. }
 	{fig:LockFree10PESectionCalls}
-
+	\vspace{-1.5cm}
 	\addlargesubfigure{lock_free/10PE_5K_Timed-Sections}
 	{1.0}{1.2}
 	{Lock Free Case Study: A graph showing the time spent in various sections of code for ten particle effects.}
-	{A graph showing the time spent in various sections of code for ten particle effects.}
+	{A graph showing the time spent in various sections of code for ten particle effects. Unlike in the single particle effect results, this shows not only no significant improvement to the \func{CommitParticleData} function, but it also shows that there was little contention to begin with in the Original data series.}
 	{fig:LockFree10PETimedSections}
 
 \end{figure}
@@ -320,23 +371,23 @@ In order to exhibit the unexpected results for the Multiple Mutex and Lock Free 
 \subsection{Discussion}\label{ssec:studies_unexpected_results_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-The most interesting (and, perhaps, frustrating) part of these results was that all of the data series that "played the same game" looked essentially the same. The ball was rendered nearly as many times for the four scenarios for both case studies, and the \var{particles actually rendered} were also similar for both as well. However, just like in the Lock Free case study results, there were slightly less particles rendered than in the original. To try to understand what happened, let us examine figures \ref{fig:1PECaseStudyLockFreeResults} and \ref{fig:10PECaseStudyLockFreeResults}. In particular, let us focus on the "1.0 TMP" scenario with the Original and Lock Free implementations.
+The most interesting (and, perhaps, frustrating) part of the results shown in sections \ref{ssec:studies_unexpected_results_mutex} and \ref{ssec:studies_unexpected_results_lock_free} was that all of the data series that "played the same game" looked essentially the same. The ball was rendered nearly as many times for the four scenarios for both case studies, and the \var{particles actually rendered} were also similar for both as well. However, just like in the Lock Free case study results, there were slightly fewer particles rendered than in the original. To try to understand what happened, let us examine figures \ref{fig:1PECaseStudyLockFreeResults} and \ref{fig:10PECaseStudyLockFreeResults}. In particular, let us focus on the "1.0 TMP" scenario with the Original and Lock Free implementations.
 
 \begin{figure}
 \addtocounter{figure}{-1}
 
-	\vspace{-1.2cm}
+	\vspace{-1.7cm}
 	\addlargesubfigure{case-studies_1PE-unexpected-results}
-	{1.0}{1.2}
+	{1.0}{1.13}
 	{A summary of the timed sections for the unexpected results for the Lock Free and $> 1$ Mutex case studies for a single particle effect.}
-	{A summary of the timed sections for the unexpected results for the Lock Free and $> 1$ Mutex case studies for a single particle effect.}
+	{A summary of the timed sections for the unexpected results for the Lock Free and $> 1$ Mutex case studies for a single particle effect. This highlights that, for a single particle effect, the Original Data series clearly experienced performance-hindering contention in \func{CommitParticleData}. The changes made in the $ > 1 $ Mutex and Lock Free data series significantly reduced this contention.}
 	{fig:1PECaseStudyLockFreeResults}
 
-	\vspace{-0.5cm}
+	\vspace{-0.6cm}
 	\addlargesubfigure{case-studies_10PE-unexpected-results}
-	{1.0}{1.2}
+	{1.0}{1.13}
 	{A summary of the timed sections for the unexpected results for the Lock Free and $> 1$ Mutex case studies for ten particle effects.}
-	{A summary of the timed sections for the unexpected results for the Lock Free and $> 1$ Mutex case studies for ten particle effects.}
+	{A summary of the timed sections for the unexpected results for the Lock Free and $> 1$ Mutex case studies for ten particle effects. This highlights that, for many particle effects, the Original Data series did not experience a great deal of contention in \func{CommitParticleData}. Since there was no contention to begin with, the changes made in the $ > 1 Mutex $ and Lock Free data series did not make a significant impact.}
 	{fig:10PECaseStudyLockFreeResults}
 
 \end{figure}
@@ -366,7 +417,7 @@ Within the 1.0 TMP Original results for ten particle effects, about 9 of the 75 
 
 For a single effect, it can be seen that the Lock Free implementation did an excellent job in reducing contention for a large data structure between a background thread writing to it and a main thread reading from it. For ten effects, the Lock Free implementation did little to reduce the contention because there was no contention to begin with. This can be observed by the fact that the results from the Original implementation with ten effects showed that, compared with a single effect, an insignificant amount of time was spent waiting for a lock to release.
 
-This behavior can be better understood if we considered the lifetime of particle effects in two scenarios: one with many effects, and one with a single effect. The one with many particle effects would have its particles distributed across many \class{Particle Effect Components} and, thus, many \class{Particle Drawables}. The \class{Renderer} running on the main thread, then, would render each \class{Particle Effect Component} separately. When the main thread requested to lock any given effect's particle array mutex, it had a reduced chance of waiting for it. This was because each \class{Particle Effect Component} had its own background thread and each one was only responsible for a fraction of the particles. The one with a single particle effect, on the other hand, had one \class{Particle Effect Component} with a large array of particles that it had to manage on its own. It can only schedule one background thread at a time and was responsible for updating every single particle. When the \class{Renderer} running on the main thread requested to lock the effect's particle array mutex, it had a greater chance of waiting for it. 
+This behavior can be better understood if we consider the lifetime of particle effects in two scenarios: one with many effects, and one with a single effect. The one with many particle effects would have its particles distributed across many \class{Particle Effect Components} and, thus, many \class{Particle Drawables}. The \class{Renderer} running on the main thread, then, renders each \class{Particle Effect Component} separately. When the main thread requests to lock any given effect's particle array mutex, it has a reduced chance of waiting for it. This is because each \class{Particle Effect Component} has its own background thread and each one is only responsible for a fraction of the particles. For example, using 10 effects would mean approximately a \nicefrac[]{1}{10}th chance of contending with any of the particle effects. The one with a single particle effect, on the other hand, has one \class{Particle Effect Component} with a large array of particles that it has to manage on its own. It can only schedule one background thread at a time and is responsible for updating every single particle. When the \class{Renderer} running on the main thread requests to lock the effect's particle array mutex, it has a greater chance of waiting for it. 
 
 The unexpected results of these case studies demonstrated the differences between managing contention for a single, large data structure and for many pieces or "shards" of a fragmented data structure. The former was likely to have contention if there was writing involved between two threads, and a solution that utilized "lock free" atomic read-modify-write operations could significantly reduce contention. The latter, however, was unlikely to have contention between two threads, and so the developer could get away with naively using mutexes to synchronize their data.
 
