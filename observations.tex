@@ -194,7 +194,7 @@ These 8 series of automated games were run with and without the above changes to
 
 The \idefine{particles actually rendered} (\fig{fig:Copies1PERenderBallFunctionCalls}) and \idefine{render ball function calls} (\fig{fig:Copies1PEParticlesActuallyRendered}) charts for 1 particle effect show something interesting. The No Object data series (the data series without the \var{ConcurrentParticleData} object) rendered the ball fewer times than the original, and it also rendered its particles fewer times. An examination of the timing metrics for 1 particle effect (\fig{fig:Copies1PETimedSections}) shows why this was occurring. Instead of the background thread waiting for the mutex to release in \func{ParticleUpdateTask}, the contention had moved to the \class{Particle Drawable} in the \func{Draw} function.  
 
-If we further examine \fig{fig:Copies1PETimedSections}, it shows that the \func{Draw} function in the No Object data series spends less time rendering than the Original data series. Although a lower run-time usually means that the engine is performing better, it is not true in this case. I did not decrease the amount of time that it takes to render all of the effect's particles and, for the single-burst (PPE is 1.0 of TMP) particle effect, only 72 - 33 =  39 seconds of meaningful work was done since the rendering thread spent about 33 seconds waiting for a lock to release. Since it spent less time in the \func{Draw} function, it rendered fewer particles. 
+If we further examine \fig{fig:Copies1PETimedSections}, it shows that the \func{Draw} function in the No Object data series spends less time rendering than the Original data series. Although a lower run-time usually means that the engine is performing better, it is not true in this case. I did not modify the amount of time that it takes to render all of the effect's particles and, for the single-burst (PPE is 1.0 of TMP) particle effect, only 72 - 33 =  39 seconds of meaningful work was done since the rendering thread spent about 33 seconds waiting for a lock to release. Since it spent less time in the \func{Draw} function, it rendered fewer particles. 
 
 In other words, the \class{Concurrent Particle Data} object improves performance by increasing the number of particles that are drawn to the screen which results in a smoother visual experience for the end user.
 
@@ -548,7 +548,7 @@ The following figures (Figures \ref{fig:FailureSolution1PERenderBallFunctionCall
 
 \footnotetext{Since a duration of any given game was only 5 seconds, a particle effect duration of 120 seconds is overkill. I set the effect's duration to this high number to be certain that it was a small duration number that was causing the particle emission failure behavior. Note that this is separate from the lifetime of a particle itself; the duration that is being referred to here is the duration of the particle effect as a whole and not the lifetime of a particle individually.}
 
-This study has shown that, when using a non-looping particle effect with a large number of particles, a large duration value should be set as well. Although this may seem like ChilliSource should disallow this from happening, it is also true that this resulted from a misconfiguration of a particle effect. At least in the context of the \class{Particle Effect Components} in ChilliSource, a game developer should not expect that a particle effect duration of a single second is reasonable for a particle effect with at least 30,000 particles. However, it would still be useful to at least have a warning printed to the console that informed the developer that a "failing" or "broken" particle effect may be due to a small duration time. 
+In essence, this study has revealed a bug that ChilliSource should fix. Since the failure occurred because the \func{ParticleUpdateTask} did not fully execute once by the time the particle effect's duration elapsed, the failure would not happen if the engine allowed the effect to update at least once before cleaning up and stopping the effect.
 
 
 \begin{figure}
@@ -558,13 +558,13 @@ This study has shown that, when using a non-looping particle effect with a large
 	\addlargesubfigure{emission_failure/solution/1PE_0-50K_Render-Ball-Function-Calls}
 	{1.0}{1.2}
 	{Emission Failure Solution Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect.}
-	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect. This shows that the Solution data series (the one with an increased duration of 120 seconds) does not spike in performance at 30,000 TMP. This is a good thing because it means that the renderer was spending some of its time rendering particles (see \fig{fig:FailureSolution10PEParticlesActuallyRendered}).}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for a single particle effect. This shows that the Non-Looping 120s Duration data series (the one with an increased duration of 120 seconds) does not spike in performance at 30,000 TMP. This is a good thing because it means that the renderer was spending some of its time rendering particles (see \fig{fig:FailureSolution10PEParticlesActuallyRendered}).}
 	{fig:FailureSolution1PERenderBallFunctionCalls}
 
 	\addlargesubfigure{emission_failure/solution/1PE_0-50K_Particles-Actually-Rendered}
 	{1.0}{1.2}
 	{Emission Failure Solution Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect.}
-	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect. This shows that the Solution data series (the one with an increased duration of 120 seconds) does not stop rendering particles to the screen at 30,000 TMP, which is the desired outcome.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for a single particle effect. This shows that the Non-Looping 120s Duration data series (the one with an increased duration of 120 seconds) does not stop rendering particles to the screen at 30,000 TMP, which is the desired outcome.}
 	{fig:FailureSolution1PEParticlesActuallyRendered}
 
 \end{figure}
@@ -576,13 +576,13 @@ This study has shown that, when using a non-looping particle effect with a large
 	\addlargesubfigure{emission_failure/solution/10PE_0-5K_Render-Ball-Function-Calls}
 	{1.0}{1.2}
 	{Emission Failure Solution Observation: A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects.}
-	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects. Since this failure did not occur for many particle effects, we see here that the Solution and Non-Looping data series render the ball about the same number of times.}
+	{A graph showing \idefine{render ball function calls} over \idefine{total maximum particles} for ten particle effects. Since this failure did not occur for many particle effects, we see here that the Solution and Non-Looping 1s Duration data series render the ball about the same number of times.}
 	{fig:FailureSolution10PERenderBallFunctionCalls}
 
 	\addlargesubfigure{emission_failure/solution/10PE_0-5K_Particles-Actually-Rendered}
 	{1.0}{1.2}
 	{Emission Failure Solution Observation: A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects.}
-	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects. Similar to \fig{fig:FailureSolution10PERenderBallFunctionCalls}, this shows that the Solution and Non-Looping data series render about the same number of particles.}
+	{A graph showing \idefine{particles actually rendered} over \idefine{total maximum particles} for ten particle effects. Similar to \fig{fig:FailureSolution10PERenderBallFunctionCalls}, this shows that the Solution and Non-Looping 1s Duration data series render about the same number of particles.}
 	{fig:FailureSolution10PEParticlesActuallyRendered}
 
 \end{figure}
@@ -594,13 +594,13 @@ This study has shown that, when using a non-looping particle effect with a large
 	\addlargesubfigure{emission_failure/solution/1PE_50K_Section-Calls}
 	{1.0}{1.2}
 	{Emission Failure Observation: A graph showing the number of section calls for various sections of code for a single particle effect.}
-	{A graph showing the number of section calls for various sections of code for a single particle effect. This shows that the Solution data series has fewer section calls than the Non-Looping data series.}
+	{A graph showing the number of section calls for various sections of code for a single particle effect. This shows that the Non-Looping 120s Duration data series has fewer section calls than the Non-Looping 1s Duration data series.}
 	{fig:FailureSolution1PESectionCalls}
 
 	\addlargesubfigure{emission_failure/solution/1PE_50K_Timed-Sections}
 	{1.0}{1.2}
 	{Emission Failure Observation: A graph showing the time spent in various sections of code for a single particle effect.}
-	{A graph showing the time spent in various sections of code for a single particle effect. This shows that the Solution data series has overall longer run times than the Non-Looping data series; this is because the \class{Particle Effect Component} is actually being rendered and processed instead of being stopped early on in the game.}
+	{A graph showing the time spent in various sections of code for a single particle effect. This shows that the Non-Looping 120s Duration data series has overall longer run times than the Non-Looping 1s Duration data series; this is because the \class{Particle Effect Component} is actually being rendered and processed instead of being stopped early on in the game.}
 	{fig:FailureSolution1PETimedSections}
 
 \end{figure}
@@ -612,13 +612,13 @@ This study has shown that, when using a non-looping particle effect with a large
 	\addlargesubfigure{emission_failure/solution/10PE_5K_Section-Calls}
 	{1.0}{1.2}
 	{Emission Failure Observation: A graph showing the number of section calls for various sections of code for ten particle effects.}
-	{A graph showing the number of section calls for various sections of code for ten particle effects. This shows: (1) The multiple-burst (or 0.1 TMP) games for the Non-Looping data series has significantly more section calls than the Solution data series, and (2) The single-burst (or 1.0 TMP) games for the Non-Looping data series has a little more section calls than the Solution data series, but their values are fairly similar. }
+	{A graph showing the number of section calls for various sections of code for ten particle effects. This shows: (1) The multiple-burst (or 0.1 TMP) games for the Non-Looping 1s Duration data series has significantly more section calls than the Non-Looping 120s Duration data series, and (2) The single-burst (or 1.0 TMP) games for the Non-Looping 1s Duration data series has a little more section calls than the Non-Looping 120s Duration data series, but their values are fairly similar. }
 	{fig:FailureSolution10PESectionCalls}
 
 	\addlargesubfigure{emission_failure/solution/10PE_5K_Timed-Sections}
 	{1.0}{1.2}
 	{Emission Failure Observation: A graph showing the time spent in various sections of code for ten particle effects.}
-	{A graph showing the time spent in various sections of code for ten particle effects. This shows: (1) The multiple-burst (or 0.1 TMP) games for the Non-Looping data series has a higher run time for particle update functions and a lower run time for particle draw functions than the Solution data series, and (2) The single-burst (or 1.0 TMP) games for the Non-Looping and Solution data series both have approximately the same run time. }
+	{A graph showing the time spent in various sections of code for ten particle effects. This shows: (1) The multiple-burst (or 0.1 TMP) games for the Non-Looping 1s Duration data series has a higher run time for particle update functions and a lower run time for particle draw functions than the Non-Looping 120s Duration data series, and (2) The single-burst (or 1.0 TMP) games for the Non-Looping 1s Duration and Non-Looping 120s Duration data series both have approximately the same run time. }
 	{fig:FailureSolution10PETimedSections}
 
 \end{figure}
