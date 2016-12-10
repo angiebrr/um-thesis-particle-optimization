@@ -200,6 +200,8 @@ As mentioned in \ch{ch:background}, \class{Particle Effects} that are passed int
 
 \begin{figure}
 \addtocounter{figure}{-1}
+
+	\vspace{-1.5cm}
 	\addsubfigure{instrumentation_visual_studio_call_tree}
 	{1.0}{1.0}
 	{Shows an example of Visual Studio's generated call tree for CPU instrumentation when ran using the metadata from \fig{fig:MetricsSystemMetadataExample}.}
@@ -236,7 +238,7 @@ Seeking a way to instrument functions and custom blocks of code across all platf
 {An example of timing output by the \class{Timing System} with just the \func{ParticleUpdateTask} and the \idefine{Particle Iteration} times.}
 {fig:TimingSystemTimingExampleNoInner}
 
-I developed the \class{Timing System} due to from dissatisfaction with the Visual Studio and Shiny function profilers. This system reliably instruments the multi-threaded engine across all platforms and returns results that are easily parsed. It uses the built-in \class{Performance Timer} from ChilliSource along with its own \func{StartTimer} and \func{StopTimer} static methods in order to time code blocks in a similar fashion to Shiny, as shown in \clis{code:ParticleUpdateTimingSystem}. To achieve this, it uses three hash tables\footnotemark $ $ with the following key-value pairs:
+I developed the \class{Timing System} due to dissatisfaction with the Visual Studio and Shiny function profilers. This system reliably instruments the multi-threaded engine across all platforms and returns results that are easily parsed. It uses the built-in \class{Performance Timer} from ChilliSource along with its own \func{StartTimer} and \func{StopTimer} static methods in order to time code blocks in a similar fashion to Shiny, as shown in \clis{code:ParticleUpdateTimingSystem}. To achieve this, it uses three hash tables\footnotemark $ $ with the following key-value pairs:
 
 \footnotetext{In C++ 11, the closest thing to a hash table is an unordered map from the std namespace.}
 

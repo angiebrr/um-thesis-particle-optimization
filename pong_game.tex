@@ -31,7 +31,7 @@ Unlike CSPong, CSAPong only uses a single state, the \class{Game State}. The mai
 
 \addtopfigure{chillisource_automated_pong_architecture}
 {0.9}{The basic architecture of the automated pong game.}
-{The basic architecture of the automated pong game.}
+{The basic architecture of the automated pong game. This shows CSAPong having a \class{Particle Effect Component Factory App System}, a \class{Game Entity State System}, a \class{Physics State System}, a \class{Scoring State System}, and the \class{Game State} itself. Although the entirety of the ChilliSource engine is used in CSAPong, this graph highlights the custom \class{Profiling Systems} within ChilliSource that I created for the purposes of instrumenting \class{Particle Effect Components}.}
 {fig:CSAPongGameArch}
 
 Although it is not necessary to go over every single class that makes up CSAPong, it is essential to understand its general architecture. As shown in \fig{fig:CSAPongGameArch}, we can broadly describe the structure having two main parts, the ChilliSource engine\footnotemark $ $ and the CSAPong application itself. Further, CSAPong can be defined as having \class{Application Systems}, a \class{Game State}, and the \class{Game State}'s \class{State Systems}.
@@ -64,7 +64,7 @@ The \class{Game State} manages the game's life cycle, its entities and component
 
 The \class{Physics State System} handles the movement of dynamic bodies (such as the ball) and collision checking. This behavior is described with components that are attached to entities which is in the spirit of ChilliSource's composition-based design. Thus, if we want the ball to be able to move, we attach a special type of component to the ball, a \class{Dynamic Body Component}, which is used by the \class{Physics State System}. Additionally, if we want collisions to occur between dynamic bodies and the walls, we must add static body components to the four wall entities within the arena.
 
-The \class{Scoring State System} uses the collision detection in the \class{Physics State System} to trigger points being added to each "opposing team". As we can see in \fig{fig:CSAPongGameArch}, however, there is a small bug in which 2 points are awarded each time the ball collides with the wall. The bug did not interfere with studying the \class{Particle Effect Component}, and so time was not taken to fix it.
+The \class{Scoring State System} uses the collision detection in the \class{Physics State System} to trigger points being added to each "opposing team". As we can see in \fig{fig:CSAPongGameNoParticles}, however, there is a small bug in which 2 points are awarded each time the ball collides with the wall. The bug did not interfere with studying the \class{Particle Effect Component}, and so time was not taken to fix it.
 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,14 +192,14 @@ The multiple-burst scenario would have the PPE be a fraction of the TMP. In othe
 
 \end{itemize}
 
-In addition to keeping track of these variables, information (or metrics) about the \class{Particle Effect Components} are gathered during the game. \var{Particle metrics} describe information such as the number of times every particle was drawn and the number of emissions that was made. \var{Timing metrics}, on the other hand, describe how long different sections of code take. The following is a list of the two important \var{particle metrics} that are most often used in my results:
+In addition to keeping track of these variables, information (or metrics) about the \class{Particle Effect Components} are gathered during the game. Particle metrics describe information such as the number of times every particle was drawn and the number of emissions that were made. Timing metrics, on the other hand, describe how long different sections of code take. The following is a list of the two important particle metrics that are most often used in my results:
 
 
 \begin{itemize}[nolistsep,topsep=0pt]
 
 	\item Render ball function calls
 		\begin{itemize}[nolistsep,topsep=0pt]
-			\item This describes the number of times that the ball itself was rendered. It serves as a way to gauge how visually smooth (or how many frames are being processed) the game is running.
+			\item This describes the number of times that the ball itself was rendered. It serves as a way to gauge how visually smooth (or how many frames are processed) the game is running.
 		\end{itemize}
 
 	\item Particles actually rendered
@@ -209,7 +209,7 @@ In addition to keeping track of these variables, information (or metrics) about 
 
 \end{itemize}
 
-A higher value for both \var{render ball function calls} and \var{particles actually rendered} indicate better performance. This is because, when more particles are rendered or the ball is rendered more often, the game appears to run more smoothly. Or, in other words, the "frames per second" improves. 
+A higher value for both \idefine{render ball function calls} and \idefine{particles actually rendered} indicate better performance. This is because, when more particles are rendered or the ball is rendered more often, the game appears to run more smoothly. Or, in other words, the "frames per second" improves. 
 
 It is unnecessary to know more than the above metrics and variables to understand the results of this thesis, but \apx{apx:instrumentation} provides much more detail for those who are motivated to learn more.
 
@@ -218,8 +218,22 @@ It is unnecessary to know more than the above metrics and variables to understan
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Initial Results}\label{sec:game_initial_results}
 
+A variety of these automated games were run and their outputs were examined on Windows, iOS, and Android platforms. This was done in an effort to find an area within the \class{Particle Effect Component} class that needed optimization. In the beginning of these studies, the only available datasets were from the \class{Metrics System} and the Visual Studio CPU sampling profiles, as the timing instrumentation was still not complete (see \apx{apx:instrumentation} for more information). I observed that a particular automated game in which the \idefine{total maximum particles} and \idefine{particles per emission} values were the same\footnotemark $ $ caused the game to visually lag, or skip frames. Armed with only the metrics information and CPU sampling (see \fig{fig:InitialResultsVisualStudioCallTreeSorted}), all that was known was that the following \class{Particle Effect Component} methods had a considerable number of samples:
+
+\footnotetext{Specifically, \idefine{total maximum particles} and \idefine{particles per emission} were 10,000 in Figures \ref{fig:InitialResultsVisualStudioCallTreeSorted}, \ref{fig:InitialResultsMetrics}, and \ref{fig:InitialResultsTiming}.}
+
+\begin{itemize}[nolistsep,topsep=0pt]
+	\item \func{ParticleDrawable::DrawParticles}
+	\item \func{ParticleUpdateTask}
+	\item \func{ParticleAffector::AffectParticles}
+\end{itemize}
+
+Given that these three methods were run repeatedly throughout the games, these results were unsurprising. At the time, it was tempting to pursue \func{ParticleUpdateTask} since it iterated over the entire particle array multiple times. I thought that, perhaps, creating a cache-friendly data structure that kept track of active particles would be a good initial optimization. However, as it shows in \fig{fig:InitialResultsTiming}, the functions that iterate over all of the particles were only taking $ (1.0 + 1.7 + 12.0 + 0.6)/48.4 \approx 32\% $ of \func{ParticleUpdateTask}'s time. The \func{CommitParticleData} function, on the other hand, was taking $ 31.5 / 48.4 \approx 65\% $ of \func{ParticleUpdateTask}'s time, and 29.4 of those 31.5 seconds were spent waiting for a lock to release. Thus, it is clear that, in this case, \func{ParticleUpdateTask}'s bottleneck was \func{CommitParticleData}. 
+
 \begin{figure}
 \addtocounter{figure}{-1}
+
+	\vspace{-1.5cm}
 	\addsubfigure{instrumentation_initial_results_visual_studio_call_tree_sorted_filtered}
 	{1.0}{0.9}
 	{A Visual Studio call tree sourced from the games based on the metadata in \fig{fig:InitialResultsMetrics}.}
@@ -238,18 +252,6 @@ It is unnecessary to know more than the above metrics and variables to understan
 	{Timing output based on the metadata in \fig{fig:InitialResultsMetrics}. The important timing sections to focus on are \idefine{ParticleUpdateTask CommitParticleData} and \idefine{ParticleUpdateTask CommitParticleData Lock}. The former shows 31.55 seconds, and the latter shows 29.39 seconds. This tells us that the \func{CommitParticleData} function spent about 29 of its 32 seconds waiting for a lock to release.}
 	{fig:InitialResultsTiming}
 \end{figure}
-
-A variety of these automated games were run and their outputs were examined on Windows, iOS, and Android platforms. This was done in an effort to find an area within the \class{Particle Effect Component} class that needed optimization. In the beginning of these studies, the only available datasets were from the \class{Metrics System} and the Visual Studio CPU sampling profiles, as the timing instrumentation was still not complete (see \apx{apx:instrumentation} for more information). It was observed that a particular automated game in which the \idefine{total maximum particles} and \idefine{particles per emission} values were the same\footnotemark $ $ caused the game to visually lag, or skip frames. Armed with only the metrics information and CPU sampling (see \fig{fig:InitialResultsVisualStudioCallTreeSorted}), all that was known was that the following \class{Particle Effect Component} methods had a considerable number of samples:
-
-\footnotetext{Specifically, \idefine{total maximum particles} and \idefine{particles per emission} were 10,000 in Figures \ref{fig:InitialResultsVisualStudioCallTreeSorted}, \ref{fig:InitialResultsMetrics}, and \ref{fig:InitialResultsTiming}.}
-
-\begin{itemize}[nolistsep,topsep=0pt]
-	\item \func{ParticleDrawable::DrawParticles}
-	\item \func{ParticleUpdateTask}
-	\item \func{ParticleAffector::AffectParticles}
-\end{itemize}
-
-Given that these three methods were run repeatedly throughout the games, these results were unsurprising. At the time, it was tempting to pursue \func{ParticleUpdateTask} since it iterated over the entire particle array multiple times. I thought that, perhaps, creating a cache-friendly data structure that kept track of active particles would be a good initial optimization. However, as it shows in \fig{fig:InitialResultsTiming}, the functions that iterate over all of the particles were only taking $ (1.0 + 1.7 + 12.0 + 0.6)/48.4 \approx 32\% $ of \func{ParticleUpdateTask}'s time. The \func{CommitParticleData} function, on the other hand, was taking $ 31.5 / 48.4 \approx 65\% $ of \func{ParticleUpdateTask}'s time, and 29.4 of those 31.5 seconds were spent waiting for a lock to release. Thus, it is clear that, in this case, \func{ParticleUpdateTask}'s bottleneck was \func{CommitParticleData}. 
 
 These initial results not only demonstrated a possible place to optimize, but it also reinforced the importance of backing up possible optimizations with data in order to avoid optimizing into a vacuum. Without the timing data, I could have easily gone forward with optimizing particle iteration instead of focusing on the contention in \func{CommitParticleData}, and that would have been a waste of time.
 

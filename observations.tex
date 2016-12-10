@@ -11,12 +11,29 @@
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Overview}\label{sec:observe_overview}
 
-I performed the case studies to understand the contention between the main thread that renders particles and the background thread that updates them. This chapter explores various other aspects of \class{Particle Effect Components}. I examined three aspects of the particle effect: (1) the importance of the \var{ConcurrentParticleData} object, (2) the relationship between ChilliSource's \class{Task Scheduler} and \class{Particle Effect Components}, and (3) the perplexing scenarios in which particle effects do not visually emit particles.
+I performed the optimization case studies in the previous chapter to understand the contention between the main thread that renders particles and the background thread that updates them. This chapter explores various other aspects of \class{Particle Effect Components}. I examined three aspects of the particle effect: (1) the importance of the \var{ConcurrentParticleData} object, (2) the relationship between ChilliSource's \class{Task Scheduler} and \class{Particle Effect Components}, and (3) the perplexing scenarios in which particle effects do not render particles.
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 % Using copies
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 \section{Copying Data with ConcurrentParticleData}\label{sec:observe_copies}
+
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\centering
+	\addsubfigure{observation-studies_copying_with-object}
+	{1.0}{1.0}
+	{Demonstrates how the updating and rendering threads use the \class{ConcurrentParticleData} object to communicate information about the particle effect.}
+	{Demonstrates how the updating and rendering threads use the \class{ConcurrentParticleData} object to communicate information about the particle effect. After the updating thread updates the particle data directly from the particle effect, it copies a subset of the particle data that is necessary for rendering to the \class{ConcurrentParticleData} instance. The rendering thread reads from the \class{ConcurrentParticleData} object and not directly from the particle effect itself.}
+	{fig:CopiesWithObject}
+	
+	\addsubfigure{observation-studies_copying_without-object}
+	{0.8}{1.0}
+	{Demonstrates how, during this observation study, updating and rendering threads worked directly with the particle effect data.}
+	{Demonstrates how, during this observation study, updating and rendering threads worked directly with the particle effect data; the \class{ConcurrentParticleData} object was completely removed.}
+	{fig:CopiesWithoutObject}
+\end{figure}
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Overview}\label{ssec:observe_copies_overview}
@@ -82,7 +99,7 @@ The metrics shown here are the result of running a series of automated games in 
 		\item Max: 50,000
 		\item Step: 5,000
 		\item Each game was 5 seconds long
-		\item This scenario ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
+		\item This scenario ran when \idefine{particles per emission} (PPE) was 10\% and 100\% of \idefine{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
 		\item This scenario ran with 1 and 10 particle effects
 	\end{itemize}
 
@@ -91,7 +108,7 @@ The metrics shown here are the result of running a series of automated games in 
 		\item Min: 50,000
 		\item Max: 50,000
 		\item Each game was 5 seconds long
-		\item This scenario ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
+		\item This scenario ran when \idefine{particles per emission} (PPE) was 10\% and 100\% of \idefine{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
 		\item This scenario ran with 1 and 10 particle effects
 	\end{itemize}
 
@@ -175,9 +192,13 @@ These 8 series of automated games were run with and without the above changes to
 \subsection{Discussion}\label{ssec:observe_copies_discussion}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-The \var{particles actually rendered} (\fig{fig:Copies1PERenderBallFunctionCalls}) and \var{render ball function calls} (\fig{fig:Copies1PEParticlesActuallyRendered}) charts for 1 particle effect show something interesting. The No Object data series (the data series without the \var{ConcurrentParticleData} object) rendered the ball fewer times than the original, and it also rendered its particles fewer times. An examination of the timing metrics for 1 particle effect (\fig{fig:Copies1PETimedSections}) shows why this was occurring. Instead of the background thread waiting for the mutex to release in \func{ParticleUpdateTask}, the contention had moved to the \class{Particle Drawable} in the \func{Draw} function. This increase in wait-time disallowed the renderer to render as many particles and, as a result, it also took away rendering time from everything else (including the ball). In other words, this object really helps with performance.
+The \idefine{particles actually rendered} (\fig{fig:Copies1PERenderBallFunctionCalls}) and \idefine{render ball function calls} (\fig{fig:Copies1PEParticlesActuallyRendered}) charts for 1 particle effect show something interesting. The No Object data series (the data series without the \var{ConcurrentParticleData} object) rendered the ball fewer times than the original, and it also rendered its particles fewer times. An examination of the timing metrics for 1 particle effect (\fig{fig:Copies1PETimedSections}) shows why this was occurring. Instead of the background thread waiting for the mutex to release in \func{ParticleUpdateTask}, the contention had moved to the \class{Particle Drawable} in the \func{Draw} function.  
 
-The charts for 10 particle effects, however, do not demonstrate this. Both the Original and No Object data series show nearly identical results. This is because there was less overall contention when the particles were distributed across effects, as discovered in the previous chapter. Although the benefits of using a \var{ConcurrentParticleData} object was not as significant when using many particle effects, it is appealing from a software engineering perspective. Encapsulating the thread synchronization to a single class is clearer and more maintainable, and that will be useful if the developer desires to refactor the \class{ParticleEffectComponent}.
+If we further examine \fig{fig:Copies1PETimedSections}, it shows that the \func{Draw} function in the No Object data series spends less time rendering than the Original data series. Although a lower run-time usually means that the engine is performing better, it is not true in this case. I did not decrease the amount of time that it takes to render all of the effect's particles and, for the single-burst (PPE is 1.0 of TMP) particle effect, only 72 - 33 =  39 seconds of meaningful work was done since the rendering thread spent about 33 seconds waiting for a lock to release. Since it spent less time in the \func{Draw} function, it rendered fewer particles. 
+
+In other words, the \class{Concurrent Particle Data} object improves performance by increasing the number of particles that are drawn to the screen which results in a smoother visual experience for the end user.
+
+The charts for 10 particle effects, however, do not demonstrate this performance benefit. Both the Original and No Object data series show nearly identical results. This is because there was less overall contention when the particles were distributed across effects, as discovered in the previous chapter. Although the benefits of using a \var{ConcurrentParticleData} object was not as significant when using many particle effects, it is appealing from a software engineering perspective. Encapsulating the thread synchronization to a single class is clearer and more maintainable, and that will be useful if the developer desires to refactor the \class{ParticleEffectComponent}.
 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -189,15 +210,28 @@ The charts for 10 particle effects, however, do not demonstrate this. Both the O
 \subsection{The ChilliSource Task Scheduler}\label{ssec:observe_threads_scheduler}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-\addtopfigure{observation-studies_task-scheduling_task-lifetime}
-{1.0}
-{Illustrates the lifetime of \idefine{small tasks}, \idefine{game logic tasks}, and \idefine{main thread tasks} in relation to the main thread.}
-{Illustrates the lifetime of \idefine{small tasks}, \idefine{game logic tasks}, and \idefine{main thread tasks} in relation to the main thread. The important concept to understand from this figure is how \idefine{small tasks} are ran whenever regardless of what the main thread is doing and the \idefine{main thread tasks} are bound by the main thread. The \idefine{game logic tasks} can also be technically ran as the main thread is processing the game loop, but it is special in that it is guaranteed to be done by the end of the current frame.}
-{fig:TasksLifetime}
+\begin{figure}
+\addtocounter{figure}{-1}
+
+	\vspace{-1.5cm}
+	\addsubfigure{observation-studies_task-scheduling_task-lifetime}
+	{1.0}{1.0}
+	{Illustrates the lifetime of \idefine{small tasks}, \idefine{game logic tasks}, and \idefine{main thread tasks} in relation to the main thread.}
+	{Illustrates the lifetime of \idefine{small tasks}, \idefine{game logic tasks}, and \idefine{main thread tasks} in relation to the main thread. The important concept to understand from this figure is how \idefine{small tasks} are ran whenever regardless of what the main thread is doing and the \idefine{main thread tasks} are bound by the main thread. The \idefine{game logic tasks} can also be technically ran as the main thread is processing the game loop, but it is special in that it is guaranteed to be done by the end of the current frame. }
+	{fig:TasksLifetime}
+
+	\addsubfigure{observation-studies_simple-task-scheduling_task-lifetime}
+	{1.0}{1.0}
+	{Illustrates the relationship between the updating and rendering processes when the updating thread is defined as a \idefine{small task}, \idefine{game logic task}, and when the updating process is not parallelized (i.e. not threaded).}
+	{Illustrates the relationship between the updating and rendering processes when the updating thread is defined as a \idefine{small task}, \idefine{game logic task}, and when the updating process is not parallelized at all (i.e. the not threaded figure). As previously demonstrated in \fig{fig:TasksLifetime}, this reiterates that the largest difference between \idefine{game logic task} and \idefine{small task} is that the main thread (i.e. the thread that renders particles) may have to wait on the \idefine{game logic task} if it is not finished by the end of the current frame. The \idefine{small task}, however, is not hindered by any restrictions; this task can be scheduled and ran concurrently alongside the rendering thread. A \func{ParticleUpdateTask} that is not scheduled as a background thread, however, forces the rendering thread to wait and thus no concurrent work is done.}
+	{fig:TasksSimpleLifetime}
+
+\end{figure}
+
 
 As mentioned earlier, \func{ParticleUpdateTask} is scheduled as a background thread by ChilliSource's \class{Task Scheduler}. The \class{Task Scheduler} can schedule a variety of task types, and this section will delve into the different outcomes when \func{ParticleUpdateTask} is scheduled as a \idefine{small task}, a \idefine{game logic task}, and if it is not scheduled at all and runs on the main thread. The results of this study showed that using a \idefine{small task} to schedule a background thread to execute \func{ParticleUpdateTask} yielded much better results than two alternatives (i.e. scheduling a \idefine{game logic task} or not scheduling it at all).  
 
-A \idefine{small task} is considered to be a task with a short execution time such that it can be processed within a single frame, where "a single frame" is the time it takes for the engine to propagate all of its \phase{Update} events from its \class{Application Systems}, \class{States}, \class{Entities}, \class{Components}, and so on (see \sect{ssec:cs_pec_lifecycle}). If a \idefine{small task} runs too long, then the task will have a negative impact on the overall performance of the program. A \idefine{game logic task} is a special kind of small task that is guaranteed to be executed prior to \idefine{main thread tasks}. It is easy to see, then, that long running \idefine{game logic tasks} will drastically affect the program's performance. \idefine{Main thread tasks} are also small tasks that are executed on the main thread after \idefine{game logic tasks}. \idefine{Main thread tasks} are executed by the main \class{Application} instance, and this is typically used by background tasks to complete I/O jobs that need to be sequential. \idefine{Game logic tasks} All of these tasks are added to \class{Task Pools}, which are a collection of tasks that are performed by one of the worker threads owned by the pool. These pools will continue to perform tasks until they are deallocated and, if there are no more tasks to perform, they will sleep until another task is added.
+A \idefine{small task} is considered to be a task with a short execution time such that it can be processed within a single frame, where "a single frame" is the time it takes for the engine to propagate all of its \phase{Update} events from its \class{Application Systems}, \class{States}, \class{Entities}, \class{Components}, and so on (see \sect{ssec:cs_pec_lifecycle}). If a \idefine{small task} runs too long, then the task will have a negative impact on the overall performance of the program. A \idefine{game logic task} is a special kind of \idefine{small task} that is guaranteed to be executed prior to \idefine{main thread tasks}. It is easy to see, then, that long running \idefine{game logic tasks} will drastically affect the program's performance. \idefine{Main thread tasks} are also \idefine{small tasks} that are executed on the main thread after \idefine{game logic tasks}. \idefine{Main thread tasks} are executed by the main \class{Application} instance, and these are typically scheduled by background tasks to complete I/O jobs or any other job that needs to be sequential. All of these tasks are added to \class{Task Pools}, which are a collection of tasks that are performed by one of the worker threads owned by the pool. These pools will continue to perform tasks until they are deallocated and, if there are no more tasks to perform, they will sleep until another task is added.
 
 \vspace{-0.5cm}
 \framecode{C++}{observations}{Tasks_TaskScheduler_ScheduleTask.cpp}
@@ -211,12 +245,11 @@ A \idefine{small task} is considered to be a task with a short execution time su
 \vspace{-0.5cm}
 
 
-
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Code}\label{ssec:observe_threads_code}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-Scheduling the different types of tasks is fairly straightforward; the task type is simply passed into the \func{ScheduleTask} method. This was not included in previous code listings in order to simplify them, but the code listings below illustrate the different ways the \func{ParticleUpdateTask} function was scheduled for this study. It should be noted that, by default, the \class{Particle Effect Component} schedules \func{ParticleUpdateTask} as a \idefine{small task}. Thus, during this study, the "Small Task" data series was analogous to the "Original" data series in previous sections.
+Scheduling the different types of tasks is fairly straightforward; the task type is simply passed into the \func{ScheduleTask} method. This was not included in previous code listings in order to simplify them, but the code listings below illustrate the different ways the \func{ParticleUpdateTask} function was scheduled for this study. It should be noted that, by default, the \class{Particle Effect Component} schedules \func{ParticleUpdateTask} as a \idefine{small task}. Thus, during this study, the Small Task data series was analogous to the Original data series in previous sections.
 
 \vspace{-0.5cm}
 % ...........................................................
@@ -255,7 +288,7 @@ The following two scenarios were used when generating metrics for the small task
 		\item Max: 50,000
 		\item Step: 5,000
 		\item Each game was 5 seconds long
-		\item This scenario ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
+		\item This scenario ran when \idefine{particles per emission} (PPE) was 10\% and 100\% of \idefine{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
 		\item This scenario ran with 1 and 10 particle effects
 	\end{itemize}
 
@@ -264,7 +297,7 @@ The following two scenarios were used when generating metrics for the small task
 		\item Min: 50,000
 		\item Max: 50,000
 		\item Each game was 5 seconds long
-		\item This scenario ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
+		\item This scenario ran when \idefine{particles per emission} (PPE) was 10\% and 100\% of \idefine{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
 		\item This scenario ran with 1 and 10 particle effects
 	\end{itemize}
 
@@ -356,29 +389,35 @@ The results of this particular study demonstrated that scheduling background tas
 
 
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-% Particles Failing to Visually Emit
+% Particles Failing to Render
 % ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-\section{Particles Failing to Visually Emit}\label{sec:observe_emit_failure}
+\section{Particles Failing to Render}\label{sec:observe_emit_failure}
 
 % ----------------------------------------------------------------------------------------------------------------------------
-\subsection{Emission Failure}\label{ssec:observe_emit_failure_failure}
+\subsection{Render Failure}\label{ssec:observe_emit_failure_failure}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-\class{Particle Effect Components} sometimes failed to visually emit particles during automated games. When this behavior was observed, I added particle metrics \var{particles actually rendered} and \var{particles actually emitted} to the instrumentation systems in order to numerically quantify (and, perhaps, understand) the failure. Two main variants of this failure emerged:
+\addtopfigure{observation-studies_emission-failure_looping-non-looping}
+{1.0}
+{Demonstrates the difference between looping and non-looping particle effects that both have a duration of 3 seconds.}
+{Demonstrates the difference between looping and non-looping particle effects that both have a duration of 3 seconds. Each particle effect emits once every second, but the non-looping particle effect will stop emitting after 3 seconds have elapsed. It's important to note that, although the non-looping particle effect has stopped emitting, ChilliSource will continue to render any active particles on the screen from previous emissions. The engine will only clean up the particle effect if there are no longer any active particles on the screen.}
+{fig:FailureLoopingNonLooping}
+
+\class{Particle Effect Components} sometimes failed to render particles during automated games. When this behavior was observed, I added particle metrics \idefine{particles actually rendered} and \idefine{particles actually emitted} to the instrumentation systems in order to numerically quantify (and, perhaps, understand) the failure. Two main variants of this failure emerged:
 
 \begin{enumerate}[nolistsep,topsep=0pt]
 	\item Particles were slow to emit, and it may look like it never emitted if the game's duration was too short
 	\item Particles never emitted even if the game's duration was lengthened significantly
 \end{enumerate}
 
-The first variant usually exhibited a low \var{render ball function call} metric, i.e. a low frames per second, while the second variant did not seem to suffer from a performance hit in the slightest. The first kind was, in a way, expected for particle effects with a large number of particles simply because the renderer was slowed by the sheer number of iterations it was forced to make every update cycle. The second kind, on the other hand, was puzzling because it was not expected behavior. For reasons that will be explained later on in this chapter, the particle effect never emitted any particles in the second variant because the effect met two conditions:
+The first variant usually exhibited a low \idefine{render ball function call} metric, i.e. a low frames per second, while the second variant did not seem to suffer from a performance hit in the slightest. The first kind was, in a way, expected for particle effects with a large number of particles simply because the renderer was slowed by the sheer number of iterations it was forced to make every update cycle. The second kind, on the other hand, was puzzling because it was not expected behavior. For reasons that will be explained later on in this chapter, the particle effect never emitted any particles in the second variant because the effect met two conditions:
 
 \begin{itemize}[nolistsep,topsep=0pt]
 	\item The effect's duration elapsed
 	\item There were no active particles
 \end{itemize}
 
-This was found to be due to the particle effect having a small duration, a large number of particles, and not be "looping". Since this was an important distinction between the results of the two variants during this study, it is important to understand what "looping" means in the context of a \class{Particle Effect Componant}. A looping particle effect will continue to draw and update itself even after its duration has elapsed, while a non-looping particle effect will stop drawing and updating once its duration has elapsed.
+This was found to be due to the particle effect having a small duration, a large number of particles, and it was not "looping". Since this was an important distinction between the results of the two variants during this study, it is important to understand what "looping" means in the context of a \class{Particle Effect Componant}. A looping particle effect will continue to draw and update itself even after its duration has elapsed, while a non-looping particle effect will stop drawing and updating once its duration has elapsed. \fig{fig:FailureLoopingNonLooping} illustrates the difference between looping and non-looping particle effects.
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Emission Failure Source}\label{ssec:observe_emit_failure_source}
@@ -394,7 +433,7 @@ In order to demonstrate and understand this particle failure, metrics were gener
 		\item Max: 50,000
 		\item Step: 5,000
 		\item Each game was 5 seconds long
-		\item This scenario ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
+		\item This scenario ran when \idefine{particles per emission} (PPE) was 10\% and 100\% of \idefine{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
 		\item This scenario ran with 1 and 10 particle effects
 	\end{itemize}
 
@@ -403,7 +442,7 @@ In order to demonstrate and understand this particle failure, metrics were gener
 		\item Min: 50,000
 		\item Max: 50,000
 		\item Each game was 5 seconds long
-		\item This scenario ran when \var{particles per emission} (PPE) was 10\% and 100\% of \var{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
+		\item This scenario ran when \idefine{particles per emission} (PPE) was 10\% and 100\% of \idefine{total maximum particles} (TMP) or, in other words, when the particle effect had multiple-bursts and a single burst.
 		\item This scenario ran with 1 and 10 particle effects
 	\end{itemize}
 
@@ -487,16 +526,16 @@ These two scenarios were both run for non-looping and looping particle effects\f
 
 \end{figure}
 
-From these results (Figures \ref{fig:Failure1PERenderBallFunctionCalls}, \ref{fig:Failure1PEParticlesActuallyRendered}, \ref{fig:Failure1PESectionCalls}, \ref{fig:Failure1PETimedSections}), it can be clearly seen that the "Non-Looping; PPE is 1.0 of TMP" data series for a single particle effect demonstrates the catastrophic emission failure. At about 30,000 total maximum particles, zero particles were rendered and, as a result, the \var{render ball function calls} skyrocketed since the renderer was not focusing on rendering particles and instead had more opportunities to render the ball since the drawing step took less time (see \fig{fig:Failure1PETimedSections}). What was also interesting about this series was the extremely short amount of time that was spent in \func{ParticleUpdateTask}. The other data series took up approximately 100 seconds when running \func{ParticleUpdateTask}. Instead, it only spent about 27 seconds in \func{ParticleUpdateTask} (see \fig{fig:Failure1PETimedSections}). 
+From these results (Figures \ref{fig:Failure1PERenderBallFunctionCalls}, \ref{fig:Failure1PEParticlesActuallyRendered}, \ref{fig:Failure1PESectionCalls}, \ref{fig:Failure1PETimedSections}), it can be clearly seen that the "Non-Looping; PPE is 1.0 of TMP" data series for a single particle effect demonstrates the catastrophic emission failure. At about 30,000 total maximum particles, zero particles were rendered and, as a result, the \idefine{render ball function calls} skyrocketed since the renderer was not focusing on rendering particles and instead had more opportunities to render the ball since the drawing step took less time (see \fig{fig:Failure1PETimedSections}). What was also interesting about this series was the extremely short amount of time that was spent in \func{ParticleUpdateTask}. The other data series took up approximately 100 seconds when running \func{ParticleUpdateTask}. Instead, it only spent about 27 seconds in \func{ParticleUpdateTask} (see \fig{fig:Failure1PETimedSections}). 
 
-The other data series from Figures \ref{fig:Failure1PERenderBallFunctionCalls}, \ref{fig:Failure1PEParticlesActuallyRendered}, \ref{fig:Failure1PESectionCalls}, \ref{fig:Failure1PETimedSections} did not experience the same catastrophic failure as "Non-Looping; PPE is 1.0 of TMP". The only one that came close was the "Non-Looping; PPE is 1.0 of TMP" data series for multiple particle effects (see Figures \ref{fig:Failure10PERenderBallFunctionCalls}, \ref{fig:Failure10PEParticlesActuallyRendered}, \ref{fig:Failure10PESectionCalls}, \ref{fig:Failure10PETimedSections}). For this data series, the \var{particles actually rendered} dipped and the \var{render ball function calls} rose at 40,000 total maximum particles. Thus, I focused on that \textbf{non-looping} particle effects with a large number of particles per emission. 
+The other data series from Figures \ref{fig:Failure1PERenderBallFunctionCalls}, \ref{fig:Failure1PEParticlesActuallyRendered}, \ref{fig:Failure1PESectionCalls}, \ref{fig:Failure1PETimedSections} did not experience the same catastrophic failure as "Non-Looping; PPE is 1.0 of TMP". The only one that came close was the "Non-Looping; PPE is 1.0 of TMP" data series for multiple particle effects (see Figures \ref{fig:Failure10PERenderBallFunctionCalls}, \ref{fig:Failure10PEParticlesActuallyRendered}, \ref{fig:Failure10PESectionCalls}, \ref{fig:Failure10PETimedSections}). For this data series, the \idefine{particles actually rendered} dipped and the \idefine{render ball function calls} rose at 40,000 total maximum particles. Thus, I focused on that \textbf{non-looping} particle effects with a large number of particles per emission. 
 
 
 % ----------------------------------------------------------------------------------------------------------------------------
 \subsection{Emission Failure Solution}\label{ssec:observe_emit_failure_solution}
 % ----------------------------------------------------------------------------------------------------------------------------
 
-Discovering why this failure occurred was a multi-step process. The automated game was set to run with a single effect with PPE at 1.0 TMP and a particle value of at least 30,000. Since this seemed to be a rendering issue, breakpoints were set in the \func{Render} function within the \class{Particle Effect Component} class. I discovered that the \func{Render} function inside of a \class{Particle Effect Component} was never called during the game with a single effect with PPE at 1.0 TMP and a particle value of at least 30,000. To further investigate, breakpoints were placed within the renderer itself when it iterated over \class{Render Components} and, specifically, when it iterated over a \class{Particle Effect Component}. It turned out that the effect was being "culled", or ignored, because the bounding information associated with the effect was set to its initial value: \var{INTEGER\_MAX}. Since the actual, non-default value of its bounding information was set inside of \func{ParticleUpdateTask}, this suggested that \func{ParticleUpdateTask} was not being called anymore. Placing breakpoints within the \func{Update} method in the \class{Particle Effect Component} revealed that it called the \func{Stop} function and ceased to schedule \func{ParticleUpdateTask}. As mentioned earlier, this was called because the effect met two conditions:
+Discovering why this failure occurred was a multi-step process. The automated game was set to run with a single effect with PPE at 1.0 TMP and a particle value of at least 30,000. Since this seemed to be a rendering issue, breakpoints were set in the \func{Render} function within the \class{Particle Effect Component} class. I discovered that the \func{Render} function inside of a \class{Particle Effect Component} was never called during a game with a single effect with PPE at 1.0 TMP (single-burst) and a particle value of at least 30,000. To further investigate, breakpoints were placed within the renderer itself when it iterated over \class{Render Components} and, specifically, when it iterated over a \class{Particle Effect Component}. It turned out that the effect was being "culled", or ignored, because the bounding information associated with the effect was set to its initial value: \var{INTEGER\_MAX}. Since the actual, non-default value of its bounding information was set inside of \func{ParticleUpdateTask}, this suggested that \func{ParticleUpdateTask} was not being called anymore. Placing breakpoints within the \func{Update} method in the \class{Particle Effect Component} revealed that it called the \func{Stop} function and ceased to schedule \func{ParticleUpdateTask}. As mentioned earlier, this was called because the effect met two conditions:
 
 \begin{itemize}[nolistsep,topsep=0pt]
 	\item The effect's duration elapsed
