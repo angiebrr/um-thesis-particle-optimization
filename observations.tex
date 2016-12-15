@@ -24,7 +24,7 @@ I performed the optimization case studies in the previous chapter to understand 
 	\centering
 	\addsubfigure{observation-studies_copying_with-object}
 	{1.0}{1.0}
-	{Demonstrates how the updating and rendering threads use the \class{ConcurrentParticleData} object to communicate information about the particle effect.}
+	{Demonstrates how the updating and rendering threads use the \newline \class{ConcurrentParticleData} object to communicate information about the particle effect.}
 	{Demonstrates how the updating and rendering threads use the \class{ConcurrentParticleData} object to communicate information about the particle effect. After the updating thread updates the particle data directly from the particle effect, it copies a subset of the particle data that is necessary for rendering to the \class{ConcurrentParticleData} instance. The rendering thread reads from the \class{ConcurrentParticleData} object and not directly from the particle effect itself.}
 	{fig:CopiesWithObject}
 	
