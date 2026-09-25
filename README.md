@@ -10,6 +10,7 @@
     - [What I found](#what-i-found)
   - [What's in here](#whats-in-here)
   - [Dataset](#dataset)
+  - [Links in the published thesis](#links-in-the-published-thesis)
   - [Building the PDF](#building-the-pdf)
 
 ## Overview
@@ -56,7 +57,17 @@ Related repos:
 
 ## Dataset
 
-All of the results in the thesis are in a single HDF5 file, `csgeps_angela-gross_thesis_data.hdf5` (about 540 KB). It used to live in this repo's Bitbucket downloads; it's now attached to this repo's [GitHub release](https://github.com/angiebrr/um-thesis-particle-optimization/releases). The citation inside the published PDF still points at the old Bitbucket URL.
+All of the results in the thesis are in a single HDF5 file, `csgeps_angela-gross_thesis_data.hdf5` (about 540 KB). It's attached to this repo's [dataset-2016 release](https://github.com/angiebrr/um-thesis-particle-optimization/releases/tag/dataset-2016).
+
+## Links in the published thesis
+
+The thesis cites three Bitbucket URLs. I've since moved everything off Bitbucket, so those links no longer work. Here's where each one lives now:
+
+| Cited in the thesis | Where it is now |
+|---|---|
+| `bitbucket.org/angelahnicole/um-thesis-particle-optimization/downloads/csgeps_angela-gross_thesis_data.hdf5` | [dataset-2016 release](https://github.com/angiebrr/um-thesis-particle-optimization/releases/tag/dataset-2016) on this repo |
+| `bitbucket.org/angelahnicole/um-thesis-cspong-benchmarking/src/c00b947…?at=automation` | [um-thesis-cspong-benchmarking at c00b947](https://github.com/angiebrr/um-thesis-cspong-benchmarking/tree/c00b947411a7e04e00d464108dee6235e3d692c1) (`automation` branch) |
+| `bitbucket.org/Chilli-Ian/chillisource-ag/src/781988bb…?at=temp/particleMetrics` | Lost. This was a ChilliSource developer's workspace, which no longer exists. The closest surviving version is [um-thesis-chillisource-engine](https://github.com/angiebrr/um-thesis-chillisource-engine), which stops in June 2016 |
 
 ## Building the PDF
 
